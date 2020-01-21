@@ -1,0 +1,85 @@
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+project(GL-Framework LANGUAGES CXX)
+
+# Find Opengl libs
+find_package(OpenGL REQUIRED)
+find_package(glad REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
+include_directories( ${OPENGL_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS})
+
+# Find opencv
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+	
+# Gather ImGUI
+set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/imgui)
+include_directories(${IMGUI_DIR} ${IMGUI_DIR}/examples)
+# Set the imgui sources
+file(GLOB IMGUI_SRC_GL ${IMGUI_DIR}/*.h ${IMGUI_DIR}/*.cpp)
+# Add glfw impl
+set(IMGUI_SRC_GL 
+	${IMGUI_SRC}
+	${IMGUI_DIR}/examples/imgui_impl_opengl3.h
+	${IMGUI_DIR}/examples/imgui_impl_opengl3.cpp
+	${IMGUI_DIR}/examples/imgui_impl_glfw.h
+	${IMGUI_DIR}/examples/imgui_impl_glfw.cpp)
+source_group("imgui" FILES ${IMGUI_SRC_GL})
+
+set(MESH_FILES
+	src/mesh.hpp
+	src/mesh.cpp
+	src/splinecurves.hpp
+	src/splinecurves.cpp)
+
+set(IMGUI_3D_FILES
+	src/imgui3d/imgui_3d.h
+	src/imgui3d/imgui_3d_utils.h
+	src/imgui3d/imgui_3d_utils.cpp
+	src/imgui3d/imgui_3d_geometry.h
+	src/imgui3d/imgui_3d.cpp
+	src/imgui3d/imgui_3d_widgets.cpp
+	src/imgui3d/imgui_3d_editor_widgets.h
+	src/imgui3d/imgui_3d_editor_widgets.cpp
+	src/imgui3d/imgui_3d_draw.cpp)
+
+set(IMGUI_FILES ${IMGUI_SRC})
+
+set(GL_FILES
+	${MESH_FILES}
+	src/texture.hpp
+	src/texture.cpp
+	src/framebuffer.hpp
+	src/framebuffer.cpp
+	src/draw_batch.hpp
+	src/draw_batch.inl.hpp
+	src/draw_batch.cpp
+	src/variadic_buffer.hpp
+	src/shadermanager.hpp
+	src/shadermanager.cpp
+	src/controls.hpp
+	src/controls.cpp
+	src/renderer.hpp
+	src/renderer.cpp
+	src/camera.hpp
+	src/buffers.hpp
+	src/gl_internal.hpp
+	src/uiwindow.hpp
+	src/uiwindow.cpp
+	src/IconsFontAwesome5.h)
+	
+source_group("Meshes" FILES ${MESH_FILES})
+source_group("Dear Imgui" FILES ${IMGUI_FILES})
+source_group("Dear Imgui 3D" FILES ${IMGUI_3D_FILES})
+
+add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${LENS_FILES} ${IMGUI_3D_FILES})
+target_link_libraries(glframework PUBLIC ${GL_LIBS} ${OpenCV_LIBRARIES})
+target_compile_definitions(glframework PUBLIC -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
+target_compile_definitions(glframework PUBLIC -DIMGUI_DEFINE_MATH_OPERATORS)
+target_compile_definitions(glframework PUBLIC -DSHADER_DIR="${PROJECT_SOURCE_DIR}/shaders/")
+target_compile_definitions(glframework PUBLIC -DFONT_DIR="${PROJECT_SOURCE_DIR}/fonts/")
+target_compile_definitions(glframework PUBLIC -DGLM_ENABLE_EXPERIMENTAL)
+
+
+add_executable(gl-test test/main.cpp)
+target_link_libraries(gl-test PUBLIC glframework)
