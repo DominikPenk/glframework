@@ -6,15 +6,13 @@ find_package(OpenGL REQUIRED)
 find_package(glad REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS})
 
 # Find opencv
 find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
 
-# Gather Imgui	
+# Gather Imgui
+if(NOT IMGUI_SRC)
 set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/imgui)
-include_directories(${IMGUI_DIR} ${IMGUI_DIR}/examples)
 # Set the imgui sources
 file(GLOB IMGUI_SRC ${IMGUI_DIR}/*.h ${IMGUI_DIR}/*.cpp)
 # Add glfw impl
@@ -24,7 +22,8 @@ set(IMGUI_SRC
 	${IMGUI_DIR}/examples/imgui_impl_opengl3.cpp
 	${IMGUI_DIR}/examples/imgui_impl_glfw.h
 	${IMGUI_DIR}/examples/imgui_impl_glfw.cpp)
-source_group("imgui" FILES ${IMGUI_SRC_GL})
+endif()
+source_group("imgui" FILES ${IMGUI_SRC})
 
 set(MESH_FILES
 	src/mesh.hpp
@@ -87,8 +86,16 @@ set_target_properties(glframework PROPERTIES
 	
 target_include_directories(glframework PUBLIC 
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-	$<INSTALL_INTERFACE:include/glframework>)
+	$<BUILD_INTERFACE:${IMGUI_DIR}>
+	$<BUILD_INTERFACE:${IMGUI_DIR}/examples>
+	${OpenCV_INCLUDE_DIRS}
+	${OPENGL_INCLUDE_DIRS} 
+	${GLM_INCLUDE_DIRS}
+	$<INSTALL_INTERFACE:include/glframework>
+	$<INSTALL_INTERFACE:include/glframework/imgui>
+	$<INSTALL_INTERFACE:include/glframework/imgui/examples>)
 
-
-add_executable(gl-test test/main.cpp)
-target_link_libraries(gl-test PUBLIC glframework)
+if(${BUILD_FRAMEWORK_TEST})
+	add_executable(gl-test test/main.cpp)
+	target_link_libraries(gl-test PUBLIC glframework)
+endif()
