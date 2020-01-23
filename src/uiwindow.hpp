@@ -12,6 +12,7 @@ namespace gl {
 
 		void draw(Renderer* env);
 		virtual void preDraw(Renderer* env);
+		virtual void viewportDraw(Renderer* env);
 
 		std::string title;
 		bool open;

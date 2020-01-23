@@ -16,7 +16,7 @@ namespace impl {
 		float sx = (float)maxSize.x / (float)width;
 		float sy = (float)maxSize.y / (float)height;
 		float s = std::min(sx, std::min(sy, 1.0f));
-		ImGui::Image((GLuint*)tid, ImVec2(width, height) * s, uv0, uv1, tint_color);
+		ImGui::Image((GLuint*)tid, ImVec2((float)width, (float)height) * s, uv0, uv1, tint_color);
 	}
 
 }
@@ -36,6 +36,10 @@ void gl::UIWindow::draw(Renderer* env)
 }
 
 void gl::UIWindow::preDraw(Renderer* env)
+{
+}
+
+void gl::UIWindow::viewportDraw(Renderer* env)
 {
 }
 
@@ -115,7 +119,7 @@ void gl::RendererDebugWindow::onDraw(Renderer* env)
 
 	// Get color under the cursor
 	ImVec2 mouse = ImGui::GetIO().MousePos;
-	glm::uvec4 color = env->framebuffer()->readColorPixel(mouse.x, mouse.y, 1);
+	glm::uvec4 color = env->framebuffer()->readColorPixel((int)mouse.x, (int)mouse.y, 1);
 	ImGuiID id = ImGui3D::ColorToID(color.r, color.g, color.b);
 
 	ImGui::Text("Mouse at (%d, %d) over color [%d, %d, %d], Id: %d", (int)mouse.x, (int)mouse.y, color.x, color.y, color.z, id);

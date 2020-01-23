@@ -41,17 +41,8 @@ namespace gl {
 		typedef typename CompactVertexBufferObject<Args...> Buffer;
 
 		std::shared_ptr<Buffer> vbo = std::make_shared<Buffer>();
-		vbo->target() = GL_ARRAY_BUFFER;
-		vbo->usage() = GL_DYNAMIC_DRAW;
-		vbo->update();
-
-		glBindVertexArray(mVAO);
-		vbo->bind();
-		impl::AddVertexAttribute<0, Buffer::value_type>(false, static_cast<int>(initialIndex));
-
-		vbo->unbind();
-		glBindVertexArray(0);
-		mVertexAttributes.push_back(vbo);
+		addVertexAttributes(initialIndex, vbo);
+		
 		return vbo;
 	}
 
@@ -75,6 +66,47 @@ namespace gl {
 		vbo->unbind();
 		glBindVertexArray(0);
 		mVertexAttributes.push_back(vbo);
+	}
+
+	template<int entry, typename ...Args>
+	inline void DrawBatch::addVertexAttribute(GLuint index, std::shared_ptr<CompactVertexBufferObject<Args...>>) {
+		assert(mVAO != 0);
+
+		glBindVertexArray(mVAO);
+		vbo->bind();
+		mBufferIds.push_back(vbo->id());
+
+		if constexpr (std::is_floating_point_v<T>) {
+			glVertexAttribPointer(index, d, impl::to_glenum_v<T>, GL_FALSE, sizeof(T) * d, nullptr);
+		}
+		else {
+			glVertexAttribIPointer(index, d, impl::to_glenum_v<T>, sizeof(T) * d, nullptr);
+		}
+		glEnableVertexAttribArray(index);
+
+		vbo->unbind();
+		glBindVertexArray(0);
+		mVertexAttributes.push_back(vbo);
+
+	}
+
+	template<typename ...Args>
+	inline void DrawBatch::addVertexAttributes(GLuint initialIndex, std::shared_ptr<CompactVertexBufferObject<Args...>> buffer)
+	{
+		typedef typename CompactVertexBufferObject<Args...> Buffer;
+
+
+		buffer->target() = GL_ARRAY_BUFFER;
+		buffer->usage() = GL_DYNAMIC_DRAW;
+		buffer->update();
+
+		glBindVertexArray(mVAO);
+		buffer->bind();
+		impl::AddVertexAttribute<0, Buffer::value_type>(false, static_cast<int>(initialIndex));
+
+		buffer->unbind();
+		glBindVertexArray(0);
+		mVertexAttributes.push_back(buffer);
 	}
 
 	template<typename T>

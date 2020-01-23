@@ -65,7 +65,7 @@ void gl::TriangleMesh::removeDoubles(float thr)
 		for (int j = i + 1; j < (int)mVertices->size(); ++j) {
 			if (mapping[j] != j) continue;
 			if ((mVertices->at(i) - mVertices->at(j)).squaredNorm() < thr) {
-				mapping[j] = i;
+				mapping[j] = (unsigned int)i;
 			}
 		}
 	}

@@ -28,6 +28,7 @@ namespace gl {
 		}
 
 		void resize(std::size_t size) {
+			mUpdated = true;
 			mData.resize(size);
 		}
 		
@@ -56,7 +57,25 @@ namespace gl {
 		}
 
 		template<int i = -1>
+		auto& at(int idx) {
+			mUpdated = true;
+			if constexpr (i < 0)
+				return mData[idx];
+			else
+				return std::get<i>(mData[idx]);
+		}
+
+		template<int i = -1>
+		auto at(int idx) const {
+			if constexpr (i < 0)
+				return mData[idx];
+			else
+				return std::get<i>(mData[idx]);
+		}
+
+		template<int i = -1>
 		auto& get(int idx) {
+			mUpdated = true;
 			if constexpr (i < 0)
 				return mData[idx];
 			else

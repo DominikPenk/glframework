@@ -67,6 +67,9 @@ void APIENTRY openglCallbackFunction(GLenum source,
 	}
 	std::cout << std::endl;
 	std::cout << "---------------------opengl-Error-end--------------" << std::endl;
+#ifdef _MSC_VER 
+	__debugbreak();
+#endif
 }
 
 // glfw: whenever the window is resized
@@ -82,8 +85,8 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	// Update screen size for ImGui3D
 	if (nullptr != ImGui3D::GImGui3D) {
 		ImGui3D::ImGui3DContext& g = *ImGui3D::GImGui3D;
-		g.ScreenSize.x = width;
-		g.ScreenSize.y = height;
+		g.ScreenSize.x = static_cast<float>(width);
+		g.ScreenSize.y = static_cast<float>(height);
 		g.Aspect = width / (float)height;
 	}
 
@@ -189,7 +192,7 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 
 	// Add callback to imgui3d impl
 	ImGui3D::GImGui3D->GetHoveredIdImpl = [&](ImVec2 mouse) -> glm::uvec4 {
-		return mFrameBuffer->readColorPixel(mouse.x, mouse.y, 1);
+		return mFrameBuffer->readColorPixel((int)mouse.x, (int)mouse.y, 1);
 	};
 
 	setToneMapping(mToneMapping);
@@ -253,8 +256,20 @@ void gl::Renderer::endFrame()
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	// Render ImGui3D
 	mFrameBuffer->clearColorAttachment(1, glm::vec4(0, 0, 0, 1));
+	// Render all ui windows that draw into viewport
+	if (mUIWindows.size() > 0) {
+		for (auto window : mUIWindows) {
+			window->viewportDraw(this);
+		}
+	}
+
+	for (auto mesh : mMeshes) {
+		if (mesh->visible) {
+			mesh->drawViewportUI(this);
+		}
+	}
+	// Render ImGui3D
 	ImGui3D::Render();
 	mFrameBuffer->unbind();
 
@@ -314,7 +329,7 @@ std::vector<std::function<void(Renderer*)>> gl::Renderer::resizeCallbacks()
 
 void gl::Renderer::ImGui3d_ImplRenderer_Init(std::shared_ptr<ImGui3D::ImGui3DContext> ctx)
 {
-	ctx->ScreenSize = ImVec2(mCamera->ScreenWidth, mCamera->ScreenHeight);
+	ctx->ScreenSize = ImVec2((float)mCamera->ScreenWidth, (float)mCamera->ScreenHeight);
 	ctx->Aspect = mCamera->ScreenWidth / (float)mCamera->ScreenHeight;
 	//ctx->IdTexture = mFrameBuffer->getRenderTexture(1);
 }

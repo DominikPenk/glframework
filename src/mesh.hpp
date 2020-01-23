@@ -45,6 +45,10 @@ namespace gl {
 
 		virtual bool handleIO(const Renderer* env, ImGuiIO& io) { return false; }
 
+		/// <summary>Use this handle to draw either ImGui3D things or draw custom data</summary>
+		/// <remarks>Framebuffer Attachment 0 is for display and Framebuffer Attachment 1 holds ImGuiIDs for io</remarks>
+		virtual void drawViewportUI(const Renderer* env) { };
+
 		std::string name;
 		bool visible;
 		glm::mat4 ModelMatrix;

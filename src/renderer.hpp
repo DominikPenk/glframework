@@ -75,8 +75,8 @@ namespace gl {
 		const std::shared_ptr<Camera> camera() const { return mCamera; }
 
 		inline void setSize(size_t width, size_t height) {
-			mCamera->ScreenHeight = height;
-			mCamera->ScreenWidth = width;
+			mCamera->ScreenHeight = static_cast<int>(height);
+			mCamera->ScreenWidth  = static_cast<int>(width);
 		}
 
 		size_t addMesh(const std::string& name, std::shared_ptr<Mesh> mesh); 

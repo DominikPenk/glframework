@@ -104,23 +104,29 @@ namespace gl {
 		}
 
 		template<int index, class _Tuple>
-		static void AddVertexAttribute(bool normalize, int offset) {
+		static inline void AddSingleVertexAttribute(bool normalize, int location) {
+			constexpr GLuint size = impl::to_size_v<std::tuple_element_t<index, _Tuple>>;
+			constexpr GLenum type = impl::to_glenum_v<std::tuple_element_t<index, _Tuple>>;
+			const std::ptrdiff_t offset = impl::tuple_inner_offset<index, _Tuple>();
+			glEnableVertexAttribArray(location);
+			if constexpr (std::is_integral_v<std::tuple_element_t<index, _Tuple>>) {
+				glVertexAttribIPointer(location, size, type, sizeof(_Tuple), reinterpret_cast<void*>(offset));
+			}
+			else {
+				glVertexAttribPointer(location, size, type, normalize, sizeof(_Tuple), reinterpret_cast<void*>(offset));
+			}
+			glEnableVertexAttribArray(location);
+		}
+
+		template<int index, class _Tuple>
+		static void AddVertexAttribute(bool normalize, int indexOffset) {
 			if constexpr (index < std::tuple_size_v<_Tuple>) {
-				const int idx = index + offset;
-				constexpr GLuint size = impl::to_size_v<std::tuple_element_t<index, _Tuple>>;
-				constexpr GLenum type = impl::to_glenum_v<std::tuple_element_t<index, _Tuple>>;
-				const std::ptrdiff_t offset = impl::tuple_inner_offset<index, _Tuple>();
-				glEnableVertexAttribArray(index);
-				if constexpr (std::is_integral_v<std::tuple_element_t<index, _Tuple>>) {
-					glVertexAttribIPointer(index, size, type, sizeof(_Tuple), reinterpret_cast<void*>(offset));
-				}
-				else {
-					glVertexAttribPointer(index, size, type, normalize, sizeof(_Tuple), reinterpret_cast<void*>(offset));
-				}
-				glEnableVertexAttribArray(index);
-				AddVertexAttribute<index + 1, _Tuple>(normalize, offset);
+				const int idx = index + indexOffset;
+				AddSingleVertexAttribute<index, _Tuple>(normalize, idx);
+				AddVertexAttribute<index + 1, _Tuple>(normalize, indexOffset);
 			}
 		}
+
 
 		template<typename T, typename... Types>
 		static constexpr bool is_any_v = std::disjunction_v<std::is_same<std::remove_cv_t<T>, Types>...>;

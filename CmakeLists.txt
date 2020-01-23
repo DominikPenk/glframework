@@ -29,7 +29,9 @@ set(MESH_FILES
 	src/mesh.hpp
 	src/mesh.cpp
 	src/splinecurves.hpp
-	src/splinecurves.cpp)
+	src/splinecurves.cpp
+	src/pointcloud.hpp
+	src/pointcloud.cpp)
 
 set(IMGUI_3D_FILES
 	src/imgui3d/imgui_3d.h

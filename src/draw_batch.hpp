@@ -45,10 +45,16 @@ namespace gl {
 		std::shared_ptr<VertexBufferObject<T, d>> addVertexAttribute(GLuint index);
 
 		template<typename ...Args>
-		std::shared_ptr< CompactVertexBufferObject<Args...>> addVertexAttributes(GLuint initialIndex = 0);
+		std::shared_ptr<CompactVertexBufferObject<Args...>> addVertexAttributes(GLuint initialIndex = 0);
+
+		template<int entry, typename ...Args>
+		void addVertexAttribute(GLuint index, std::shared_ptr<CompactVertexBufferObject<Args...>>);
 
 		template<typename T, int d>
 		void addVertexAttribute(GLuint index, std::shared_ptr<VertexBufferObject<T, d>> buffer);
+
+		template<typename ...Args>
+		void addVertexAttributes(GLuint initialIndex, std::shared_ptr<CompactVertexBufferObject<Args...>> buffer);
 
 		template<typename T>
 		void setUniform(const std::string& location, T value);
