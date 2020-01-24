@@ -68,7 +68,8 @@ void APIENTRY openglCallbackFunction(GLenum source,
 	std::cout << std::endl;
 	std::cout << "---------------------opengl-Error-end--------------" << std::endl;
 #ifdef _MSC_VER 
-	__debugbreak();
+	if(severity == GL_DEBUG_SEVERITY_HIGH || type == GL_DEBUG_TYPE_ERROR)
+		__debugbreak();
 #endif
 }
 
