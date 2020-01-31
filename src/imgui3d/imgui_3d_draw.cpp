@@ -215,6 +215,23 @@ namespace ImGui3D {
 		AddDashedCircle(glm::vec4(pos, 1), radius, width, color, segments, subdivisions, id);
 	}
 
+	void DrawCommand::AddTriangle(glm::vec4 a, glm::vec4 b, glm::vec4 c, glm::vec4 color, ImGuiID id)
+	{
+		unsigned int i0 = data->size();
+		gl::IndexBuffer& indices = *batch.indexBuffer;
+		data->extend({
+			{a, color, id, glm::vec2(0)},
+			{b, color, id, glm::vec2(0)},
+			{c, color, id, glm::vec2(0)},
+			});
+		indices.insert(indices.end(), { i0, i0 + 1, i0 + 2 });
+	}
+
+	void DrawCommand::AddTriangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec4 color, ImGuiID id)
+	{
+		AddTriangle(glm::vec4(a, 1), glm::vec4(b, 1), glm::vec4(c, 1), color, id);
+	}
+
 	void DrawCommand::AddTriangleStrip(std::vector<glm::vec4> points, std::vector<glm::vec4> colors, glm::mat4 T, ImGuiID id)
 	{
 		assert(points.size() == colors.size());

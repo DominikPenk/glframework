@@ -72,6 +72,9 @@ namespace ImGui3D {
 		void AddDashedCircle(glm::vec4 pos, float radius, float width, glm::vec4 color, unsigned int segments, unsigned int subdivisions, ImGuiID id = 0);
 		void AddDashedCircle(glm::vec3 pos, float radius, float width, glm::vec4 color, unsigned int segments, unsigned int subdivisions, ImGuiID id = 0);
 
+		void AddTriangle(glm::vec4 a, glm::vec4 b, glm::vec4 c, glm::vec4 color, ImGuiID id = 0);
+		void AddTriangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec4 color, ImGuiID id = 0);
+
 		void AddTriangleStrip(std::vector<glm::vec4> points, std::vector<glm::vec4> colors, glm::mat4 T = glm::mat4(1), ImGuiID id = 0);
 		void AddTriangleStrip(std::vector<glm::vec3> points, std::vector<glm::vec4> colors, glm::mat4 T = glm::mat4(1), ImGuiID id = 0);
 		
@@ -224,6 +227,8 @@ namespace ImGui3D {
 
 	bool IsItemActive();
 
+	bool IsItemHovered();
+
 	bool IsItemClicked();
 
 	/// <summary>Get an id based on a string label</summary>
@@ -237,6 +242,12 @@ namespace ImGui3D {
 	/// <param name="keepFocus">If true the generated id is kept during dragging events even if the cursor stops hovering the 3D-object</param>
 	/// <returns>The generated id</returns>
 	ImGuiID GetID(const void* data, bool keepFocus = true);
+
+	/// <summary>Get an id based on an unsigned 64 bit integer</summary>
+	/// <param name="i">Integer used to generate the id</param>
+	/// <param name="keepFocus">If true the generated id is kept during dragging events even if the cursor stops hovering the 3D-object</param>
+	/// <returns>The generated id</returns>
+	ImGuiID GetID(uint64_t i, bool keepFocus = true);
 
 	/// <summary>Converts a color to an id</summary>
 	/// <remarks>This function is more or less depricated since the shader converts the id to a color</remarks>

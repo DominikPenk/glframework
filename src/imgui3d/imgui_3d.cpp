@@ -93,6 +93,10 @@ namespace ImGui3D {
 		return g.ActiveId == g.CurrentId && io.MouseClicked[0];
 	}
 
+	bool IsItemHovered() {
+		return GImGui3D->ActiveId == GImGui3D->CurrentId;
+	}
+
 	ImGuiID GetID(const std::string& str, bool keepFocus)
 	{
 		ImGui3D::ImGui3DContext& g = *ImGui3D::GImGui3D;
@@ -116,6 +120,23 @@ namespace ImGui3D {
 		const ImGuiID seed = g.SeedStack.back();
 		const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(data);
 		const ImGuiID id = (ImHashData(&address, sizeof(address), seed) % (256 * 256 * 256)) + 1;
+		g.CurrentId = id;
+		if (keepFocus) {
+			ImGuiIO& io = ImGui::GetIO();
+			if (ImGui::IsMouseClicked(0) && g.ActiveId == id) {
+				TakeIOFocus(id);
+			}
+			else if (io.MouseReleased[0] && g.ActiveId == id) {
+				ReleaseIOFocus(id);
+			}
+		}
+		return id;
+	}
+
+	ImGuiID GetID(uint64_t i, bool keepFocus) {
+		ImGui3D::ImGui3DContext& g = *ImGui3D::GImGui3D;
+		const ImGuiID seed = g.SeedStack.back();
+		const ImGuiID id = (ImHashData(&i, sizeof(i), seed) % (256 * 256 * 256)) + 1;
 		g.CurrentId = id;
 		if (keepFocus) {
 			ImGuiIO& io = ImGui::GetIO();
