@@ -86,11 +86,11 @@ namespace ImGui3D {
 		return GImGui3D->ActiveId == GImGui3D->CurrentId && GImGui3D->KeepCaptureFocus;
 	}
 
-	bool IsItemClicked()
+	bool IsItemClicked(int button)
 	{
 		const ImGuiIO& io = ImGui::GetIO();
 		const ImGui3DContext& g = *ImGui3D::GImGui3D;
-		return g.ActiveId == g.CurrentId && io.MouseClicked[0];
+		return g.ActiveId == g.CurrentId && io.MouseClicked[button];
 	}
 
 	bool IsItemHovered() {

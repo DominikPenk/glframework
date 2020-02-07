@@ -229,7 +229,7 @@ namespace ImGui3D {
 
 	bool IsItemHovered();
 
-	bool IsItemClicked();
+	bool IsItemClicked(int button = 0);
 
 	/// <summary>Get an id based on a string label</summary>
 	/// <param name="str">String used to generate the id</param>
