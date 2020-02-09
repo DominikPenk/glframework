@@ -42,6 +42,8 @@ set(IMGUI_3D_FILES
 	src/imgui3d/imgui_3d_widgets.cpp
 	src/imgui3d/imgui_3d_editor_widgets.h
 	src/imgui3d/imgui_3d_editor_widgets.cpp
+	src/imgui3d/imgui_3d_surfaces.h
+	src/imgui3d/imgui_3d_surfaces.cpp
 	src/imgui3d/imgui_3d_draw.cpp)
 
 set(IMGUI_FILES ${IMGUI_SRC})

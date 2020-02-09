@@ -114,6 +114,8 @@ namespace ImGui3D {
 		void AddAxisAlignedCube(glm::vec4 pos, glm::vec3 size, float thickness, glm::vec4 color, ImGuiID id = 0);
 		void AddAxisAlignedCube(glm::vec3 pos, glm::vec3 size, float thickness, glm::vec4 color, ImGuiID id = 0);
 	
+		void AddIndexedFaceSet(const std::vector<glm::vec4>& vertices, const std::vector<unsigned int>& indices, glm::vec4 color, ImGuiID id = 0);
+
 		// Screen space functions
 		void AddFilledScreenSpaceCircle(ImVec2 pos, float radius, glm::vec4 color, unsigned int segments, float depth = -1.f, ImGuiID id = 0);
 		void AddScreenSpaceCircle(ImVec2 pos, float radius, float width, glm::vec4 color, unsigned int segments, float depth = -1.f, ImGuiID id = 0);
@@ -143,6 +145,9 @@ namespace ImGui3D {
 		ImGui3DCol_Editor_Widget,
 		ImGui3DCol_Editor_Widget_selected,
 
+		// Surface Widgets
+		ImGui3DCol_Grid,
+
 		ImGui3DCol_COUNT
 	};
 
@@ -162,6 +167,10 @@ namespace ImGui3D {
 		float      LightHandleSize;
 		float      CubeMapRadius;
 		float      CubeMapSize;
+		
+		// Surface settings
+		float      GridLineWidth;
+
 
 		glm::vec4  Colors[ImGui3DCol_COUNT];
 
@@ -201,7 +210,6 @@ namespace ImGui3D {
 		gl::Shader                         Shader;
 		std::function<glm::uvec4(ImVec2)>  GetHoveredIdImpl;
 		std::vector<ImGuiID>               SeedStack;
-
 
 		std::vector<std::shared_ptr<DrawCommand>> drawCommands;
 		std::shared_ptr<DrawCommand> currentDrawList() {

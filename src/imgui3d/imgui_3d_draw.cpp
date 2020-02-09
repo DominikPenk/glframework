@@ -705,6 +705,17 @@ namespace ImGui3D {
 	{
 		AddAxisAlignedCube(glm::vec4(pos, 1), size, thickness, color, id);
 	}
+
+	void DrawCommand::AddIndexedFaceSet(const std::vector<glm::vec4>& vertices, const std::vector<unsigned int>& indices, glm::vec4 color, ImGuiID id)
+	{
+		const unsigned int i0 = data->size();
+		for (size_t i = 0; i < vertices.size(); ++i) {
+			data->push_back(vertices[i], color, id, glm::vec2(0));
+		}
+		std::transform(indices.begin(), indices.end(), std::back_inserter(*batch.indexBuffer), [i0](unsigned int i) {
+			return i0 + i;
+		});
+	}
 	
 	void DrawCommand::AddCircle(glm::vec4 pos, glm::vec4 axis, float radius, float width, glm::vec4 color, int segments, ImGuiID id)
 	{

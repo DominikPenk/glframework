@@ -10,6 +10,7 @@
 
 #include "imgui3d/imgui_3d.h"
 #include "imgui3d/imgui_3d_editor_widgets.h"
+#include "imgui3d/imgui_3d_surfaces.h"
 
 #include "texture.hpp"
 
@@ -34,18 +35,28 @@ int main(int argc, const char* argv[]) {
 	glm::vec4 angles(glm::radians(45.0f), 0, 0, 1);
 	glm::mat4 T(1);
 
+	int subdivs = 3;
+	int gridSize = 4;
+	glm::vec4 params(.1f, -.23f, -.3f, 0.f);
+
+	auto window = renderer.addUIWindow("Surface Settings", [&](gl::Renderer* env) {
+		ImGui::InputFloat4("Parameters", &params[0]);
+		ImGui::DragInt("GridSize", &gridSize, 1.f, 1, 10);
+		ImGui::DragInt("Subdivisions", &subdivs, 1.f, 1, 10);
+	});
+
 	while (!renderer.shouldClose()) {
 		renderer.startFrame();
 		control.update(cam);
-
-		//ImGui3D::GImGui3D->currentDrawList()->AddScreenAlignedCircle(glm::vec4(0, 0, 0, 1), 25, 4, glm::vec4(1, 0, 0, 1), 24);
-		//ImGui3D::GImGui3D->currentDrawList()->AddScreenAlignedQuad(glm::vec4(5, 5, 0, 1), ImVec2(25, 50), 4, glm::vec4(1, 0, 0, 1));
-		//ImGui3D::GImGui3D->currentDrawList()->AddLine(glm::vec4(10, 5, 0, 1), glm::vec4(25, 5, 10, 1), 4, glm::vec4(1, 0, 0, 1));
 
 		//ImGui3D::DirectionalLight(&d[0], &p1[0]);
 		ImGui3D::Spotlight(d, p1, angles[0]);
 		ImGui3D::CubeMap(p0);
 		ImGui3D::CamerViewDirection(renderer.camera()->viewMatrix);
+
+		ImGui3D::ParametricSurface([&](float u, float v) {
+			return glm::vec3(u, v, params.x * u * u + params.y * u * v + params.z * v * v + params.w);
+			}, glm::vec4(.9, .1, .1, .5), ImVec4(-2, -2, 2, 2), ImVec2(gridSize, gridSize), subdivs);
 
 		renderer.endFrame();
 	}

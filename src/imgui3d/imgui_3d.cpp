@@ -230,6 +230,7 @@ namespace ImGui3D {
 		CubeMapRadius                =  45;
 		CubeMapSize                  =  25;
 
+		GridLineWidth                = 1.25f;
 
 		// Set up colors
 		Colors[ImGui3DCol_xAxis]          = GLMCOLCHAR2FLOAT(210,  50, 110, 255);
@@ -258,6 +259,9 @@ namespace ImGui3D {
 
 		Colors[ImGui3DCol_Editor_Widget]          = GLMCOLCHAR2FLOAT(  0,   0,  0, 255);
 		Colors[ImGui3DCol_Editor_Widget_selected] = GLMCOLCHAR2FLOAT(255, 160, 40, 255);
+
+
+		Colors[ImGui3DCol_Grid] = GLMCOLCHAR2FLOAT(25, 25, 25, 255);
 	}
 }
 
