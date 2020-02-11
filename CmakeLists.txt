@@ -1,14 +1,25 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(GL-Framework LANGUAGES CXX)
 
+option(WITH_OPENMESH "WITH_OpenMesh" ON)
+
 # Find Opengl libs
 find_package(OpenGL REQUIRED)
 find_package(glad REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 
-# Find opencv
+# Find OpenCV
 find_package(OpenCV REQUIRED)
+
+# Find OpenMesh (if requested)
+if(${WITH_OPENMESH})
+	find_package(OpenMesh QUIET)
+	if(NOT ${OpenMesh_FOUND})
+		message(STATUS "Did not find OpenMesh, turning it off")
+		set(${WITH_OPENMESH} OFF)
+	endif()
+endif()
 
 # Gather Imgui
 if(NOT IMGUI_SRC)
@@ -70,6 +81,7 @@ set(GL_FILES
 	src/uiwindow.hpp
 	src/uiwindow.cpp
 	src/IconsFontAwesome5.h)
+
 	
 source_group("Meshes" FILES ${MESH_FILES})
 source_group("Dear Imgui" FILES ${IMGUI_FILES})
@@ -79,6 +91,11 @@ add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${LENS_FILES} ${IMGUI_
 target_link_libraries(glframework PUBLIC ${OPENGL_gl_LIBRARY} glfw glad::glad ${OpenCV_LIBRARIES})
 target_compile_definitions(glframework PUBLIC -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 target_compile_definitions(glframework PUBLIC -DIMGUI_DEFINE_MATH_OPERATORS)
+if(${WITH_OPENMESH})
+	target_link_libraries(glframework PUBLIC OpenMeshCore)
+	target_compile_definitions(glframework PUBLIC -D_USE_MATH_DEFINES -DWITH_OPENMESH)
+	target_sources(glframework PRIVATE src/openmesh_ext.h)
+endif()
 
 target_compile_definitions(glframework PUBLIC -DGL_FRAMEWORK_SHADER_DIR="${PROJECT_SOURCE_DIR}/shaders/")
 target_compile_definitions(glframework PUBLIC -DGL_FRAMEWORK_FONT_DIR="${PROJECT_SOURCE_DIR}/fonts/")

@@ -6,6 +6,10 @@
 #include "camera.hpp"
 #include "draw_batch.hpp"
 
+#ifdef WITH_OPENMESH
+#include "openmesh_ext.h"
+#endif
+
 #include <opencv2/core.hpp>
 #include <fstream>
 #include <sstream>
@@ -62,6 +66,9 @@ namespace gl {
 	public:
 		TriangleMesh();
 		TriangleMesh(const std::vector<Eigen::Vector3f>& vertices, std::vector<Eigen::Vector3i>& indices);
+#ifdef WITH_OPENMESH
+		TriangleMesh(const OpenMesh::TriangleMesh3f& mesh);
+#endif
 
 		void render(const Renderer* env);
 

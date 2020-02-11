@@ -35,6 +35,25 @@ gl::TriangleMesh::TriangleMesh(const std::vector<Eigen::Vector3f>& vertices, std
 	}
 }
 
+#ifdef WITH_OPENMESH
+gl::TriangleMesh::TriangleMesh(const OpenMesh::TriangleMesh3f& mesh) :
+	gl::TriangleMesh()
+{
+	/*mVertices->resize(mesh.n_vertices());
+	for (auto vh : mesh.vertices()) {
+		const glm::vec3 p = mesh.point(vh);
+		mVertices->at(vh.idx()) = Eigen::Vector3f(p.x, p.y, p.z);
+	}
+
+	IndexBuffer& indexBuffer = *mBatch.indexBuffer;
+	for (auto fh : mesh.vertices()) {
+		indexBuffer.push_back(fh.halfedge().from().idx());
+		indexBuffer.push_back(fh.halfedge().to().idx());
+		indexBuffer.push_back(fh.halfedge().next().from().idx());
+	}*/
+}
+#endif
+
 void gl::TriangleMesh::render(const gl::Renderer* env)
 {
 
