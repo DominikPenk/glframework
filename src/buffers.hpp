@@ -213,6 +213,10 @@ namespace gl {
 			mData.resize(size);
 			mUpdated = true;
 		}
+		inline void resize(size_t size, const value_type& val) {
+			mData.resize(size, val);
+			mUpdated = true;
+		}
 		inline void clear() {
 			mUpdated = true;
 			mData.clear();

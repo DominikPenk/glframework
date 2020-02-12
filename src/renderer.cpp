@@ -204,11 +204,14 @@ Renderer::~Renderer() {
 	mWindow = NULL;
 }
 
-void gl::Renderer::startFrame()
+bool gl::Renderer::startFrame()
 {
 	glfwMakeContextCurrent(mWindow);
 	glfwPollEvents();
 
+	// Skip if minimized
+	if (glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED))
+		return false;
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -228,10 +231,16 @@ void gl::Renderer::startFrame()
 	if (showDebug) {
 		mDebugWindow->draw(this);
 	}
+
+	return true;
 }
 
 void gl::Renderer::endFrame()
 {
+	// Skip if minimized
+	if (glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED))
+		return;
+
 	mFrameBuffer->bind();
 	glClearColor(mClearColor.r, mClearColor.g, mClearColor.b, mClearColor.w);
 	mFrameBuffer->clear({ mClearColor, glm::vec4(0, 0, 0, 1) });

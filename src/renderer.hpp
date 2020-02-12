@@ -44,7 +44,8 @@ namespace gl {
 		/// <summary>This function initializes a new frame and polls for user input.</summary>
 		/// <remarks>Call this function as soon as possible in your render loop. 
 		/// In most cases you should call this first.</remarks>
-		void startFrame();
+		/// <returns>True if the window will be drawn or false otherwise (e.g. if window is iconyfied)</returns>
+		bool startFrame();
 
 		/// <summary>This function finalizes the frame by drawing UI and geometry.</summary>
 		/// <remarks>Call this function as late as possbile in your render loop. In most cases this is the last function called.</remarks>
@@ -102,6 +103,7 @@ namespace gl {
 		size_t numMeshes() const { return mMeshes.size(); }
 
 		bool shouldClose() const { return glfwWindowShouldClose(mWindow); }
+		bool isMinified() const { glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED); }
 
 		const std::vector<std::shared_ptr<Mesh>>& objects() const;
 		std::vector<std::shared_ptr<Mesh>>& objects();

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(GL-Framework LANGUAGES CXX)
 
 option(WITH_OPENMESH "WITH_OpenMesh" ON)
+option(BUILD_FRAMEWORK_TEST "BUILD_FRAMEWORK_TEST" OFF)
 
 # Find Opengl libs
 find_package(OpenGL REQUIRED)
