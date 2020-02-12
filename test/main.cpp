@@ -22,7 +22,7 @@ int main(int argc, const char* argv[]) {
 
 	gl::OrbitControl control(cam);
 
-	gl::Renderer renderer(800, 600, cam);
+	gl::Renderer renderer(800, 600, cam, "Test Window", true);
 
 	//auto spline = renderer.addMesh<gl::BSplineSurfaceMesh>("Lens", approximateSphere(16, 32.5, 3.25));
 	auto coo = renderer.addMesh<gl::CoordinateFrame>("Coordinate Frame");

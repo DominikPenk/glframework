@@ -96,7 +96,7 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std::string& title) :
+Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std::string& title, bool maximized) :
 	mCamera(cam),
 	mOutliner(std::make_unique<OutlinerWindow>()),
 	mDebugWindow(std::make_unique<RendererDebugWindow>()),
@@ -124,6 +124,7 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 #if _DEBUG
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
+	glfwWindowHint(GLFW_MAXIMIZED, maximized ? GLFW_TRUE : GLFW_FALSE);
 
 	mWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 	if (mWindow == NULL)
@@ -140,7 +141,12 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	glfwMakeContextCurrent(mWindow);
 	glfwSetWindowUserPointer(mWindow, this);
 
-	glfwSetWindowSize(mWindow, mCamera->ScreenWidth, mCamera->ScreenHeight);
+	if (maximized) {
+		glfwGetWindowSize(mWindow, &mCamera->ScreenWidth, &mCamera->ScreenHeight);
+	}
+	else {
+		glfwSetWindowSize(mWindow, mCamera->ScreenWidth, mCamera->ScreenHeight);
+	} 
 
 	// set callbacks
 	glfwSetFramebufferSizeCallback(mWindow, framebuffer_size_callback);

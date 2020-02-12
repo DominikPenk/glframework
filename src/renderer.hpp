@@ -38,7 +38,7 @@ namespace gl {
 			Uncharted2                 = 4
 		};
 
-		Renderer(int width, int height, std::shared_ptr<Camera> cam, const std::string& title = "Title");
+		Renderer(int width, int height, std::shared_ptr<Camera> cam, const std::string& title = "Title", bool maximized = false);
 		~Renderer();
 
 		/// <summary>This function initializes a new frame and polls for user input.</summary>
