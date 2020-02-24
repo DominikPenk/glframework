@@ -45,6 +45,23 @@ set(MESH_FILES
 	src/pointcloud.hpp
 	src/pointcloud.cpp)
 
+if(${WITH_OPENMESH})
+	set(MESH_FILES
+		${MESH_FILES}
+		src/openmesh_mesh.h
+		src/openmesh_mesh.cpp)
+
+	set(OPENMESH_EXT
+		src/OpenMeshExtension/DebuggableMixin.h
+		src/OpenMeshExtension/DebuggablePolyConnectivity.h
+		src/OpenMeshExtension/DebuggablePolyConnectivity.cpp
+		src/OpenMeshExtension/DebuggableTriConnectivity.h
+		src/OpenMeshExtension/DebuggableTriConnectivity.cpp
+		src/OpenMeshExtension/DebuggableAttribKernelT.h
+		src/OpenMeshExtension/DebuggableTriMesh_ArrayKernelT.h)
+	source_group("OpenMesh Extension" FILES ${OPENMESH_EXT})
+endif()
+
 set(IMGUI_3D_FILES
 	src/imgui3d/imgui_3d.h
 	src/imgui3d/imgui_3d_utils.h
@@ -95,7 +112,7 @@ target_compile_definitions(glframework PUBLIC -DIMGUI_DEFINE_MATH_OPERATORS)
 if(${WITH_OPENMESH})
 	target_link_libraries(glframework PUBLIC OpenMeshCore)
 	target_compile_definitions(glframework PUBLIC -D_USE_MATH_DEFINES -DWITH_OPENMESH)
-	target_sources(glframework PRIVATE src/openmesh_ext.h)
+	target_sources(glframework PRIVATE src/openmesh_ext.h ${OPENMESH_EXT})
 endif()
 
 target_compile_definitions(glframework PUBLIC -DGL_FRAMEWORK_SHADER_DIR="${PROJECT_SOURCE_DIR}/shaders/")
