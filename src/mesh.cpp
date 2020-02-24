@@ -80,7 +80,7 @@ void gl::TriangleMesh::removeDoubles(float thr)
 	std::iota(mapping.begin(), mapping.end(), 0);
 	for (size_t i = 0; i < mVertices->size(); ++i) {
 		if (mapping[i] != i) continue;
-#pragma omp parallel for
+		#pragma omp parallel for
 		for (int j = i + 1; j < (int)mVertices->size(); ++j) {
 			if (mapping[j] != j) continue;
 			if ((mVertices->at(i) - mVertices->at(j)).squaredNorm() < thr) {

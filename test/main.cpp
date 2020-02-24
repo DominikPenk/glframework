@@ -4,6 +4,7 @@
 #include "camera.hpp"
 #include "controls.hpp"
 #include "splinecurves.hpp"
+#include "openmesh_mesh.h"
 
 
 #include "imgui.h"
@@ -49,61 +50,57 @@ int main(int argc, const char* argv[]) {
 		ImGui::DragInt("Subdivisions", &subdivs, 1.f, 1, 10);
 	});
 
-	{
-		std::shared_ptr<OpenMesh::TriangleMesh3f> mesh = std::make_shared<OpenMesh::TriangleMesh3f>();
-		OpenMesh::TriangleMesh3f::VertexHandle vhandle[8];
-		vhandle[0] = mesh->add_vertex(OpenMesh::TriangleMesh3f::Point(-1, -1, 1));
-		vhandle[1] = mesh->add_vertex(OpenMesh::TriangleMesh3f::Point(1, -1, 1));
-		vhandle[2] = mesh->add_vertex(OpenMesh::TriangleMesh3f::Point(1, 1, 1));
-		vhandle[3] = mesh->add_vertex(OpenMesh::TriangleMesh3f::Point(-1, 1, 1));
-		vhandle[4] = mesh->add_vertex(OpenMesh::TriangleMesh3f::Point(-1, -1, -1));
-		vhandle[5] = mesh->add_vertex(OpenMesh::TriangleMesh3f::Point(1, -1, -1));
-		vhandle[6] = mesh->add_vertex(OpenMesh::TriangleMesh3f::Point(1, 1, -1));
-		vhandle[7] = mesh->add_vertex(OpenMesh::TriangleMesh3f::Point(-1, 1, -1));
+	auto omesh = renderer.addMesh<gl::OpenMeshMesh>("OpenMesh Mesh");
+	OpenMesh::TriangleMesh3f::VertexHandle vhandle[8];
+	vhandle[0] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(-1, -1, 1));
+	vhandle[1] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(1, -1, 1));
+	vhandle[2] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(1, 1, 1));
+	vhandle[3] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(-1, 1, 1));
+	vhandle[4] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(-1, -1, -1));
+	vhandle[5] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(1, -1, -1));
+	vhandle[6] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(1, 1, -1));
+	vhandle[7] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(-1, 1, -1));
+	//omesh->data->watch(vhandle[0]);
 
-		mesh->watch(vhandle[0]);
+	// generate (quadrilateral) faces
+	std::vector<OpenMesh::TriangleMesh3f::VertexHandle>  face_vhandles;
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[0]);
+	face_vhandles.push_back(vhandle[1]);
+	face_vhandles.push_back(vhandle[2]);
+	face_vhandles.push_back(vhandle[3]);
+	omesh->data().add_face(face_vhandles);
 
-		// generate (quadrilateral) faces
-		std::vector<OpenMesh::TriangleMesh3f::VertexHandle>  face_vhandles;
-		face_vhandles.clear();
-		face_vhandles.push_back(vhandle[0]);
-		face_vhandles.push_back(vhandle[1]);
-		face_vhandles.push_back(vhandle[2]);
-		face_vhandles.push_back(vhandle[3]);
-		mesh->add_face(face_vhandles);
-
-		face_vhandles.clear();
-		face_vhandles.push_back(vhandle[7]);
-		face_vhandles.push_back(vhandle[6]);
-		face_vhandles.push_back(vhandle[5]);
-		face_vhandles.push_back(vhandle[4]);
-		mesh->add_face(face_vhandles);
-		face_vhandles.clear();
-		face_vhandles.push_back(vhandle[1]);
-		face_vhandles.push_back(vhandle[0]);
-		face_vhandles.push_back(vhandle[4]);
-		face_vhandles.push_back(vhandle[5]);
-		mesh->add_face(face_vhandles);
-		face_vhandles.clear();
-		face_vhandles.push_back(vhandle[2]);
-		face_vhandles.push_back(vhandle[1]);
-		face_vhandles.push_back(vhandle[5]);
-		face_vhandles.push_back(vhandle[6]);
-		mesh->add_face(face_vhandles);
-		face_vhandles.clear();
-		face_vhandles.push_back(vhandle[3]);
-		face_vhandles.push_back(vhandle[2]);
-		face_vhandles.push_back(vhandle[6]);
-		face_vhandles.push_back(vhandle[7]);
-		mesh->add_face(face_vhandles);
-		face_vhandles.clear();
-		face_vhandles.push_back(vhandle[0]);
-		face_vhandles.push_back(vhandle[3]);
-		face_vhandles.push_back(vhandle[7]);
-		face_vhandles.push_back(vhandle[4]);
-		mesh->add_face(face_vhandles);
-
-	}
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[7]);
+	face_vhandles.push_back(vhandle[6]);
+	face_vhandles.push_back(vhandle[5]);
+	face_vhandles.push_back(vhandle[4]);
+	omesh->data().add_face(face_vhandles);
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[1]);
+	face_vhandles.push_back(vhandle[0]);
+	face_vhandles.push_back(vhandle[4]);
+	face_vhandles.push_back(vhandle[5]);
+	omesh->data().add_face(face_vhandles);
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[2]);
+	face_vhandles.push_back(vhandle[1]);
+	face_vhandles.push_back(vhandle[5]);
+	face_vhandles.push_back(vhandle[6]);
+	omesh->data().add_face(face_vhandles);
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[3]);
+	face_vhandles.push_back(vhandle[2]);
+	face_vhandles.push_back(vhandle[6]);
+	face_vhandles.push_back(vhandle[7]);
+	omesh->data().add_face(face_vhandles);
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[0]);
+	face_vhandles.push_back(vhandle[3]);
+	face_vhandles.push_back(vhandle[7]);
+	face_vhandles.push_back(vhandle[4]);
+	omesh->data().add_face(face_vhandles);
 
 	while (!renderer.shouldClose()) {
 		renderer.startFrame();

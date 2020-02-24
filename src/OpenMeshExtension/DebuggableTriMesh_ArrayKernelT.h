@@ -21,8 +21,6 @@ struct Debuggable_TriMesh_ArrayKernel_GeneratorT
 	typedef TriMeshT<AttribKernel>                                        Mesh;
 };
 
-
-
 /** \ingroup mesh_types_group
 	Triangle mesh based on the ArrayKernel.
 	\see OpenMesh::TriMeshT

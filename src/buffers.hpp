@@ -217,6 +217,9 @@ namespace gl {
 			mData.resize(size, val);
 			mUpdated = true;
 		}
+		inline void reserve(size_t size) {
+			mData.reserve(size);
+		}
 		inline void clear() {
 			mUpdated = true;
 			mData.clear();
