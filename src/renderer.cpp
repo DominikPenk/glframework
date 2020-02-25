@@ -226,6 +226,7 @@ bool gl::Renderer::startFrame()
 	// initialize a new imgui frame
 	if (mUIWindows.size() > 0) {
 		for (auto window : mUIWindows) {
+			const std::lock_guard<std::mutex> lock(getLock(window));
 			window->preDraw(this);
 			window->draw(this);
 		}
@@ -253,6 +254,7 @@ void gl::Renderer::endFrame()
 
 	for (auto mesh : mMeshes) {
 		if (mesh->visible) {
+			const std::lock_guard<std::mutex> lock(getLock(mesh));
 			mesh->render(this);
 			mesh->handleIO(this, ImGui::GetIO());
 		}
@@ -276,12 +278,14 @@ void gl::Renderer::endFrame()
 	// Render all ui windows that draw into viewport
 	if (mUIWindows.size() > 0) {
 		for (auto window : mUIWindows) {
+			const std::lock_guard<std::mutex> lock(getLock(window));
 			window->viewportDraw(this);
 		}
 	}
 
 	for (auto mesh : mMeshes) {
 		if (mesh->visible) {
+			const std::lock_guard<std::mutex> lock(getLock(mesh));
 			mesh->drawViewportUI(this);
 		}
 	}
@@ -341,6 +345,18 @@ void gl::Renderer::pushResizeCallback(std::function<void(Renderer*)> fn)
 std::vector<std::function<void(Renderer*)>> gl::Renderer::resizeCallbacks()
 {
 	return mResizeCallbacks;
+}
+
+std::mutex& gl::Renderer::getLock(std::shared_ptr<Mesh> obj)
+{
+	const std::lock_guard<std::mutex> lock(mLockLock);
+	return mObjectLocks[obj];
+}
+
+std::mutex& gl::Renderer::getLock(std::shared_ptr<UIWindow> window)
+{
+	const std::lock_guard<std::mutex> lock(mLockLock);
+	return mWindowLocks[window];
 }
 
 void gl::Renderer::ImGui3d_ImplRenderer_Init(std::shared_ptr<ImGui3D::ImGui3DContext> ctx)

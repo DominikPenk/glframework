@@ -122,6 +122,9 @@ namespace gl {
 
 		std::shared_ptr<Framebuffer> framebuffer() { return mFrameBuffer; }
 
+		std::mutex& getLock(std::shared_ptr<Mesh> obj);
+		std::mutex& getLock(std::shared_ptr<UIWindow> window);
+
 	private:
 		void ImGui3d_ImplRenderer_Init(std::shared_ptr<ImGui3D::ImGui3DContext> ctx);
 
@@ -145,6 +148,11 @@ namespace gl {
 		gl::VertexArrayObject mDummyVAO;
 
 		std::vector<std::function<void(Renderer*)>> mResizeCallbacks;
+	
+		// In case of threading
+		std::mutex mLockLock;
+		std::unordered_map<std::shared_ptr<Mesh>, std::mutex> mObjectLocks;
+		std::unordered_map<std::shared_ptr<UIWindow>, std::mutex> mWindowLocks;
 	};
 
 }

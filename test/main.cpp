@@ -105,7 +105,6 @@ int main(int argc, const char* argv[]) {
 	while (!renderer.shouldClose()) {
 		renderer.startFrame();
 		control.update(cam);
-
 		//ImGui3D::DirectionalLight(&d[0], &p1[0]);
 		ImGui3D::Spotlight(d, p1, angles[0]);
 		ImGui3D::CubeMap(p0);
@@ -114,7 +113,6 @@ int main(int argc, const char* argv[]) {
 		ImGui3D::ParametricSurface([&](float u, float v) {
 			return glm::vec3(u, v, params.x * u * u + params.y * u * v + params.z * v * v + params.w);
 			}, glm::vec4(.9, .1, .1, .5), ImVec4(-2, -2, 2, 2), ImVec2(gridSize, gridSize), subdivs);
-
 		renderer.endFrame();
 	}
 
