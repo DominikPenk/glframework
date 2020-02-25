@@ -15,6 +15,7 @@
 
 #ifdef WITH_OPENMESH
 #include "openmesh_ext.h"
+#include "OpenMeshExtension/MeshDebugWindow.h"
 #endif
 
 #include "texture.hpp"
@@ -33,6 +34,7 @@ int main(int argc, const char* argv[]) {
 	auto coo = renderer.addMesh<gl::CoordinateFrame>("Coordinate Frame");
 	
 	renderer.showDebug = true;
+	renderer.showMeshWatch = true;
 
 	glm::vec3 p0(0);
 	glm::vec4 p1(10, 4, 0, 1);
@@ -60,7 +62,7 @@ int main(int argc, const char* argv[]) {
 	vhandle[5] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(1, -1, -1));
 	vhandle[6] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(1, 1, -1));
 	vhandle[7] = omesh->data().add_vertex(OpenMesh::TriangleMesh3f::Point(-1, 1, -1));
-	//omesh->data->watch(vhandle[0]);
+	
 
 	// generate (quadrilateral) faces
 	std::vector<OpenMesh::TriangleMesh3f::VertexHandle>  face_vhandles;
@@ -102,6 +104,27 @@ int main(int argc, const char* argv[]) {
 	face_vhandles.push_back(vhandle[4]);
 	omesh->data().add_face(face_vhandles);
 
+	for (auto vh : vhandle) {
+		omesh->data().watch(vh);
+	}
+	
+	//std::dynamic_pointer_cast<gl::MeshDebugWindow>(renderer.mMeshWatch)->addBreakPoint(omesh, vhandle[1]);
+
+	std::mutex m;
+	std::condition_variable cond_var;
+	omesh->addBreakpoint(vhandle[1], [&]() {
+		std::cout << "Triggered Breakpoint ... ";
+		std::unique_lock<std::mutex> lock(m);
+		cond_var.wait(lock);
+		std::cout << "Resume!" << std::endl;
+	});
+
+	std::thread backgroundWorker([&]() {
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		std::cout << "Trigger Breakpoin!" << std::endl;
+		omesh->data().point(vhandle[1]);
+	});
+
 	while (!renderer.shouldClose()) {
 		renderer.startFrame();
 		control.update(cam);
@@ -109,6 +132,11 @@ int main(int argc, const char* argv[]) {
 		ImGui3D::Spotlight(d, p1, angles[0]);
 		ImGui3D::CubeMap(p0);
 		ImGui3D::CamerViewDirection(renderer.camera()->viewMatrix);
+
+		if (ImGui::IsKeyReleased(GLFW_KEY_N)) {
+			std::unique_lock<std::mutex> lock(m);
+			cond_var.notify_all();
+		}
 
 		ImGui3D::ParametricSurface([&](float u, float v) {
 			return glm::vec3(u, v, params.x * u * u + params.y * u * v + params.z * v * v + params.w);

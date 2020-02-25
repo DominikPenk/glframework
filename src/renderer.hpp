@@ -89,6 +89,18 @@ namespace gl {
 			return mesh;
 		}
 
+		template<class MeshType>
+		std::vector<std::shared_ptr<MeshType>> getMeshes() {
+			std::vector<std::shared_ptr<MeshType>> filtered;
+			for (std::shared_ptr<Mesh> mesh : mMeshes) {
+				std::shared_ptr<MeshType> converted = std::dynamic_pointer_cast<MeshType, gl::Mesh>(mesh);
+				if (converted != nullptr) {
+					filtered.push_back(converted);
+				}
+			}
+			return filtered;
+		}
+
 		void removeMesh(size_t index) {
 			mMeshes.erase(mMeshes.begin() + index);
 		}
@@ -113,6 +125,7 @@ namespace gl {
 
 		bool showOutliner;
 		bool showDebug;
+		bool showMeshWatch;
 		bool gammaCorrection;
 		bool hdr;
 		float gamma;
@@ -132,6 +145,7 @@ namespace gl {
 
 		std::unique_ptr<UIWindow> mOutliner;
 		std::unique_ptr<UIWindow> mDebugWindow;
+		std::unique_ptr<UIWindow> mMeshWatch;
 
 		std::shared_ptr<Framebuffer> mFrameBuffer;
 
@@ -153,6 +167,8 @@ namespace gl {
 		std::mutex mLockLock;
 		std::unordered_map<std::shared_ptr<Mesh>, std::mutex> mObjectLocks;
 		std::unordered_map<std::shared_ptr<UIWindow>, std::mutex> mWindowLocks;
+
+
 	};
 
 }

@@ -58,7 +58,10 @@ if(${WITH_OPENMESH})
 		src/OpenMeshExtension/DebuggableTriConnectivity.h
 		src/OpenMeshExtension/DebuggableTriConnectivity.cpp
 		src/OpenMeshExtension/DebuggableAttribKernelT.h
-		src/OpenMeshExtension/DebuggableTriMesh_ArrayKernelT.h)
+		src/OpenMeshExtension/DebuggableTriMesh_ArrayKernelT.h
+		# Debug Window
+		src/OpenMeshExtension/MeshDebugWindow.h
+		src/OpenMeshExtension/MeshDebugWindow.cpp)
 	source_group("OpenMesh Extension" FILES ${OPENMESH_EXT})
 endif()
 

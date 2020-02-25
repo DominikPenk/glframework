@@ -15,31 +15,32 @@ public:
 	//-------------------------------------------------------------------- points
 	const Point& point(VertexHandle _vh) const
 	{
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::point);
 		return Base::point(_vh);
 	}
 
 	Base::Point& point(VertexHandle _vh)
 	{
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::point);
 		return Base::point(_vh);
 	}
 	void set_point(VertexHandle _vh, const Point& _p)
 	{
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::set_point);
 		Base::set_point(_vh, _p);
 	}
 
 	//------------------------------------------------------------ vertex normals
 	const Normal& normal(VertexHandle _vh) const
 	{
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::normal);
 		return Base::normal(_vh);
 	}
 
 	void set_normal(VertexHandle _vh, const Normal& _n)
 	{
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::normal);
+
 		Base::set_normal(_vh, _n);
 	}
 
@@ -47,13 +48,13 @@ public:
 
 	const Color& color(VertexHandle _vh) const
 	{
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::color);
 		return Base::color(_vh);
 	}
 
 	void set_color(VertexHandle _vh, const Color& _c)
 	{
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::set_color);
 		Base::set_color(_vh, _c);
 	}
 
@@ -61,12 +62,12 @@ public:
 	//------------------------------------------------------- vertex 1D texcoords
 
 	const TexCoord1D& texcoord1D(VertexHandle _vh) const {
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::texcoord1D);
 		return Base::texcoord1D(_vh);
 	}
 
 	void set_texcoord1D(VertexHandle _vh, const TexCoord1D& _t) {
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::set_texcoord1D);
 		Base::set_texcoord1D(_vh, _t);
 	}
 
@@ -74,12 +75,12 @@ public:
 	//------------------------------------------------------- vertex 2D texcoords
 
 	const TexCoord2D& texcoord2D(VertexHandle _vh) const {
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::texcoord2D);
 		return Base::texcoord2D(_vh);
 	}
 
 	void set_texcoord2D(VertexHandle _vh, const TexCoord2D& _t) {
-		if (shouldBreak(_vh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::set_texcoord2D);
 		Base::set_texcoord2D(_vh, _t);
 	}
 
@@ -87,27 +88,24 @@ public:
 	//------------------------------------------------------- vertex 3D texcoords
 
 	const TexCoord3D& texcoord3D(VertexHandle _vh) const {
-		if (shouldBreak(_vh)) debugBreakCallback_();
-
+		checkBreakPoints(_vh, OpenMeshFunction::texcoord3D);
 		return Base::texcoord3D(_vh);
 	}
 
 	void set_texcoord3D(VertexHandle _vh, const TexCoord3D& _t) {
-		if (shouldBreak(_vh)) debugBreakCallback_();
-
+		checkBreakPoints(_vh, OpenMeshFunction::set_texcoord3D);
 		Base::set_texcoord3D(_vh, _t);
 	}
 
 	//.------------------------------------------------------ halfedge 1D texcoords
 
 	const TexCoord1D& texcoord1D(HalfedgeHandle _heh) const {
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::texcoord1D);
 		return Base::texcoord1D(_heh);
 	}
 
 	void set_texcoord1D(HalfedgeHandle _heh, const TexCoord1D& _t) {
-		if (shouldBreak(_vh)) debugBreakCallback_();
-
+		checkBreakPoints(_heh, OpenMeshFunction::set_texcoord1D);
 		Base::set_texcoord1D(_heh, _t);
 	}
 
@@ -115,12 +113,12 @@ public:
 	//------------------------------------------------------- halfedge 2D texcoords
 
 	const TexCoord2D& texcoord2D(HalfedgeHandle _heh) const {
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::texcoord2D);
 		return Base::texcoord2D(heh);
 	}
 
 	void set_texcoord2D(HalfedgeHandle _heh, const TexCoord2D& _t) {
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::set_texcoord2D);
 		Base::set_texcoord2D(_heh, _t);
 	}
 
@@ -128,12 +126,12 @@ public:
 	//------------------------------------------------------- halfedge 3D texcoords
 	
 	const TexCoord3D& texcoord3D(HalfedgeHandle _heh) const {
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::texcoord3D);
 		return Base::texcoord3D(_heh);
 	}
 
 	void set_texcoord3D(HalfedgeHandle _heh, const TexCoord3D& _t) {
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::set_texcoord3D);
 		Base::set_texcoord3D(_heh, _t);
 	}
 
@@ -141,13 +139,13 @@ public:
 
 	const Color& color(EdgeHandle _eh) const
 	{
-		if (shouldBreak(_eh)) debugBreakCallback_();
+		checkBreakPoints(_eh, OpenMeshFunction::color);
 		return Base::color(_eh);
 	}
 
 	void set_color(EdgeHandle _eh, const Color& _c)
 	{
-		if (shouldBreak(_eh)) debugBreakCallback_();
+		checkBreakPoints(_eh, OpenMeshFunction::set_color);
 		Base::set_color(_eh, _c);
 	}
 
@@ -156,13 +154,13 @@ public:
 
 	const Normal& normal(HalfedgeHandle _heh) const
 	{
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::normal);
 		return Base::normal(_heh);
 	}
 
 	void set_normal(HalfedgeHandle _heh, const Normal& _n)
 	{
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::set_normal);
 		Base::set_normal(_heh, _n);
 	}
 
@@ -171,13 +169,13 @@ public:
 
 	const Color& color(HalfedgeHandle _heh) const
 	{
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::color);
 		return Base::color(_heh);
 	}
 
 	void set_color(HalfedgeHandle _heh, const Color& _c)
 	{
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::set_color);
 		Base::set_color(_heh, _c);
 	}
 
@@ -185,13 +183,13 @@ public:
 
 	const Normal& normal(FaceHandle _fh) const
 	{
-		if (shouldBreak(_fh)) debugBreakCallback_();
+		checkBreakPoints(_fh, OpenMeshFunction::normal);
 		return Base::normal(_fh);
 	}
 
 	void set_normal(FaceHandle _fh, const Normal& _n)
 	{
-		if (shouldBreak(_fh)) debugBreakCallback_();
+		checkBreakPoints(_fh, OpenMeshFunction::set_normal);
 		Base::set_normal(_fh, _n);
 	}
 
@@ -199,13 +197,13 @@ public:
 
 	const TextureIndex& texture_index(FaceHandle _fh) const
 	{
-		if (shouldBreak(_fh)) debugBreakCallback_();
+		checkBreakPoints(_fh, OpenMeshFunction::texture_index);
 		return Base::texture_index(_fh);
 	}
 
 	void set_texture_index(FaceHandle _fh, const TextureIndex& _t)
 	{
-		if (shouldBreak(_fh)) debugBreakCallback_();
+		checkBreakPoints(_fh, OpenMeshFunction::set_texture_index);
 		Base::set_texture_index(_fh, _t);
 	}
 
@@ -213,61 +211,61 @@ public:
 
 	const Color& color(FaceHandle _fh) const
 	{
-		if (shouldBreak(_fh)) debugBreakCallback_();
+		checkBreakPoints(_fh, OpenMeshFunction::color);
 		return Base::color(_fh);
 	}
 
 	void set_color(FaceHandle _fh, const Color& _c)
 	{
-		if (shouldBreak(_fh)) debugBreakCallback_();
+		checkBreakPoints(_fh, OpenMeshFunction::set_color);
 		Base::set_color(_fh, _c);
 	}
 
 	VertexData& data(VertexHandle _vh)
 	{
-		if(shouldBreak(_fh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::data);
 		return Base::data(_vh);
 	}
 
 	const VertexData& data(VertexHandle _vh) const
 	{
-		if (shouldBreak(_fh)) debugBreakCallback_();
+		checkBreakPoints(_vh, OpenMeshFunction::const_data);
 		return Base::data(_vh);
 	}
 
 	FaceData& data(FaceHandle _fh)
 	{
-		if (shouldBreak(_fh)) debugBreakCallback_();
+		checkBreakPoints(_fh, OpenMeshFunction::data);
 		return Base::data(_fh);
 	}
 
 	const FaceData& data(FaceHandle _fh) const
 	{
-		if (shouldBreak(_fh)) debugBreakCallback_();
+		checkBreakPoints(_fh, OpenMeshFunction::const_data);
 		return Base::data(_fh);
 	}
 
 	EdgeData& data(EdgeHandle _eh)
 	{
-		if (shouldBreak(_eh)) debugBreakCallback_();
+		checkBreakPoints(_eh, OpenMeshFunction::data);
 		return Base::data(_eh);
 	}
 
 	const EdgeData& data(EdgeHandle _eh) const
 	{
-		if (shouldBreak(_eh)) debugBreakCallback_();
+		checkBreakPoints(_eh, OpenMeshFunction::const_data);
 		return Base::data(_eh);
 	}
 
 	HalfedgeData& data(HalfedgeHandle _heh)
 	{
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::data);
 		return Base::data(_heh);
 	}
 
 	const HalfedgeData& data(HalfedgeHandle _heh) const
 	{
-		if (shouldBreak(_heh)) debugBreakCallback_();
+		checkBreakPoints(_heh, OpenMeshFunction::const_data);
 		return Base::data(_heh);
 	}
 };

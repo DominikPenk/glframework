@@ -9,6 +9,10 @@
 #include "IconsFontAwesome5.h"
 #include "uiwindow.hpp"
 
+#ifdef WITH_OPENMESH
+#include "OpenMeshExtension/MeshDebugWindow.h"
+#endif
+
 using namespace gl;
 
 void APIENTRY openglCallbackFunction(GLenum source,
@@ -100,8 +104,14 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	mCamera(cam),
 	mOutliner(std::make_unique<OutlinerWindow>()),
 	mDebugWindow(std::make_unique<RendererDebugWindow>()),
+#if defined(WITH_OPENMESH) && defined(_DEBUG)
+	mMeshWatch(std::make_unique<MeshDebugWindow>()),
+#else
+	mMeshWatch(nullptr),
+#endif
 	showOutliner(true),
 	showDebug(false),
+	showMeshWatch(false),
 	gammaCorrection(true),
 	mToneMapping(ToneMapping::Reinhard),
 	gamma(1.2f),
@@ -237,6 +247,9 @@ bool gl::Renderer::startFrame()
 
 	if (showDebug) {
 		mDebugWindow->draw(this);
+	}
+	if (mMeshWatch != nullptr && showMeshWatch) {
+		mMeshWatch->draw(this);
 	}
 
 	return true;

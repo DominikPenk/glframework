@@ -24,8 +24,24 @@ namespace gl {
 		void update(bool force = false);
 
 		glm::vec4 faceColor, edgeColor, vertexColor;
-		bool drawVertices;
 		bool drawEdges;
+
+		void watch(OpenMesh::VertexHandle vh);
+		void watch(OpenMesh::EdgeHandle eh);
+		void watch(OpenMesh::HalfedgeHandle heh);
+		void watch(OpenMesh::FaceHandle fh);
+
+		void addBreakpoint(OpenMesh::VertexHandle vh,    const std::function<void()>& callback = []() { __debugbreak(); }, OpenMesh::Conditional condition = OpenMesh::Always);
+		void addBreakpoint(OpenMesh::EdgeHandle eh,      const std::function<void()>& callback = []() { __debugbreak(); }, OpenMesh::Conditional condition = OpenMesh::Always);
+		void addBreakpoint(OpenMesh::HalfedgeHandle heh, const std::function<void()>& callback = []() { __debugbreak(); }, OpenMesh::Conditional condition = OpenMesh::Always);
+		void addBreakpoint(OpenMesh::FaceHandle fh,      const std::function<void()>& callback = []() { __debugbreak(); }, OpenMesh::Conditional condition = OpenMesh::Always); 
+		
+		void stopWatch(OpenMesh::VertexHandle vh);
+		void stopWatch(OpenMesh::EdgeHandle eh);
+		void stopWatch(OpenMesh::HalfedgeHandle heh);
+		void stopWatch(OpenMesh::FaceHandle fh);
+
+		void setBreakPointCheck(bool value);
 
 	private:
 		bool dirty;
