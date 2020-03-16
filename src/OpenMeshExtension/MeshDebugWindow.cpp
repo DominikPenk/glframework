@@ -25,6 +25,7 @@ gl::MeshDebugWindow::MeshDebugWindow() :
 
 void gl::MeshDebugWindow::onDraw(gl::Renderer* env)
 {
+#ifdef _DEBUG
 	std::vector<std::shared_ptr<OpenMeshMesh>> watchableMeshes = env->getMeshes<gl::OpenMeshMesh>();
 
 
@@ -207,4 +208,5 @@ void gl::MeshDebugWindow::onDraw(gl::Renderer* env)
 	for (auto mesh : watchableMeshes) {
 		mesh->setBreakPointCheck(true);
 	}
+#endif
 }

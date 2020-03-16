@@ -163,5 +163,7 @@ void gl::OpenMeshMesh::stopWatch(OpenMesh::FaceHandle fh)
 
 void gl::OpenMeshMesh::setBreakPointCheck(bool value)
 {
+#ifdef _DEBUG
 	mesh.disableCheck = value;
+#endif
 }
