@@ -104,9 +104,11 @@ int main(int argc, const char* argv[]) {
 	face_vhandles.push_back(vhandle[4]);
 	omesh->data().add_face(face_vhandles);
 
+#ifdef _DEBUG
 	for (auto vh : vhandle) {
 		omesh->data().watch(vh);
 	}
+#endif
 	
 	//std::dynamic_pointer_cast<gl::MeshDebugWindow>(renderer.mMeshWatch)->addBreakPoint(omesh, vhandle[1]);
 
