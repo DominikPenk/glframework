@@ -121,7 +121,7 @@ int main(int argc, const char* argv[]) {
 
 	std::thread backgroundWorker([&]() {
 		std::this_thread::sleep_for(std::chrono::seconds(5));
-		std::cout << "Trigger Breakpoin!" << std::endl;
+		std::cout << "Trigger Breakpoint!" << std::endl;
 		omesh->data().point(vhandle[1]);
 	});
 

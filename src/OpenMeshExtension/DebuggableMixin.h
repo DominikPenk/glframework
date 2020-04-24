@@ -63,7 +63,9 @@ enum class OpenMeshFunction {
 
 typedef typename std::function<bool(OpenMeshFunction fn)> Conditional;
 
-static Conditional Always = [](OpenMeshFunction fn) { return true; };
+static Conditional Always = [](OpenMeshFunction fn) { 
+	return true; 
+};
 static Conditional CustomAttributeAcces = [](OpenMeshFunction fn) {
 	return fn == OpenMeshFunction::const_data || fn == OpenMeshFunction::data;
 };
@@ -132,7 +134,7 @@ struct DebuggalbeMixin {
 	inline void stopWatch(HalfedgeHandle heh);
 	inline void stopWatch(FaceHandle fh);
 
-	bool disableCheck;
+	bool                                                disableCheck;
 
 	std::vector<VertexHandle>                           watchedVertexHandles;
 	std::vector<EdgeHandle>                             watchedEdgeHandles;

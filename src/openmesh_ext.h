@@ -5,9 +5,7 @@
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <OpenMesh/Core/Geometry/VectorT.hh>
 
-#ifdef _DEBUG
 #include "OpenMeshExtension/DebuggableTriMesh_ArrayKernelT.h"
-#endif
 
 namespace OpenMesh {
 	template<int d, typename Scalar>

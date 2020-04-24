@@ -25,20 +25,22 @@ gl::MeshDebugWindow::MeshDebugWindow() :
 
 void gl::MeshDebugWindow::onDraw(gl::Renderer* env)
 {
+#ifdef _DEBUG
 	std::vector<std::shared_ptr<OpenMeshMesh>> watchableMeshes = env->getMeshes<gl::OpenMeshMesh>();
 
 
+	std::vector<std::lock_guard<std::mutex>> locks;
 	// Get all OpenMesh meshes the renderer has to over
 	for (auto mesh : watchableMeshes) {
 		ImGui::Text(mesh->name.c_str());
-		mesh->setBreakPointCheck(false);
+		mesh->disableBreakPointCheck(true);
 	}
 
 	int tbl_flags = ImGuiTableFlags_Reorderable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollFreezeTopRow | ImGuiTableFlags_SizingPolicyMaskX_;
 	
+
 	// Check if anyone is waiting
-	if (breakPointTriggered && ImGui::Button("Resume")) {
-		breakPointTriggered = false;
+	if (ImGui::Button("Resume")) {
 		std::lock_guard<std::mutex> guard(mutex);
 		breakpoint.notify_all();
 	}
@@ -205,6 +207,7 @@ void gl::MeshDebugWindow::onDraw(gl::Renderer* env)
 	}
 
 	for (auto mesh : watchableMeshes) {
-		mesh->setBreakPointCheck(true);
+		mesh->disableBreakPointCheck(false);
 	}
+#endif
 }

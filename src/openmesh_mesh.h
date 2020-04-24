@@ -41,7 +41,7 @@ namespace gl {
 		void stopWatch(OpenMesh::HalfedgeHandle heh);
 		void stopWatch(OpenMesh::FaceHandle fh);
 
-		void setBreakPointCheck(bool value);
+		void disableBreakPointCheck(bool value);
 
 	private:
 		bool dirty;
