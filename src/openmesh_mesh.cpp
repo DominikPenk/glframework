@@ -19,7 +19,7 @@ gl::OpenMeshMesh::OpenMeshMesh(OpenMesh::TriangleMesh3f mesh) :
 	this->mesh = mesh;
 }
 
-void gl::OpenMeshMesh::render(const Renderer* env)
+void gl::OpenMeshMesh::render(const gl::RendererBase * env)
 {
 	update();
 	glm::mat4 P = env->camera()->GetProjectionMatrix();

@@ -6,6 +6,7 @@
 struct ImGuiIO;
 
 namespace gl {
+	class RendererBase;
 	class Renderer;
 
 	class CatmullRomSpline : public Mesh {
@@ -19,7 +20,7 @@ namespace gl {
 
 		CatmullRomSpline(const std::vector<glm::vec3>& points);
 
-		virtual void render(const Renderer* env) override;
+		virtual void render(const RendererBase* env) override;
 
 		virtual void drawOutliner() override; 
 

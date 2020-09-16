@@ -259,6 +259,16 @@ std::shared_ptr<gl::Texture> gl::Framebuffer::getRenderTexture(int slot)
 	return mColorAttachments[slot].targetTexture;
 }
 
+void gl::Framebuffer::readColorAttachment(int slot, int x, int y, int width, int height, void* buffer)
+{
+	bind();
+	glReadBuffer(GL_COLOR_ATTACHMENT0 + slot);
+	glReadPixels(x, y, width, height,
+		mColorAttachments[slot].targetTexture->exposedFormat,
+		mColorAttachments[slot].targetTexture->dataType,
+		buffer);
+}
+
 void gl::Framebuffer::bind()
 {
 	if (mRequriesUpdate)

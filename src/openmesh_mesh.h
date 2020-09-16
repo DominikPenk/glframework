@@ -14,7 +14,7 @@ namespace gl {
 		OpenMeshMesh(OpenMesh::TriangleMesh3f);
 
 		// Inherited via Mesh
-		virtual void render(const Renderer* env) override;
+		virtual void render(const RendererBase* env) override;
 
 		virtual void drawOutliner() override;
 
@@ -42,6 +42,9 @@ namespace gl {
 		void stopWatch(OpenMesh::FaceHandle fh);
 
 		void disableBreakPointCheck(bool value);
+
+		virtual Shader& getShader() override { return batch.shader; }
+		virtual const Shader& getShader() const { return batch.shader; }
 
 	private:
 		bool dirty;

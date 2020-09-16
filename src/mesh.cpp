@@ -54,7 +54,7 @@ gl::TriangleMesh::TriangleMesh(const OpenMesh::TriangleMesh3f& mesh) :
 }
 #endif
 
-void gl::TriangleMesh::render(const gl::Renderer* env)
+void gl::TriangleMesh::render(const gl::RendererBase * env)
 {
 
 	glm::mat4 P = env->camera()->GetProjectionMatrix();
@@ -150,7 +150,7 @@ gl::CoordinateFrame::CoordinateFrame(float length) :
 	mShowInOutliner = false;
 }
 
-void gl::CoordinateFrame::render(const Renderer* env)
+void gl::CoordinateFrame::render(const gl::RendererBase * env)
 {
 	mPoints.update();
 
@@ -187,7 +187,7 @@ gl::Plane::Plane(glm::vec3 position, glm::vec3 normal, glm::vec2 dimensions) :
 }
 
 
-void gl::Plane::render(const Renderer* env)
+void gl::Plane::render(const gl::RendererBase * env)
 {
 
 	auto _ = mShader.use();

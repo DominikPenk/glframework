@@ -4,12 +4,15 @@
 layout(location = 0) in vec3 vPosition;
 
 out vec3 fColor;
+out int vid;
 
 uniform mat4 MVP;
 uniform vec4 color;
 
+
 void main() {
 	gl_Position = MVP * vec4(vPosition, 1.0);
+	vid = gl_VertexID;
 	fColor = vec3(color);
 }
 

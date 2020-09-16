@@ -27,7 +27,18 @@ namespace gl {
 		glm::fvec3 color;
 	};
 
-	class Renderer {
+	class RendererBase {
+	public:
+		RendererBase(std::shared_ptr<Camera> cam);
+		std::shared_ptr<Camera> camera() { return mCamera; }
+		const std::shared_ptr<Camera> camera() const { return mCamera; }
+	protected:
+		GLFWwindow* mWindow;
+		std::shared_ptr<Camera> mCamera;
+		int mVersion[2];
+	};
+
+	class Renderer : public RendererBase {
 	public:
 
 		enum class ToneMapping {
@@ -71,9 +82,6 @@ namespace gl {
 		/// <param name="drawFn">Function drawing the window contents.</param>
 		/// <returns>A shared pointer to the newly constructed ui window.</returns>
 		std::shared_ptr<GenericUIWindow> addUIWindow(std::string title, std::function<void(Renderer*)> drawFn);
-
-		std::shared_ptr<Camera> camera() { return mCamera; }
-		const std::shared_ptr<Camera> camera() const { return mCamera; }
 
 		inline void setSize(size_t width, size_t height) {
 			mCamera->ScreenHeight = static_cast<int>(height);
@@ -141,7 +149,7 @@ namespace gl {
 	private:
 		void ImGui3d_ImplRenderer_Init(std::shared_ptr<ImGui3D::ImGui3DContext> ctx);
 
-		int m_version[2];
+		
 
 		std::unique_ptr<UIWindow> mOutliner;
 		std::unique_ptr<UIWindow> mDebugWindow;
@@ -150,11 +158,9 @@ namespace gl {
 		std::shared_ptr<Framebuffer> mFrameBuffer;
 
 		std::vector<std::shared_ptr<Mesh>> mMeshes;
-		std::shared_ptr<Camera> mCamera;
 
 		std::vector<std::shared_ptr<UIWindow>> mUIWindows;
 		glm::fvec4 mClearColor;
-		GLFWwindow* mWindow;
 		PointLight mLight;
 		ToneMapping mToneMapping;
 		gl::Shader mPostProShader;
@@ -167,8 +173,6 @@ namespace gl {
 		std::mutex mLockLock;
 		std::unordered_map<std::shared_ptr<Mesh>, std::mutex> mObjectLocks;
 		std::unordered_map<std::shared_ptr<UIWindow>, std::mutex> mWindowLocks;
-
-
 	};
 
 }

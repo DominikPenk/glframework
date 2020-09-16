@@ -46,7 +46,7 @@ gl::CatmullRomSpline::CatmullRomSpline(const std::vector<glm::vec3>& points) :
 	computeCatmulRomData(points, mPoints, mIndices);
 }
 
-void gl::CatmullRomSpline::render(const Renderer* env)
+void gl::CatmullRomSpline::render(const gl::RendererBase * env)
 {
 
 	glm::mat4 P = env->camera()->GetProjectionMatrix();

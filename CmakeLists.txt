@@ -93,6 +93,8 @@ set(GL_FILES
 	src/controls.cpp
 	src/renderer.hpp
 	src/renderer.cpp
+	src/offscreen_renderer.hpp
+	src/offscreen_renderer.cpp
 	src/camera.hpp
 	src/buffers.hpp
 	src/gl_internal.hpp
@@ -137,4 +139,12 @@ target_include_directories(glframework PUBLIC
 if(${BUILD_FRAMEWORK_TEST})
 	add_executable(gl-test test/main.cpp)
 	target_link_libraries(gl-test PUBLIC glframework)
+
+	add_executable(gl-test-framebuffer test/framebuffer_test.cpp)
+	target_link_libraries(gl-test-framebuffer PUBLIC glframework)
+	target_compile_definitions(gl-test-framebuffer PRIVATE -DTEST_DIR="${PROJECT_SOURCE_DIR}/test/")
+
+	add_executable(gl-test-offscreen test/offscreen_test.cpp)
+	target_link_libraries(gl-test-offscreen PUBLIC glframework)
+	target_compile_definitions(gl-test-offscreen PRIVATE -DTEST_DIR="${PROJECT_SOURCE_DIR}/test/")
 endif()

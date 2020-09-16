@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <cstddef>
 #include <functional>
+#include <iostream>
 
 namespace gl {
 
@@ -185,5 +186,67 @@ namespace gl {
 			return reinterpret_cast<char*>(&std::get<N>(val)) - reinterpret_cast<char*>(&val);
 		}
 
+	}
+
+	static void APIENTRY openglCallbackFunction(GLenum source,
+		GLenum type,
+		GLuint id,
+		GLenum severity,
+		GLsizei length,
+		const GLchar* message,
+		const void* userParam) {
+
+		// Some filters
+		if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
+
+		std::cout << "---------------------opengl-Error------------" << std::endl;
+		std::cout << "message: " << message << std::endl;
+		std::cout << "type: ";
+		switch (type) {
+		case GL_DEBUG_TYPE_ERROR:
+			std::cout << "ERROR";
+			break;
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+			std::cout << "DEPRECATED_BEHAVIOR";
+			break;
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+			std::cout << "UNDEFINED_BEHAVIOR";
+			break;
+		case GL_DEBUG_TYPE_PORTABILITY:
+			std::cout << "PORTABILITY";
+			break;
+		case GL_DEBUG_TYPE_PERFORMANCE:
+			std::cout << "PERFORMANCE";
+			break;
+		case GL_DEBUG_TYPE_OTHER:
+			std::cout << "OTHER";
+			break;
+		}
+		std::cout << std::endl;
+
+		std::cout << "id: " << id << std::endl;
+		std::cout << "severity: ";
+		switch (severity) {
+		case GL_DEBUG_SEVERITY_LOW:
+			std::cout << "LOW";
+			break;
+		case GL_DEBUG_SEVERITY_MEDIUM:
+			std::cout << "MEDIUM";
+			break;
+		case GL_DEBUG_SEVERITY_HIGH:
+			std::cout << "HIGH";
+			break;
+		case GL_DEBUG_SEVERITY_NOTIFICATION:
+			std::cout << "NOTIFICATION";
+			break;
+		default:
+			std::cout << "UNKNOWN";
+		}
+		std::cout << std::endl;
+		std::cout << "---------------------opengl-Error-end--------------" << std::endl;
+#ifdef _MSC_VER 
+		if (severity == GL_DEBUG_SEVERITY_HIGH || type == GL_DEBUG_TYPE_ERROR)
+			__debugbreak();
+#endif
 	}
 }

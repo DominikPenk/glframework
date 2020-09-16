@@ -52,6 +52,8 @@ namespace gl {
 
 		std::shared_ptr<gl::Texture> getRenderTexture(int slot);
 
+		void readColorAttachment(int slot, int x, int y, int width, int height, void* buffer);
+
 		void bind();
 		void unbind();
 

@@ -33,7 +33,7 @@ namespace gl {
 
 		std::size_t size() const;
 
-		virtual void render(const Renderer* env) override;
+		virtual void render(const RendererBase* env) override;
 		virtual void drawOutliner() override;
 
 		int pointSize;

@@ -130,7 +130,7 @@ std::size_t gl::PointCloud::size() const
 	return mBatch.indexBuffer->size();
 }
 
-void gl::PointCloud::render(const Renderer* env)
+void gl::PointCloud::render(const gl::RendererBase * env)
 {
 	glm::mat4 P = env->camera()->GetProjectionMatrix();
 	glm::mat4 V = env->camera()->viewMatrix;

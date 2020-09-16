@@ -23,6 +23,7 @@ struct ImGuiIO;
 
 
 namespace gl {
+	class RendererBase;
 	class Renderer;
 
 	class Mesh {
@@ -30,7 +31,7 @@ namespace gl {
 		friend class OutlinerWindow;
 
 		Mesh();
-		virtual void render(const Renderer* env) = 0;
+		virtual void render(const RendererBase * env) = 0;
 
 		Shader& setShader(std::string path) {
 			mShader = Shader(path);
@@ -41,8 +42,8 @@ namespace gl {
 			return mShader;
 		}
 
-		Shader& getShader() { return mShader; }
-		const Shader& getShader() const { return mShader; }
+		virtual Shader& getShader() { return mShader; }
+		virtual const Shader& getShader() const { return mShader; }
 
 		/// <summary>Override this function if you want to display additional information about your object in the outliner</summary>
 		virtual void drawOutliner();
@@ -70,7 +71,7 @@ namespace gl {
 		TriangleMesh(const OpenMesh::TriangleMesh3f& mesh);
 #endif
 
-		void render(const Renderer* env);
+		void render(const RendererBase* env);
 
 		void addTriangles(std::vector<Eigen::Vector3f>& vertices);
 
@@ -93,7 +94,7 @@ namespace gl {
 		CoordinateFrame(float length = 10.0f);
 
 		// Inherited via Mesh
-		virtual void render(const Renderer* env) override;
+		virtual void render(const RendererBase* env) override;
 
 		float axisLength;
 
@@ -106,7 +107,7 @@ namespace gl {
 	public:
 		Plane(glm::vec3 position, glm::vec3 normal, glm::vec2 dimensions);
 
-		virtual void render(const Renderer* env) override;
+		virtual void render(const RendererBase* env) override;
 
 		glm::vec2 dimensions;
 		glm::vec4 color;

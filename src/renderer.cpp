@@ -8,74 +8,13 @@
 
 #include "IconsFontAwesome5.h"
 #include "uiwindow.hpp"
+#include "gl_internal.hpp"
 
 #ifdef WITH_OPENMESH
 #include "OpenMeshExtension/MeshDebugWindow.h"
 #endif
 
 using namespace gl;
-
-void APIENTRY openglCallbackFunction(GLenum source,
-	GLenum type,
-	GLuint id,
-	GLenum severity,
-	GLsizei length,
-	const GLchar* message,
-	const void* userParam) {
-
-	// Some filters
-	if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
-
-	std::cout << "---------------------opengl-Error------------" << std::endl;
-	std::cout << "message: " << message << std::endl;
-	std::cout << "type: ";
-	switch (type) {
-	case GL_DEBUG_TYPE_ERROR:
-		std::cout << "ERROR";
-		break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-		std::cout << "DEPRECATED_BEHAVIOR";
-		break;
-	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-		std::cout << "UNDEFINED_BEHAVIOR";
-		break;
-	case GL_DEBUG_TYPE_PORTABILITY:
-		std::cout << "PORTABILITY";
-		break;
-	case GL_DEBUG_TYPE_PERFORMANCE:
-		std::cout << "PERFORMANCE";
-		break;
-	case GL_DEBUG_TYPE_OTHER:
-		std::cout << "OTHER";
-		break;
-	}
-	std::cout << std::endl;
-
-	std::cout << "id: " << id << std::endl;
-	std::cout << "severity: ";
-	switch (severity) {
-	case GL_DEBUG_SEVERITY_LOW:
-		std::cout << "LOW";
-		break;
-	case GL_DEBUG_SEVERITY_MEDIUM:
-		std::cout << "MEDIUM";
-		break;
-	case GL_DEBUG_SEVERITY_HIGH:
-		std::cout << "HIGH";
-		break;
-	case GL_DEBUG_SEVERITY_NOTIFICATION:
-		std::cout << "NOTIFICATION";
-		break;
-	default:
-		std::cout << "UNKNOWN";
-	}
-	std::cout << std::endl;
-	std::cout << "---------------------opengl-Error-end--------------" << std::endl;
-#ifdef _MSC_VER 
-	if(severity == GL_DEBUG_SEVERITY_HIGH || type == GL_DEBUG_TYPE_ERROR)
-		__debugbreak();
-#endif
-}
 
 // glfw: whenever the window is resized
 // -------------------------------------------------------
@@ -101,7 +40,7 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std::string& title, bool maximized) :
-	mCamera(cam),
+	RendererBase(cam),
 	mOutliner(std::make_unique<OutlinerWindow>()),
 	mDebugWindow(std::make_unique<RendererDebugWindow>()),
 #if defined(WITH_OPENMESH) && defined(_DEBUG)
@@ -119,17 +58,15 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	mDisplayShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "copyShader.glsl")
 {
 
-	mWindow = NULL;
 	mCamera->ScreenWidth = width;
 	mCamera->ScreenHeight = height;
-	m_version[0] = 4;
-	m_version[1] = 3;
+	
 	mClearColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
 
 	// Create window to get a context
 	if (glfwInit() == 0) throw std::runtime_error("Failed to init GLFW");
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, mVersion[0]);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, mVersion[1]);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #if _DEBUG
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
@@ -387,4 +324,12 @@ void gl::Renderer::addUIWindow(std::shared_ptr<UIWindow> window)
 std::shared_ptr<GenericUIWindow> gl::Renderer::addUIWindow(std::string title, std::function<void(Renderer*)> drawFn)
 {
 	return addUIWindow<GenericUIWindow>(title, drawFn);
+}
+
+gl::RendererBase::RendererBase(std::shared_ptr<Camera> cam) :
+	mCamera(cam),
+	mWindow(NULL)
+{
+	mVersion[0] = 4;
+	mVersion[1] = 3;
 }
