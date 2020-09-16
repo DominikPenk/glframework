@@ -82,8 +82,6 @@ namespace internal {
 	}
 }
 
-gl::Framebuffer* gl::Framebuffer::s_boundBuffer = NULL;
-
 std::shared_ptr<gl::Texture> gl::Framebuffer::setRenderTexture(int attachment, std::shared_ptr<gl::Texture> texture)
 {
 	assert(attachment < mColorAttachments.size());
@@ -122,10 +120,7 @@ void gl::Framebuffer::appendColorBuffer()
 
 void gl::Framebuffer::clear(std::initializer_list<glm::vec4> clearColors)
 {
-	gl::Framebuffer* bound_buffer = s_boundBuffer;
-	if (this != s_boundBuffer) {
-		bind();
-	}
+	bind();
 	// clear depth and stencils
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	int idx = 0;
@@ -136,19 +131,18 @@ void gl::Framebuffer::clear(std::initializer_list<glm::vec4> clearColors)
 		}
 		glClearBufferfv(GL_COLOR, idx++, &col[0]);
 	}
-	if(this != bound_buffer)
-		bound_buffer->bind();
 }
 
 void gl::Framebuffer::clearColorAttachment(int slot, glm::vec4 clearColor)
 {
-	gl::Framebuffer* bound_buffer = s_boundBuffer;
-	if (this != s_boundBuffer) {
-		bind();
-	}
+	bind();
 	glClearBufferfv(GL_COLOR, slot, &clearColor[0]);
-	if (this != bound_buffer)
-		bound_buffer->bind();
+}
+
+void gl::Framebuffer::clearColorAttachment(int slot, int value)
+{
+	bind();
+	glClearBufferiv(GL_COLOR, slot, &value);
 }
 
 gl::Framebuffer::Framebuffer(int width, int height) :
@@ -165,9 +159,6 @@ gl::Framebuffer::~Framebuffer()
 {
 	if (mId != 0) {
 		glDeleteFramebuffers(1, &mId);
-		if (s_boundBuffer == this) {
-			s_boundBuffer = NULL;
-		}
 		mId = 0;
 	}
 }
@@ -274,13 +265,11 @@ void gl::Framebuffer::bind()
 	if (mRequriesUpdate)
 		update();
 	glBindFramebuffer(GL_FRAMEBUFFER, mId);
-	s_boundBuffer = this;
 }
 
 void gl::Framebuffer::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	s_boundBuffer = NULL;
 }
 
 gl::Framebuffer::FramebufferAttachment::FramebufferAttachment() :

@@ -35,6 +35,8 @@ namespace gl {
 
 		void clearColorAttachment(int slot, glm::vec4 clearColor = glm::vec4(0, 0, 0, 0));
 
+		void clearColorAttachment(int slot, int value);
+
 		/// <summary>Sets a texture as target for the depth component</summary>
 		/// <param name="texture">Texture to write to. If this is a nullptr a new texture will be created</param>
 		/// <param name="depthAndStencil">If set to true the texture will capture stencil and depth component simultaniously</param>

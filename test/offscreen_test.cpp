@@ -47,7 +47,7 @@ int main() {
 	buffer.appendRenderTexture(index_texture);
 
 	renderer.startRender(1024, 720);
-	glEnable(GL_DEPTH_TEST);
+	buffer.clearColorAttachment(1, -1);
 	CImg<int> image((int)cam->ScreenWidth, (int)cam->ScreenHeight, 1);
 	std::printf("Generated image of size: %dx%d with %d channels\n", image.height(), image.width(), image.depth());
 	std::printf("Camera: %dx%d\n", (int)cam->ScreenHeight, (int)cam->ScreenWidth);
@@ -62,6 +62,9 @@ int main() {
 	for (int j = 0; j < image.height(); ++j) {
 		for (int i = 0; i < image.width(); ++i) {
 			float t = image(i, image.height() - 1 - j) / 2463.0;
+			if (t < 0) {
+				continue;
+			}
 			disp_img(i, image.height() - 1 - j, 0) = 255;
 			disp_img(i, image.height() - 1 - j, 1) = 255 * (1.0f - t);
 			disp_img(i, image.height() - 1 - j, 2) = 255 * (1.0f - t);
