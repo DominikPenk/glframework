@@ -46,34 +46,45 @@ int main() {
 	index_texture->generateMipMap = false;
 	buffer.appendRenderTexture(index_texture);
 
-	renderer.startRender(1024, 720);
-	buffer.clearColorAttachment(1, -1);
-	CImg<int> image((int)cam->ScreenWidth, (int)cam->ScreenHeight, 1);
-	std::printf("Generated image of size: %dx%d with %d channels\n", image.height(), image.width(), image.depth());
-	std::printf("Camera: %dx%d\n", (int)cam->ScreenHeight, (int)cam->ScreenWidth);
-	buffer.bind();
-	buffer.clear({ glm::vec4(0, 0, 0, 1) });
-	mesh.render(&renderer);
-	buffer.readColorAttachment(1, 0, 0, cam->ScreenWidth, cam->ScreenHeight, (void*)image.data());
-	buffer.unbind();
+	auto render_offscreen = [&](int frame) {
+		renderer.startRender(1024, 720);
 
-	// Convert to uchar
-	CImg<unsigned char> disp_img(image.width(), image.height(), 1, 3, 0);
-	for (int j = 0; j < image.height(); ++j) {
-		for (int i = 0; i < image.width(); ++i) {
-			float t = image(i, image.height() - 1 - j) / 2463.0;
-			if (t < 0) {
-				continue;
+		// Update camera position
+		float t = (frame % 120) / 120.f;
+		float angle = 6.28318530718 * t;
+		glm::vec3 pos(3.0f * std::cos(angle), 2, 3.0f * std::sin(angle));
+		cam->lookAt(glm::vec3(0), pos);
+		
+		buffer.clearColorAttachment(1, -1);
+		CImg<int> image((int)cam->ScreenWidth, (int)cam->ScreenHeight, 1);
+		buffer.bind();
+		buffer.clear({ glm::vec4(0, 0, 0, 1) });
+		mesh.render(&renderer);
+		buffer.readColorAttachment(1, 0, 0, cam->ScreenWidth, cam->ScreenHeight, (void*)image.data());
+		buffer.unbind();
+		CImg<unsigned char> disp_img(image.width(), image.height(), 1, 3, 0);
+
+		// Convert to uchar
+		for (int j = 0; j < image.height(); ++j) {
+			for (int i = 0; i < image.width(); ++i) {
+				float t = image(i, j) / 2463.0;
+				if (t < 0) {
+					continue;
+				}
+				disp_img(i, j, 0) = 255;
+				disp_img(i, j, 1) = 255 * (1.0f - t);
+				disp_img(i, j, 2) = 255 * (1.0f - t);
 			}
-			disp_img(i, image.height() - 1 - j, 0) = 255;
-			disp_img(i, image.height() - 1 - j, 1) = 255 * (1.0f - t);
-			disp_img(i, image.height() - 1 - j, 2) = 255 * (1.0f - t);
-		}	
-	}
+		}
+		return disp_img;
+	};
 
+	int frame = 0;
+	CImg<unsigned char> disp_img = render_offscreen(frame++);
 	CImgDisplay main_disp(disp_img, "Offscreen Result");
 	while (!main_disp.is_closed()) {
-		main_disp.wait();
+		disp_img = render_offscreen(frame++);
+		disp_img.display(main_disp);
 	}
 
 

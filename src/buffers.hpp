@@ -247,6 +247,34 @@ namespace gl {
 		std::vector<value_type> mData;
 	};
 
+	template<typename T>
+	class VertexBufferObjectMap : public VertexBufferObjectBase  {
+	public:
+		VertexBufferObjectMap(const T* data, size_t size, GLenum target = GL_ARRAY_BUFFER, GLenum usage = GL_STATIC_DRAW) :
+			VertexBufferObjectBase(sizeof(T)),
+			mDataPtr(data),
+			mSize(size) 
+		{
+			mUsage = usage;
+			mTarget = target;
+			mUpdated = true;
+		}
+
+		virtual std::size_t size() const override
+		{
+			return mSize;
+		}
+	protected:
+		virtual const void* dataPtr() const override
+		{
+			return mDataPtr;
+		}
+
+	private:
+		const T* mDataPtr;
+		size_t mSize;
+	};
+
 #pragma region typedefs
 	typedef VertexBufferObject<unsigned int, 1> IndexBuffer;
 #pragma endregion

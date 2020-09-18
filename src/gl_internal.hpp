@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <functional>
 #include <iostream>
+#include <type_traits>
 
 namespace gl {
 
@@ -185,6 +186,17 @@ namespace gl {
 			_Tuple val;
 			return reinterpret_cast<char*>(&std::get<N>(val)) - reinterpret_cast<char*>(&val);
 		}
+
+		template<typename T>
+		static constexpr bool is_floating_point_v = 
+			is_any_v<T, glm::vec4, glm::vec3, glm::vec2, Eigen::Vector4f, Eigen::Vector3f, Eigen::Vector2f, float>;
+
+		template<typename T>
+		static constexpr size_t get_dimension_v = select_value_v<size_t,
+			is_any<T, glm::vec4, Eigen::Vector4f>,	std::integral_constant<std::size_t, 4>,
+			is_any<T, glm::vec3, Eigen::Vector3f>,	std::integral_constant<std::size_t, 3>,
+			is_any<T, glm::vec2, Eigen::Vector2f>,	std::integral_constant<std::size_t, 2>,
+			is_any<T, glm::vec1, float>,			std::integral_constant<std::size_t, 1>>;
 
 	}
 

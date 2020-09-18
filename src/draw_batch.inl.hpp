@@ -46,6 +46,20 @@ namespace gl {
 		return vbo;
 	}
 
+	template<typename T>
+	inline std::shared_ptr<VertexBufferObjectMap<T>> gl::DrawBatch::addVertexAttribute(GLuint index, T* data, size_t n)
+	{
+		assert(mVAO != 0);
+
+		std::shared_ptr<VertexBufferObjectMap<T>> vbo = std::make_shared<VertexBufferObjectMap<T>>(data, n);
+		vbo->target() = GL_ARRAY_BUFFER;
+		vbo->update();
+
+		addVertexAttribute(index, vbo);
+
+		return vbo;
+	}
+
 	template<typename T, int d>
 	inline void DrawBatch::addVertexAttribute(GLuint index, std::shared_ptr<VertexBufferObject<T, d>> vbo)
 	{
@@ -60,6 +74,28 @@ namespace gl {
 		}
 		else {
 			glVertexAttribIPointer(index, d, impl::to_glenum_v<T>, sizeof(T) * d, nullptr);
+		}
+		glEnableVertexAttribArray(index);
+
+		vbo->unbind();
+		glBindVertexArray(0);
+		mVertexAttributes.push_back(vbo);
+	}
+
+	template<typename T>
+	inline void DrawBatch::addVertexAttribute(GLuint index, std::shared_ptr<VertexBufferObjectMap<T>> vbo)
+	{
+		assert(mVAO != 0);
+
+		glBindVertexArray(mVAO);
+		vbo->bind();
+		mBufferIds.push_back(vbo->id());
+
+		if constexpr (impl::is_floating_point_v<T>) {
+			glVertexAttribPointer(index, impl::get_dimension_v<T>, impl::to_glenum_v<T>, GL_FALSE, sizeof(T), nullptr);
+		}
+		else {
+			glVertexAttribIPointer(index, impl::get_dimension_v<T>, impl::to_glenum_v<T>, sizeof(T), nullptr);
 		}
 		glEnableVertexAttribArray(index);
 

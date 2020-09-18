@@ -46,6 +46,10 @@ namespace gl {
 		virtual Shader& getShader() override { return batch.shader; }
 		virtual const Shader& getShader() const { return batch.shader; }
 
+		DrawBatch& getBatch() {
+			return batch;
+		}
+
 	private:
 		bool dirty;
 		OpenMesh::TriangleMesh3f mesh;

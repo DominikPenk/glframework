@@ -33,7 +33,7 @@ namespace internal {
 	}
 
 	std::shared_ptr<gl::Texture> createAndCheckDepthTexture(int width, int height, std::shared_ptr<gl::Texture> texture, bool depthAndStencil) {
-		GLenum internalFormat = depthAndStencil ? GL_DEPTH24_STENCIL8 : GL_DEPTH_COMPONENT;
+		GLenum internalFormat = depthAndStencil ? GL_DEPTH24_STENCIL8 : GL_DEPTH_COMPONENT24;
 		GLenum format = depthAndStencil ? GL_DEPTH_STENCIL : GL_DEPTH_COMPONENT;
 		GLenum type = depthAndStencil ? GL_UNSIGNED_INT_24_8 : GL_FLOAT;
 		
@@ -250,6 +250,11 @@ std::shared_ptr<gl::Texture> gl::Framebuffer::getRenderTexture(int slot)
 	return mColorAttachments[slot].targetTexture;
 }
 
+std::shared_ptr<gl::Texture> gl::Framebuffer::getDepthTexture()
+{
+	return mDepthAttachment.targetTexture;
+}
+
 void gl::Framebuffer::readColorAttachment(int slot, int x, int y, int width, int height, void* buffer)
 {
 	bind();
@@ -335,6 +340,7 @@ void gl::Framebuffer::FramebufferAttachment::attach(GLuint framebuffer, int widt
 		targetTexture->resize(width, height);
 		// Ensure that resize actually is updated
 		targetTexture->update();
+		targetTexture->bind();
 		glFramebufferTexture(GL_FRAMEBUFFER, attachment, targetTexture->id, 0);
 	}
 	else {

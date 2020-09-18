@@ -14,7 +14,7 @@
 
 int main(int argc, const char* argv[]) {
 	auto cam = std::make_shared<gl::Camera>(
-		glm::vec3(3.0f, -5.0f, -2.0f),
+		glm::vec3(3.0f, .0f, -2.0f),
 		glm::vec3(0, 0, 0));
 	cam->Far = 200;
 	gl::OrbitControl control(cam);
@@ -30,6 +30,7 @@ int main(int argc, const char* argv[]) {
 	}
 	gl::OpenMeshMesh mesh(teapot);
 	mesh.getShader() = gl::Shader(std::string(TEST_DIR) + "test-shader.glsl");
+	auto coo = renderer.addMesh<gl::CoordinateFrame>("Frame");
 
 	// Create a frame buffer to draw to
 	gl::Framebuffer buffer(cam->ScreenWidth, cam->ScreenHeight);
@@ -55,15 +56,15 @@ int main(int argc, const char* argv[]) {
 		});
 
 
-	// Render teapot offscreen
-	buffer.bind();
-	buffer.clear({ glm::vec4(0, 0, 0, 1) });
-	mesh.render(&renderer);
-	buffer.unbind();
-
 	while (!renderer.shouldClose()) {
 		renderer.startFrame();
 		control.update(cam);
+
+		// Render teapot offscreen
+		buffer.bind();
+		buffer.clear({ glm::vec4(0, 0, 0, 1) });
+		mesh.render(&renderer);
+		buffer.unbind();
 
 		renderer.endFrame();
 	}

@@ -53,6 +53,7 @@ namespace gl {
 		glm::uvec4 readColorPixel(int col, int row, int slot);
 
 		std::shared_ptr<gl::Texture> getRenderTexture(int slot);
+		std::shared_ptr<gl::Texture> getDepthTexture();
 
 		void readColorAttachment(int slot, int x, int y, int width, int height, void* buffer);
 

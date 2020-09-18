@@ -11,6 +11,7 @@
 #include <filesystem>
 
 #include "buffers.hpp"
+#include "texture.hpp"
 
 
 namespace gl {
@@ -118,6 +119,9 @@ namespace gl {
 		inline void setUniform(const std::string& name, unsigned int value) const {
 			glUniform1ui(glGetUniformLocation(mProgram, name.c_str()), value);
 		}
+		inline void setUniform(const std::string& name, bool value) const {
+			glUniform1i(glGetUniformLocation(mProgram, name.c_str()), value);
+		}
 
 		template<typename T, int n>
 		inline void setShaderStorageBuffer(VertexBufferObject<T, n>& buffer, GLuint index) const {
@@ -135,9 +139,17 @@ namespace gl {
 			glUniformMatrix4fv(glGetUniformLocation(mProgram, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 		}
 
+		void setUniform(const std::string& name, std::shared_ptr<gl::Texture> texture) const {
+			GLuint tid = textureId(name);
+			if (tid == -1) {
+				return;
+			}
+			texture->bind(0);
+		}
+
 		ShaderRequirements use();
 
-		GLuint textureId(std::string name) {
+		GLuint textureId(const std::string& name) const {
 			int id = glGetUniformLocation(mProgram, name.c_str());
 			if(id == -1)
 				std::cerr << "Uniform " << name << " not found in shader" << std::endl;
