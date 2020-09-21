@@ -255,6 +255,31 @@ std::pair<bool, GLuint> loadAndCompileShader(const ShaderCode& src, GLenum type,
 	return std::make_pair(true, shader);
 }
 
+static std::pair<bool, GLuint> compileShader(std::string src, GLenum type) {
+	GLuint shader = glCreateShader(type);
+	const GLchar* src_ptr = (const GLchar*)src.c_str();
+	glShaderSource(shader, 1, &src_ptr, NULL);
+	glCompileShader(shader);
+	GLint test;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &test);
+	if (!test) {
+		std::cerr << "Shader compilation failed:" << std::endl;
+		std::string compilationLog;
+		compilationLog.resize(512);
+		glGetShaderInfoLog(shader, compilationLog.size(), NULL, compilationLog.data());
+
+		// Assume the first integer is the src id
+		std::regex fid_re(R"((\d+))");
+		std::smatch match;
+		std::regex_replace(compilationLog, fid_re, "FileId: $1");
+
+		std::cout << std::endl << "----------------------------------" << std::endl;
+		std::cerr << compilationLog << std::endl;
+		return std::make_pair(false, (GLuint)0);
+	}
+	return std::make_pair(true, shader);
+}
+
 std::tuple<Prefix, std::map<GLenum, ShaderCode>> parseFile(std::ifstream& in, const std::string & srcDir, 
 	std::vector<std::string>& sources, const std::unordered_map<std::string, std::string>& _defines = std::unordered_map<std::string, std::string>()) {
 	assert(in.is_open(), "Tried to parse closed file");
@@ -409,6 +434,54 @@ Shader::Shader(std::string path) :
 	Shader() 
 {
 	mSourceFiles.push_back(path);
+}
+
+gl::Shader::Shader(std::initializer_list<std::pair<GLenum, std::string>> stages) 
+	: Shader()
+{
+	auto t1 = std::chrono::high_resolution_clock::now();
+
+	std::cout << "Compiling shader" << std::endl;
+
+	std::vector<GLuint> shaders;
+	bool allValid = true;
+	for (auto [type, src] : stages) {
+		auto [valid, sid] = compileShader(src, type);
+		shaders.push_back(sid);
+		allValid = allValid && valid;
+	}
+
+	GLint success = 0;
+	if (allValid) {
+		// clean old program
+		mProgram = glCreateProgram();
+		for (GLuint shader : shaders) glAttachShader(mProgram, shader);
+		glLinkProgram(mProgram);
+		for (GLuint shader : shaders) glDeleteShader(shader);
+
+		glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			GLchar infoLog[1024];
+			glGetProgramInfoLog(mProgram, 1024, NULL, infoLog);
+			std::cerr << "failed to link shader:\n" << infoLog << std::endl;
+		}
+
+		glValidateProgram(mProgram);
+		glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &success);
+		if (!success)
+		{
+			std::cerr << "failed to validate shader" << std::endl;
+		}
+	}
+
+	auto t2 = std::chrono::high_resolution_clock::now();
+	long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+	if (success && allValid) {
+		std::cout << "Compilation sucessfull (Compile time: " << duration << "ms)" << std::endl;
+	}
+
 }
 
 Shader::~Shader() {

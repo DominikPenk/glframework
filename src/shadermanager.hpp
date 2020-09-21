@@ -68,6 +68,8 @@ namespace gl {
 
 		Shader(std::string path);
 
+		Shader(std::initializer_list<std::pair<GLenum, std::string>> stages);
+
 		~Shader();
 
 		void requires(GLenum cap) {
