@@ -11,7 +11,7 @@ gl::PointCloud::PointCloud() :
 {
 	data = mBatch.addVertexAttributes<glm::vec3, glm::vec3>();
 	mBatch.primitiveType = GL_POINTS;
-	mBatch.shader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "pointcloud.glsl");
+	mBatch.shader = std::make_shared<Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "pointcloud.glsl");
 }
 
 gl::PointCloud::PointCloud(const std::vector<glm::vec3>& points, glm::vec3 color) :

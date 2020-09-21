@@ -9,7 +9,7 @@
 namespace gl {
 
 	struct Uniform {
-		virtual void bind(Shader& shader) const  = 0;
+		virtual void bind(std::shared_ptr<Shader> shader) const  = 0;
 	};
 
 	template<typename T>
@@ -20,7 +20,7 @@ namespace gl {
 
 		std::string location;
 		T value;
-		virtual void bind(Shader& shader) const override {
+		virtual void bind(std::shared_ptr<Shader> shader) const override {
 			if constexpr (std::is_pointer_v<T>) {
 				shader.setUniform(location, *value);
 			}
@@ -65,7 +65,7 @@ namespace gl {
 		template<typename T>
 		void setUniform(const std::string& location, T value);
 
-		Shader shader;
+		std::shared_ptr<Shader> shader;
 		std::shared_ptr<IndexBuffer> indexBuffer;
 		GLenum primitiveType;
 		unsigned int patchsize;

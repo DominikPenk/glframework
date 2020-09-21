@@ -10,7 +10,7 @@ gl::OpenMeshMesh::OpenMeshMesh() :
 	vertexColor(.1f, .1f, .1f, 1.f),
 	drawEdges(false)
 {
-	batch.shader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
+	batch.shader = std::make_shared<Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
 	vertices = batch.addVertexAttribute<float, 3>(0);
 }
 

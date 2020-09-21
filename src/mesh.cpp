@@ -16,7 +16,7 @@ gl::TriangleMesh::TriangleMesh() :
 {
 	mColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
-	mBatch.shader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
+	mBatch.shader = std::make_shared<Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
 	mVertices = mBatch.addVertexAttribute<float, 3>(0);
 }
 

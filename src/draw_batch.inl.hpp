@@ -11,8 +11,8 @@ namespace gl {
 
 	namespace impl {
 		template<typename T, typename... Args>
-		void SetUniforms(Shader& shader, const std::string& location, T const& value, Args const&... rest) {
-			shader.setUniform(location, value);
+		void SetUniforms(std::shared_ptr<Shader> shader, const std::string& location, T const& value, Args const&... rest) {
+			shader->setUniform(location, value);
 			if constexpr (sizeof...(rest) > 0) {
 				SetUniforms(shader, rest...);
 			}
@@ -162,7 +162,7 @@ namespace gl {
 			indexBuffer->update();
 		}
 
-		auto _ = shader.use();
+		auto _ = shader->use();
 		impl::SetUniforms(shader, uniforms...);
 		for (auto uniform : mUniforms) {
 			uniform->bind(shader);

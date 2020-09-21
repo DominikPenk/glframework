@@ -455,7 +455,8 @@ gl::Shader::Shader(std::initializer_list<std::pair<GLenum, std::string>> stages)
 	if (allValid) {
 		// clean old program
 		mProgram = glCreateProgram();
-		for (GLuint shader : shaders) glAttachShader(mProgram, shader);
+		for (GLuint shader : shaders) 
+			glAttachShader(mProgram, shader);
 		glLinkProgram(mProgram);
 		for (GLuint shader : shaders) glDeleteShader(shader);
 

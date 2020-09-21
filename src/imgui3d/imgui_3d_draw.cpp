@@ -22,7 +22,7 @@ namespace ImGui3D {
 	DrawCommand::DrawCommand()
 	{
 		data = batch.addVertexAttributes<glm::vec4, glm::vec4, ImGuiID, glm::vec2>();
-		batch.shader = gl::Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "imgui3d.glsl");
+		batch.shader = std::make_shared<gl::Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "imgui3d.glsl");
 	}
 
 	void DrawCommand::AddFilledScreenAlignedQuad(glm::vec4 pos, ImVec2 size, glm::vec4 color, ImGuiID id)

@@ -23,6 +23,11 @@ namespace gl {
 		
 		operator GLuint() const { return id; }
 
+		void reset() {
+			deallocate(id);
+			id = (*allocate)();
+		}
+
 		GLuint id;
 	};
 
@@ -196,7 +201,7 @@ namespace gl {
 			is_any<T, glm::vec4, Eigen::Vector4f>,	std::integral_constant<std::size_t, 4>,
 			is_any<T, glm::vec3, Eigen::Vector3f>,	std::integral_constant<std::size_t, 3>,
 			is_any<T, glm::vec2, Eigen::Vector2f>,	std::integral_constant<std::size_t, 2>,
-			is_any<T, glm::vec<1, float, glm::defaultp>, std::integral_constant<std::size_t, 1>>;
+			is_any<T, glm::vec<1, float, glm::defaultp>>, std::integral_constant<std::size_t, 1>>;
 
 	}
 

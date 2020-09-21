@@ -33,7 +33,7 @@ void gl::DrawBatch::execute()
 		indexBuffer->update();
 	}
 
-	auto _ = shader.use();
+	auto _ = shader->use();
 	for (auto uniform : mUniforms) {
 		uniform->bind(shader);
 	}
