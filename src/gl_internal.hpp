@@ -5,8 +5,41 @@
 #include <functional>
 #include <iostream>
 #include <type_traits>
+#include <memory>
 
 namespace gl {
+
+	class Shader;
+
+	namespace impl {
+		template<typename T, typename... Args>
+		void SetUniformsHelper(gl::Shader& shader, int nextFreeTextureSlot, const std::string& location, T& value, Args&... rest) {
+			if constexpr (std::is_same_v<gl::Texture, T>) {
+				shader.bindTexture(location, nextFreeTextureSlot, value);
+				nextFreeTextureSlot++;
+			}
+			else if constexpr (std::is_same_v<std::shared_ptr<gl::Texture>, T>) {
+				shader.bindTexture(location, nextFreeTextureSlot, *value);
+				nextFreeTextureSlot++;
+			}
+			else {
+				shader.setUniform(location, value);
+			}
+			if constexpr (sizeof...(rest) > 0) {
+				SetUniformsHelper(shader, nextFreeTextureSlot, rest...);
+			}
+		}
+
+		template<typename... Args>
+		void SetUniforms(std::shared_ptr<gl::Shader> shader, Args&... rest) {
+			SetUniformsHelper(*shader, 0, rest...);
+		}
+
+		template<typename... Args>
+		void SetUniforms(gl::Shader& shader, Args&... rest) {
+			SetUniformsHelper(shader, 0, rest...);
+		}
+	}
 
 	template<GLuint(*allocate)(), void(*deallocate)(GLuint)>
 	struct Identifier {
@@ -201,6 +234,7 @@ namespace gl {
 			is_any<T, glm::vec3, Eigen::Vector3f>,	std::integral_constant<std::size_t, 3>,
 			is_any<T, glm::vec2, Eigen::Vector2f>,	std::integral_constant<std::size_t, 2>,
 			is_any<T, glm::vec<1, float, glm::defaultp>>, std::integral_constant<std::size_t, 1>>;
+
 
 	}
 

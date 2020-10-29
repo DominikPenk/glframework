@@ -95,6 +95,9 @@ set(GL_FILES
 	src/draw_batch.hpp
 	src/draw_batch.inl.hpp
 	src/draw_batch.cpp
+	src/intermediate.h
+	src/intermediate.inl.h
+	src/intermediate.cpp
 	src/variadic_buffer.hpp
 	src/shadermanager.hpp
 	src/shadermanager.cpp

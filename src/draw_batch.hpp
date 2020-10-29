@@ -8,38 +8,6 @@
 
 namespace gl {
 
-	struct Uniform {
-		virtual void bind(std::shared_ptr<Shader> shader) const  = 0;
-		virtual void bind(Shader& shader) const  = 0;
-	};
-
-	template<typename T>
-	struct NamedUniform : public Uniform {
-		NamedUniform(const std::string& location, T value) :
-			location(location),
-			value(value) { }
-
-		std::string location;
-		T value;
-		virtual void bind(std::shared_ptr<Shader> shader) const override {
-			if constexpr (std::is_pointer_v<T>) {
-				shader->setUniform(location, *value);
-			}
-			else {
-				shader->setUniform(location, value);
-			}
-		}
-
-		virtual void bind(gl::Shader& shader) const override {
-			if constexpr (std::is_pointer_v<T>) {
-				shader.setUniform(location, *value);
-			}
-			else {
-				shader.setUniform(location, value);
-			}
-		}
-	};
-
 	class DrawBatch {
 	public:
 		DrawBatch();

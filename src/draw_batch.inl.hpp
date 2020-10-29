@@ -9,24 +9,6 @@
 
 namespace gl {
 
-	namespace impl {
-		template<typename T, typename... Args>
-		void SetUniforms(std::shared_ptr<Shader> shader, const std::string& location, T const& value, Args const&... rest) {
-			shader->setUniform(location, value);
-			if constexpr (sizeof...(rest) > 0) {
-				SetUniforms(shader, rest...);
-			}
-		}
-
-		template<typename T, typename... Args>
-		void SetUniforms(gl::Shader& shader, const std::string& location, T const& value, Args const&... rest) {
-			shader.setUniform(location, value);
-			if constexpr (sizeof...(rest) > 0) {
-				SetUniforms(shader, rest...);
-			}
-		}
-	}
-
 	template<typename T, int d>
 	std::shared_ptr<VertexBufferObject<T, d>> DrawBatch::addVertexAttribute(GLuint index) {
 		assert(VAO != 0);
