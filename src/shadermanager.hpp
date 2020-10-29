@@ -13,7 +13,6 @@
 #include "buffers.hpp"
 #include "texture.hpp"
 
-
 namespace gl {
 	struct Layout {
 		GLint index;
@@ -157,6 +156,17 @@ namespace gl {
 				std::cerr << "Uniform " << name << " not found in shader" << std::endl;
 			return (GLuint)id;
 		}
+
+		void bindTexture(const std::string& name, int slot, gl::Texture& tex) {
+			tex.bind(slot);
+			setUniform(name, slot);
+		}
+
+		void bindTexture(const std::string& name, int slot, std::shared_ptr<gl::Texture> tex) {
+			tex->bind(slot);
+			setUniform(name, slot);
+		}
+
 
 	protected:
 		bool requiresUpdate() const;

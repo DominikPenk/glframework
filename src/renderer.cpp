@@ -61,7 +61,7 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	mCamera->ScreenWidth = width;
 	mCamera->ScreenHeight = height;
 	
-	mClearColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
+	clearColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
 
 	// Create window to get a context
 	if (glfwInit() == 0) throw std::runtime_error("Failed to init GLFW");
@@ -194,21 +194,28 @@ bool gl::Renderer::startFrame()
 
 void gl::Renderer::endFrame()
 {
+	// viewport might be modidified by any hook
+	glViewport(0, 0, mCamera->ScreenWidth, mCamera->ScreenHeight);
+
 	// Skip if minimized
 	if (glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED))
 		return;
 
 	mFrameBuffer->bind();
-	glClearColor(mClearColor.r, mClearColor.g, mClearColor.b, mClearColor.w);
-	mFrameBuffer->clear({ mClearColor, glm::vec4(0, 0, 0, 1) });
-
+	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.w);
+	mFrameBuffer->clear({ clearColor, glm::vec4(0, 0, 0, 1) });
+	
+	// These should be rendered with depth test
+	glEnable(GL_DEPTH_TEST);
 	for (auto mesh : mMeshes) {
 		if (mesh->visible) {
 			const std::lock_guard<std::mutex> lock(getLock(mesh));
 			mesh->render(this);
 			mesh->handleIO(this, ImGui::GetIO());
 		}
-
+	}
+	for (auto hook : mPostMeshDrawingHook) {
+		hook(this);
 	}
 	
 	// Do post processing
@@ -233,6 +240,7 @@ void gl::Renderer::endFrame()
 		}
 	}
 
+	mFrameBuffer->clearDepthBuffer();
 	for (auto mesh : mMeshes) {
 		if (mesh->visible) {
 			const std::lock_guard<std::mutex> lock(getLock(mesh));
@@ -250,11 +258,15 @@ void gl::Renderer::endFrame()
 	mDummyVAO.bind();
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	mDummyVAO.unbind();
-	glEnable(GL_DEPTH_TEST);
+
+	for (auto hook : mPreImGuiHook) {
+		hook(this);
+	}
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	
+	glEnable(GL_DEPTH_TEST);
 	glfwSwapBuffers(mWindow);
 }
 
@@ -285,6 +297,20 @@ void gl::Renderer::setToneMapping(ToneMapping mapping)
 	mToneMapping = mapping;
 	mPostProShader.setDefine("HDR_MAPPING_TYPE", (int)mToneMapping);
 	mPostProShader.update();
+}
+
+void gl::Renderer::addRenderHook(RenderHook hookType, std::function<void(Renderer*)> hook)
+{
+	switch (hookType) {
+	case(RenderHook::Pre2DGui):
+		mPreImGuiHook.push_back(hook);
+		break;
+	case(RenderHook::PostMeshDrawing):
+		mPostMeshDrawingHook.push_back(hook);
+		break;
+	default:
+		throw std::invalid_argument("Unknown hook type");
+	}
 }
 
 void gl::Renderer::pushResizeCallback(std::function<void(Renderer*)> fn)

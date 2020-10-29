@@ -10,6 +10,50 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+void ImGui3D::ViewFrustum(float VP[16], glm::vec3 color)
+{
+	ViewFrustum(glm::make_mat4(VP), color);
+}
+
+void ImGui3D::ViewFrustum(glm::mat4& VP, glm::vec3 color)
+{
+	ImGui3DContext& g = *GImGui3D;
+
+	glm::vec3 points[] = {
+		{ -1.f, -1.f,  1.f }, // 0
+		{  1.f, -1.f,  1.f }, // 1
+		{ -1.f,  1.f,  1.f }, // 2
+		{  1.f,  1.f,  1.f }, // 3
+		{ -1.f, -1.f, -1.f }, // 4
+		{  1.f, -1.f, -1.f }, // 5
+		{ -1.f,  1.f, -1.f }, // 6
+		{  1.f,  1.f, -1.f }, // 7
+	};
+
+	glm::mat4 invVP = glm::inverse(VP);
+	for (int i = 0; i < 8; ++i) {
+		glm::vec3 cube = points[i] * 0.5f - glm::vec3(0.5f);
+		glm::vec3 ndc = cube * 2.0f - glm::vec3(1.0f);
+		glm::vec4 homPosition = invVP * glm::vec4(ndc, 1.0f);
+		points[i] = glm::vec3(homPosition) / homPosition.w;
+	}
+
+	const glm::vec4 col(color, 1.0);
+
+	g.currentDrawList()->AddLine(points[0], points[1], 2, col);
+	g.currentDrawList()->AddLine(points[0], points[2], 2, col);
+	g.currentDrawList()->AddLine(points[1], points[3], 2, col);
+	g.currentDrawList()->AddLine(points[2], points[3], 2, col);
+	g.currentDrawList()->AddLine(points[4], points[5], 2, col);
+	g.currentDrawList()->AddLine(points[4], points[6], 2, col);
+	g.currentDrawList()->AddLine(points[5], points[7], 2, col);
+	g.currentDrawList()->AddLine(points[6], points[7], 2, col);
+	g.currentDrawList()->AddLine(points[0], points[4], 2, col);
+	g.currentDrawList()->AddLine(points[1], points[5], 2, col);
+	g.currentDrawList()->AddLine(points[2], points[6], 2, col);
+	g.currentDrawList()->AddLine(points[3], points[7], 2, col);
+}
+
 bool ImGui3D::PointLight(float p[3])
 {
 	ImGui3DContext& g = *GImGui3D;

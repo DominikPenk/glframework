@@ -12,6 +12,7 @@ namespace gl {
 	public:
 		OpenMeshMesh();
 		OpenMeshMesh(OpenMesh::TriangleMesh3f);
+		OpenMeshMesh(std::string path);
 
 		// Inherited via Mesh
 		virtual void render(const RendererBase* env) override;
@@ -23,8 +24,11 @@ namespace gl {
 
 		void update(bool force = false);
 
+		void computeVertexNormals();
+
 		glm::vec4 faceColor, edgeColor, vertexColor;
 		bool drawEdges;
+		bool displayNormals;
 
 		void watch(OpenMesh::VertexHandle vh);
 		void watch(OpenMesh::EdgeHandle eh);
@@ -46,17 +50,22 @@ namespace gl {
 		virtual Shader& getShader() override { return *batch.shader; }
 		virtual const Shader& getShader() const { return *batch.shader; }
 
+
 		DrawBatch& getBatch() {
 			return batch;
 		}
 
 	private:
 		bool dirty;
+
 		OpenMesh::TriangleMesh3f mesh;
 
-		// We can either use a pointer or construct a mesh directly ins
+		std::shared_ptr<Shader> triangleShader;
+		std::shared_ptr<Shader> normalShader;
 		DrawBatch batch;
+		// We can either use a pointer or construct a mesh directly ins
 		std::shared_ptr<VertexBufferObject<float, 3>> vertices;
+		std::shared_ptr<VertexBufferObject<float, 3>> normals;
 	};
 
 }

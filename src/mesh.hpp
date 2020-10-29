@@ -33,6 +33,11 @@ namespace gl {
 		Mesh();
 		virtual void render(const RendererBase * env) = 0;
 
+		template<typename... Args>
+		void render(gl::Shader& shader, const Args&... uniforms) {
+			mBatch.execute(shader, uniforms...);
+		}
+
 		Shader& setShader(std::string path) {
 			mShader = Shader(path);
 			return mShader;
@@ -59,6 +64,9 @@ namespace gl {
 		glm::mat4 ModelMatrix;
 
 	protected:
+		gl::IndexBuffer& getIndexBuffer();
+
+		gl::DrawBatch mBatch;
 		bool mShowInOutliner;
 		Shader mShader;
 	};
@@ -70,23 +78,26 @@ namespace gl {
 #ifdef WITH_OPENMESH
 		TriangleMesh(const OpenMesh::TriangleMesh3f& mesh);
 #endif
+		TriangleMesh(const std::string& path);
 
 		void render(const RendererBase* env);
 
-		void addTriangles(std::vector<Eigen::Vector3f>& vertices);
+		virtual void drawOutliner() override;
 
-		void removeDoubles(float thr = 1e-4f);
+		void addTriangles(std::vector<Eigen::Vector3f>& vertices);
 
 		void setColor(float r, float g, float b) { mColor = glm::vec4(r, g, b, 1); }
 
-		size_t numPoints() const { return mVertices->size(); }
+		size_t numVertices() const { return mVertexData->size(); }
+		size_t numFaces() const { return mBatch.indexBuffer->size() / 3; }
 
 		virtual bool handleIO(const Renderer* env, ImGuiIO& io) override;
 
+		bool visualizeNormals;
 	protected:
-		std::shared_ptr<VertexBufferObject<float, 3>> mVertices;
-		DrawBatch mBatch;
+		std::shared_ptr<gl::PositionUVNormalBuffer3f> mVertexData;
 		glm::vec4 mColor;
+		Shader mNormalShader;
 	};
 
 	class CoordinateFrame : public Mesh {

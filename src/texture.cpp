@@ -26,7 +26,7 @@ gl::Texture::Texture() :
 	id(mId),
 	cols(mCols),
 	rows(mRows),
-	exposedFormat(mExposedFormat),
+	exposedFormat(mExternalFormat),
 	depth(mDepth),
 	dimensions(mDimensions),
 	dataType(mDataType),
@@ -36,7 +36,7 @@ gl::Texture::Texture() :
 	mRows(0),
 	mDepth(0),
 	mDimensions(2),
-	mExposedFormat(GL_RGBA),
+	mExternalFormat(GL_RGBA),
 	mId(0),
 	mUpdated(false),
 	mResized(false),
@@ -58,14 +58,13 @@ gl::Texture::Texture(int cols, int rows,
 	unsigned char* data) :
 	Texture()
 {
-	mExposedFormat = exposedFormat;
+	mExternalFormat = exposedFormat;
 	mInternalFormat = internalFormat;
 	mDataType = dataType;
 	mUpdated = true;
 	mResized = true;
 	mRows = rows;
 	mCols = cols;
-	mExposedFormat = exposedFormat;
 	if (data != nullptr) {
 		setData(data, dataType);
 	}
@@ -81,9 +80,27 @@ gl::Texture::~Texture()
 
 void gl::Texture::setData(unsigned char* data, GLenum dataFormat)
 {
-	mDataPtr = data;
-	mDataType = dataFormat;
-	mUpdated = true;
+	if (mId == 0) {
+		init();
+	}
+	glBindTexture(mTextureType, mId);
+	switch (mDimensions) {
+	case 1:
+		glTexSubImage1D(GL_TEXTURE_1D, 0, 0, mCols, dataFormat, mDataType, data);
+		break;
+	case 2:
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mCols, mRows, dataFormat, mDataType, data);
+		break;
+	case 3:
+		glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, mCols, mRows, mDepth, dataFormat, mDataType, data);
+	default:
+		throw std::runtime_error("Invalid number of dimensions");
+	}
+	if (generateMipMap) {
+		glGenerateMipmap(mTextureType);
+	}
+	mDataPtr = nullptr;
+	glBindTexture(mTextureType, 0);
 }
 
 void gl::Texture::update()
@@ -98,37 +115,18 @@ void gl::Texture::update()
 		if (mResized) {
 			switch (mDimensions) {
 			case 1:
-				glTexImage1D(GL_TEXTURE_1D, 0, mInternalFormat, mCols, 0, mExposedFormat, mDataType, nullptr);
+				glTexImage1D(GL_TEXTURE_1D, 0, mInternalFormat, mCols, 0, mExternalFormat, mDataType, nullptr);
 				break;
 			case 2:
-				glTexImage2D(GL_TEXTURE_2D, 0, mInternalFormat, mCols, mRows, 0, mExposedFormat, mDataType, nullptr);
+				glTexImage2D(GL_TEXTURE_2D, 0, mInternalFormat, mCols, mRows, 0, mExternalFormat, mDataType, nullptr);
 				break;
 			case 3:
-				glTexImage3D(GL_TEXTURE_3D, 0, mInternalFormat, mCols, mRows, mDepth, 0, mExposedFormat, mDataType, nullptr);
+				glTexImage3D(GL_TEXTURE_3D, 0, mInternalFormat, mCols, mRows, mDepth, 0, mExternalFormat, mDataType, nullptr);
 				break;
 			default:
 				throw std::runtime_error("Invalid number of dimensions");
 			}
 		}
-
-		if (mDataPtr != nullptr) {
-			switch (mDimensions) {
-				case 1:
-					glTexSubImage1D(GL_TEXTURE_1D, 0, 0, mCols, mInternalFormat, mDataType, mDataPtr);
-					break;
-				case 2:
-					glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mCols, mRows, mInternalFormat, mDataType, mDataPtr);
-					break;
-				case 3:
-					glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, mCols, mRows, mDepth, mInternalFormat, mDataType, mDataPtr);
-				default:
-					throw std::runtime_error("Invalid number of dimensions");
-			}
-			if (generateMipMap) {
-				glGenerateMipmap(mTextureType);
-			}
-		}
-
 		glBindTexture(mTextureType, 0);
 		mUpdated = false;
 		mResized = false;
@@ -177,6 +175,20 @@ void gl::Texture::init()
 {
 	glGenTextures(1, &mId);
 	glBindTexture(mTextureType, mId);
+
+	switch (mDimensions) {
+	case 1:
+		glTexImage1D(GL_TEXTURE_1D, 0, mInternalFormat, mCols, 0, mExternalFormat, mDataType, nullptr);
+		break;
+	case 2:
+		glTexImage2D(GL_TEXTURE_2D, 0, mInternalFormat, mCols, mRows, 0, mExternalFormat, mDataType, nullptr);
+		break;
+	case 3:
+		glTexImage3D(GL_TEXTURE_3D, 0, mInternalFormat, mCols, mRows, mDepth, 0, mExternalFormat, mDataType, nullptr);
+		break;
+	default:
+		throw std::runtime_error("Invalid number of dimensions");
+	}
 
 	glTexParameteri(mTextureType, GL_TEXTURE_WRAP_S, textureWrapType[0]);
 	glTexParameteri(mTextureType, GL_TEXTURE_WRAP_T, textureWrapType[1]);

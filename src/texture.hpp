@@ -8,7 +8,7 @@ namespace gl {
 	public:
 		Texture();
 		Texture(int cols, int rows,
-			GLenum exposedFormat = GL_RGBA,
+			GLenum externalFormat = GL_RGBA,
 			GLenum internalFormat = GL_RGBA,
 			GLenum dataType = GL_UNSIGNED_BYTE,
 			unsigned char* data = nullptr);
@@ -50,7 +50,7 @@ namespace gl {
 		int mCols, mRows, mDepth;
 		int mDimensions;
 		GLenum mTextureType;
-		GLenum mExposedFormat;
+		GLenum mExternalFormat;
 		GLenum mInternalFormat;
 		GLenum mDataType;
 	};

@@ -48,6 +48,7 @@ namespace ImGui3D {
 	struct DrawCommand {
 		std::shared_ptr<gl::CompactVertexBufferObject<glm::vec4, glm::vec4, ImGuiID, glm::vec2>> data;
 		gl::DrawBatch batch;
+		gl::Shader shader;
 
 		void execute();
 
@@ -291,6 +292,9 @@ namespace ImGui3D {
 	void TakeIOFocus(ImGuiID id);
 
 	void ReleaseIOFocus(ImGuiID id);
+
+	void ViewFrustum(float VP[16], glm::vec3 color);
+	void ViewFrustum(glm::mat4& VP, glm::vec3 color);
 
 	// Higher level functions
 	bool RotationGizmo(const float pos[3], float angles[3], ImGuiID idoverride = 0);

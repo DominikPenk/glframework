@@ -10,6 +10,7 @@ namespace gl {
 
 	struct Uniform {
 		virtual void bind(std::shared_ptr<Shader> shader) const  = 0;
+		virtual void bind(Shader& shader) const  = 0;
 	};
 
 	template<typename T>
@@ -21,6 +22,15 @@ namespace gl {
 		std::string location;
 		T value;
 		virtual void bind(std::shared_ptr<Shader> shader) const override {
+			if constexpr (std::is_pointer_v<T>) {
+				shader->setUniform(location, *value);
+			}
+			else {
+				shader->setUniform(location, value);
+			}
+		}
+
+		virtual void bind(gl::Shader& shader) const override {
 			if constexpr (std::is_pointer_v<T>) {
 				shader.setUniform(location, *value);
 			}
@@ -35,11 +45,8 @@ namespace gl {
 		DrawBatch();
 		~DrawBatch();
 
-		void execute();
-
 		template<typename... Args>
-		void execute(const Args&... uniforms);
-
+		void execute(gl::Shader& shader, const Args&... uniforms);
 
 		template<typename T, int d>
 		std::shared_ptr<VertexBufferObject<T, d>> addVertexAttribute(GLuint index);
@@ -50,9 +57,6 @@ namespace gl {
 		template<typename T>
 		std::shared_ptr<VertexBufferObjectMap<T>> addVertexAttribute(GLuint index, T* data, size_t n);
 
-		template<int entry, typename ...Args>
-		void addVertexAttribute(GLuint index, std::shared_ptr<CompactVertexBufferObject<Args...>>);
-
 		template<typename T, int d>
 		void addVertexAttribute(GLuint index, std::shared_ptr<VertexBufferObject<T, d>> buffer);
 
@@ -62,21 +66,16 @@ namespace gl {
 		template<typename ...Args>
 		void addVertexAttributes(GLuint initialIndex, std::shared_ptr<CompactVertexBufferObject<Args...>> buffer);
 
-		template<typename T>
-		void setUniform(const std::string& location, T value);
-
-		std::shared_ptr<Shader> shader;
 		std::shared_ptr<IndexBuffer> indexBuffer;
 		GLenum primitiveType;
+		GLenum indexType;
 		unsigned int patchsize;
 
-	private:
-		std::vector<GLuint> mBufferIds;
-		std::vector<std::shared_ptr<VertexBufferObjectBase>> mVertexAttributes;
-		std::vector<std::shared_ptr<Uniform>> mUniforms;
+		unsigned int indexOffset;
+		VAOIndex VAO;
 
-		unsigned int mIndexOffset;
-		VAOIndex mVAO;
+	private:
+		std::vector<std::shared_ptr<VertexBufferObjectBase>> mVertexAttributes;
 	};
 }
 

@@ -38,7 +38,7 @@ namespace gl {
 		{
 			viewMatrix = glm::lookAt(position, target, up);
 		}
-		
+
 		void lookAt(glm::vec3 target) {
 			viewMatrix = glm::lookAt(position(), target, glm::vec3(0, 1, 0));
 		}

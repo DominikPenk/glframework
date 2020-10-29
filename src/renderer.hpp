@@ -40,6 +40,10 @@ namespace gl {
 
 	class Renderer : public RendererBase {
 	public:
+		enum class RenderHook {
+			Pre2DGui,
+			PostMeshDrawing
+		};
 
 		enum class ToneMapping {
 			Linear                     = 0,
@@ -131,12 +135,15 @@ namespace gl {
 		const ToneMapping toneMapping() const { return mToneMapping; }
 		void setToneMapping(ToneMapping mapping);
 
+		void addRenderHook(RenderHook hookType, std::function<void(Renderer*)> hook);
+
 		bool showOutliner;
 		bool showDebug;
 		bool showMeshWatch;
 		bool gammaCorrection;
 		bool hdr;
 		float gamma;
+		glm::vec4 clearColor;
 
 		void pushResizeCallback(std::function<void(Renderer*)> fn);
 		std::vector<std::function<void(Renderer*)>> resizeCallbacks();
@@ -149,8 +156,6 @@ namespace gl {
 	private:
 		void ImGui3d_ImplRenderer_Init(std::shared_ptr<ImGui3D::ImGui3DContext> ctx);
 
-		
-
 		std::unique_ptr<UIWindow> mOutliner;
 		std::unique_ptr<UIWindow> mDebugWindow;
 		std::unique_ptr<UIWindow> mMeshWatch;
@@ -160,7 +165,6 @@ namespace gl {
 		std::vector<std::shared_ptr<Mesh>> mMeshes;
 
 		std::vector<std::shared_ptr<UIWindow>> mUIWindows;
-		glm::fvec4 mClearColor;
 		PointLight mLight;
 		ToneMapping mToneMapping;
 		gl::Shader mPostProShader;
@@ -168,7 +172,14 @@ namespace gl {
 		gl::VertexArrayObject mDummyVAO;
 
 		std::vector<std::function<void(Renderer*)>> mResizeCallbacks;
-	
+
+		/// <summary>
+		/// This hook is called just before ImGui is rendered and 
+		// after prosprocessed Render content and ImGui3D content was drawn.
+		/// </summary>
+		std::vector<std::function<void(Renderer*)>> mPreImGuiHook;
+		std::vector<std::function<void(Renderer*)>> mPostMeshDrawingHook;
+
 		// In case of threading
 		std::mutex mLockLock;
 		std::unordered_map<std::shared_ptr<Mesh>, std::mutex> mObjectLocks;

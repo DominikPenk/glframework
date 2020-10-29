@@ -145,6 +145,21 @@ void gl::Framebuffer::clearColorAttachment(int slot, int value)
 	glClearBufferiv(GL_COLOR, slot, &value);
 }
 
+void gl::Framebuffer::clearDepthBuffer()
+{
+	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void gl::Framebuffer::clearStencilBuffer()
+{
+	glClear(GL_STENCIL_BUFFER_BIT);
+}
+
+void gl::Framebuffer::clearDepthAndStencilBuffer()
+{
+	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
 gl::Framebuffer::Framebuffer(int width, int height) :
 	mId(0),
 	mWidth(width),
@@ -269,6 +284,7 @@ void gl::Framebuffer::bind()
 {
 	if (mRequriesUpdate)
 		update();
+	glViewport(0, 0, mWidth, mHeight);
 	glBindFramebuffer(GL_FRAMEBUFFER, mId);
 }
 

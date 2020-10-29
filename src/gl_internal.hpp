@@ -122,7 +122,6 @@ namespace gl {
 			else {
 				glVertexAttribPointer(location, size, type, normalize, sizeof(_Tuple), reinterpret_cast<void*>(offset));
 			}
-			glEnableVertexAttribArray(location);
 		}
 
 		template<int index, class _Tuple>

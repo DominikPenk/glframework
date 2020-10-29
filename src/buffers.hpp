@@ -88,7 +88,7 @@ namespace gl {
 			VertexBufferObjectBase(n * sizeof(T))
 		{}
 		VertexBufferObject(const std::vector<value_type>& data, GLenum target, GLenum usage = GL_DYNAMIC_DRAW) :
-			VertexBufferObjectBase()
+			VertexBufferObjectBase(n * sizeof(T))
 		{
 			mData = data;
 			mTarget = target;
@@ -96,6 +96,7 @@ namespace gl {
 			mUpdated = true;
 		}
 		VertexBufferObject(const VertexBufferObject& other) {
+			mEntrySize = other.mEntrySize;
 			mData = other.mData;
 			mUsage = other.mUsage;
 			mTarget = other.mTarget;
@@ -108,6 +109,7 @@ namespace gl {
 			mTarget = other.mTarget;
 			mUpdated = other.mUpdated;
 			mId = other.mId;
+			mEntrySize = other.mEntrySize;
 			// Delte other data
 			other.mId = 0;
 		}
@@ -126,6 +128,7 @@ namespace gl {
 				mUsage = other.mUsage;
 				mTarget = other.mTarget;
 				mId = 0;
+				mEntrySize = other.mEntrySize;
 				mUpdated = true;
 			}
 			return *this;
@@ -138,6 +141,7 @@ namespace gl {
 				mTarget = other.mTarget;
 				mUpdated = other.mUpdated;
 				mId = other.mId;
+				mEntrySize = other.mEntrySize;
 				// Delte other data
 				other.mId = 0;
 			}
@@ -453,11 +457,20 @@ namespace gl {
 			}
 			unbind();
 		}
+
+		static void bindDummy() {
+			if (s_dummyId == 0) {
+				glGenVertexArrays(1, &s_dummyId);
+			}
+			glBindVertexArray(s_dummyId);
+		}
 	private:
 		GLuint mId;
 		VertexBufferObject<unsigned int, 1>* indices;
 		std::vector<VertexBufferObjectBase*> buffers;
 		std::vector<std::shared_ptr<VertexBufferObjectBase>> sharedBuffers;
 		int n;
+
+		static GLuint s_dummyId;
 	};
 }

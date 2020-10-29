@@ -37,6 +37,10 @@ namespace gl {
 
 		void clearColorAttachment(int slot, int value);
 
+		void clearDepthBuffer();
+		void clearStencilBuffer();
+		void clearDepthAndStencilBuffer();
+
 		/// <summary>Sets a texture as target for the depth component</summary>
 		/// <param name="texture">Texture to write to. If this is a nullptr a new texture will be created</param>
 		/// <param name="depthAndStencil">If set to true the texture will capture stencil and depth component simultaniously</param>
@@ -59,6 +63,13 @@ namespace gl {
 
 		void bind();
 		void unbind();
+
+		int width() const {
+			return mWidth;
+		}
+		int height() const {
+			return mHeight;
+		}
 
 	private:
 		static Framebuffer* s_boundBuffer;

@@ -107,4 +107,5 @@ namespace gl {
 
 	};
 
+	typedef typename CompactVertexBufferObject<glm::vec3, glm::vec2, glm::vec3> PositionUVNormalBuffer3f;
 }

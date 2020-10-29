@@ -11,7 +11,7 @@ gl::PointCloud::PointCloud() :
 {
 	data = mBatch.addVertexAttributes<glm::vec3, glm::vec3>();
 	mBatch.primitiveType = GL_POINTS;
-	mBatch.shader = std::make_shared<Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "pointcloud.glsl");
+	mShader = gl::Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "pointcloud.glsl");
 }
 
 gl::PointCloud::PointCloud(const std::vector<glm::vec3>& points, glm::vec3 color) :
@@ -136,6 +136,7 @@ void gl::PointCloud::render(const gl::RendererBase * env)
 	glm::mat4 V = env->camera()->viewMatrix;
 	glm::mat4 MV = V * ModelMatrix;
 	mBatch.execute(
+		mShader,
 		"MV", MV,
 		"P", P,
 		"pointsize", static_cast<float>(pointSize) / env->camera()->ScreenWidth);

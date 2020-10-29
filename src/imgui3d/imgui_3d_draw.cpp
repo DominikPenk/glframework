@@ -16,13 +16,13 @@ namespace ImGui3D {
 	void DrawCommand::execute()
 	{
 		ImGui3DContext& g = *GImGui3D;
-		batch.execute("VP", g.ViewProjectionMatrix);
+		batch.execute(shader, "VP", g.ViewProjectionMatrix);
 	}
 
 	DrawCommand::DrawCommand()
 	{
 		data = batch.addVertexAttributes<glm::vec4, glm::vec4, ImGuiID, glm::vec2>();
-		batch.shader = std::make_shared<gl::Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "imgui3d.glsl");
+		shader = gl::Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "imgui3d.glsl");
 	}
 
 	void DrawCommand::AddFilledScreenAlignedQuad(glm::vec4 pos, ImVec2 size, glm::vec4 color, ImGuiID id)
