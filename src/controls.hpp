@@ -19,8 +19,9 @@ namespace gl {
 	public:
 		OrbitControl(std::shared_ptr<Camera> cam);
 
-		// Inherited via Control
 		virtual void update(std::shared_ptr<Camera> camera) override;
+		
+		virtual void reset(std::shared_ptr<Camera> camera) override;
 
 		glm::vec3 target;
 		glm::vec3 orbital_axis;
@@ -53,8 +54,29 @@ namespace gl {
 		glm::vec3 _sphericalDelta;
 		glm::vec3 _panOffset;
 
-		// Inherited via Control
-		virtual void reset(std::shared_ptr<Camera> camera) override;
 	};
 
+	class FlyingControl : public Control {
+	public:
+		FlyingControl(std::shared_ptr<Camera> cam = nullptr);
+
+		virtual void update(std::shared_ptr<Camera> camera) override;
+		virtual void reset(std::shared_ptr<Camera> camera) override;
+	
+		float cameraSpeed;
+		float sensitivity;
+		bool constrainPitch;
+
+		int keyForward;
+		int keyBackward;
+		int keyLeft;
+		int keyRight;
+		int keyUp;
+		int keyDown;
+
+	private:
+		bool initialized;
+		glm::vec3 startPos;
+		glm::vec3 startViewDir;
+	};
 }

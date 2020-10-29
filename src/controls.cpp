@@ -8,6 +8,9 @@
 
 #include "camera.hpp"
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 glm::mat3 rotationFromUnitVectors(const glm::vec3& a, const glm::vec3& b) {
 	glm::vec3 v = glm::cross(a, b);
 	glm::mat3 V = glm::matrixCross3(v);
@@ -211,4 +214,91 @@ void gl::OrbitControl::update(std::shared_ptr<Camera> camera)
 void gl::OrbitControl::reset(std::shared_ptr<Camera> camera)
 {
 	//camera->Position = _position0;
+}
+
+gl::FlyingControl::FlyingControl(std::shared_ptr<Camera> cam) :
+	keyForward(GLFW_KEY_W),
+	keyBackward(GLFW_KEY_S),
+	keyLeft(GLFW_KEY_A),
+	keyRight(GLFW_KEY_D),
+	keyUp(GLFW_KEY_Q),
+	keyDown(GLFW_KEY_E),
+	cameraSpeed(1.f),
+	sensitivity(0.1f),
+	constrainPitch(true)
+{
+	if (cam != nullptr) {
+		initialized = true;
+		startPos = cam->position();
+		startViewDir = cam->forward();
+	}
+}
+
+void gl::FlyingControl::update(std::shared_ptr<Camera> camera)
+{
+	const glm::vec3 Front = camera->forward();
+	const glm::vec3 Right = glm::normalize(glm::cross(Front, camera->up()));
+	const glm::vec3 Up = camera->up();
+
+	ImGuiIO io = ImGui::GetIO();
+	if (!io.WantCaptureKeyboard && !io.WantCaptureMouse) {
+		bool hadUserInteraction = false;
+
+		const float deltaTime = io.DeltaTime;
+
+		// Keyboard
+		float velocity = cameraSpeed * deltaTime;
+		glm::vec3 position = camera->position();
+		if (io.KeysDown[keyForward]) {
+			position += Front * velocity;
+		}
+		if (io.KeysDown[keyBackward]) {
+			position -= Front * velocity;
+		}
+		if (io.KeysDown[keyLeft]) {
+			position -= Right * velocity;
+		}
+		if (io.KeysDown[keyRight]) {
+			position += Right * velocity;
+		}
+		if (io.KeysDown[keyUp]) {
+			position += Up * velocity;
+		}
+		if (io.KeysDown[keyDown]) {
+			position -= Up * velocity;
+		}
+
+		// Mouse movement
+		float pitch = std::asin(Front.y);
+		float yaw = std::atan2(Front.z, Front.x);
+
+		if (ImGui::IsMouseDown(1)) {
+			yaw += io.MouseDelta.x * glm::radians(sensitivity);
+			pitch += io.MouseDelta.y * glm::radians(sensitivity);
+
+			if (constrainPitch) {
+				pitch = std::clamp(pitch, -glm::radians(89.0f), glm::radians(89.0f));
+			}
+		}
+
+		glm::vec3 front;
+		front.x = std::cos(yaw) * std::cos(pitch);
+        front.y = std::sin(pitch);
+        front.z = std::sin(yaw) * std::cos(pitch);
+        
+		camera->lookAt(position + front, position);
+	
+		// Scroll wheel
+		if (io.MouseWheel > 0) {
+			cameraSpeed /= std::pow(0.95f, cameraSpeed);
+		}
+		else if (io.MouseWheel < 0) {
+			cameraSpeed *= std::pow(0.95f, cameraSpeed);
+			hadUserInteraction = true;
+		}
+	}
+}
+
+void gl::FlyingControl::reset(std::shared_ptr<Camera> camera)
+{
 }

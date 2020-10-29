@@ -31,7 +31,7 @@ namespace gl {
 			float fov = 50.0f) :
 			
 			fov(fov),
-			Near(0.1f),
+			Near(-1.f),
 			Far(100.0f),
 			ScreenWidth(1),
 			ScreenHeight(1)
@@ -70,7 +70,7 @@ namespace gl {
 		}
 
 		glm::vec3 forward() const {
-			return glm::inverse(viewMatrix) * glm::vec4(0, 1, 0, 0);
+			return glm::inverse(viewMatrix) * glm::vec4(0, 0, -1, 0);
 		}
 
 		void translate(const glm::vec3& t) {
