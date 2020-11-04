@@ -47,10 +47,6 @@ namespace gl {
 
 		void disableBreakPointCheck(bool value);
 
-		virtual Shader& getShader() override { return *batch.shader; }
-		virtual const Shader& getShader() const { return *batch.shader; }
-
-
 		DrawBatch& getBatch() {
 			return batch;
 		}
