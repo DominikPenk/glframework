@@ -62,26 +62,13 @@ namespace ImGui3D {
 				// Get current angle
 				auto [o, d] = worldCameraRay(io.MousePos);
 				glm::vec4 currentPoint = closestPointOnUnitCircle(o, d, glm::vec4(pos, 1), getAxis4(axis));
-				float angle = glm::orientedAngle(glm::vec3(s_lastPoint) - pos, glm::vec3(currentPoint) - pos, getAxis3(axis));
-
-				// Check if we can "fix" the angle
-				const float delta_angle = std::abs(angle);
-				if (std::abs(s_angle - angle - glm::two_pi<float>()) < delta_angle) {
-					angle += glm::two_pi<float>();
-				}
-				else if (std::abs(s_angle - angle + glm::two_pi<float>()) < delta_angle) {
-					angle -= glm::two_pi<float>();
-				}
-				if (angle > glm::two_pi<float>()) {
-					angle -= glm::two_pi<float>();
-				}
-				if (angle < -glm::two_pi<float>()) {
-					angle += glm::two_pi<float>();
-				}
 				retVal = true;
 
 				// Visualize angle
-				float composedAngle = glm::orientedAngle(glm::vec3(s_startPoint) - pos, glm::vec3(currentPoint) - pos, getAxis3(axis));
+				float composedAngle = glm::orientedAngle(
+					glm::normalize(glm::vec3(s_startPoint) - pos), 
+					glm::normalize(glm::vec3(currentPoint) - pos)
+					, getAxis3(axis));
 				_angles[axis] = composedAngle;
 				g.currentDrawList()->AddFilledSemiCircle(
 					pos, 
@@ -188,7 +175,7 @@ namespace ImGui3D {
 		static glm::mat4 s_Told;
 
 		ImGuiID rotId = GetID(_T, false);
-		float angles[3];
+		float angles[3] = {0.f, 0.f, 0.f};
 		bool rUpdating = RotationGizmo(&_T[4 * 3], angles, rotId);
 		bool tUpdating = TranslationGizmo(&_T[4 * 3]);
 
@@ -204,6 +191,7 @@ namespace ImGui3D {
 					_T[4 * i + j] = T[i][j];
 				}
 			}
+			std::printf("Angle: %.3f %.3f %.3f\r", angles[0], angles[1], angles[2]);
 		}
 		else
 		{
