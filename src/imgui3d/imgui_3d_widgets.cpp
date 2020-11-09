@@ -14,8 +14,9 @@ namespace ImGui3D {
 
 	bool RotationGizmo(const float _pos[3], float _angles[3], ImGuiID idoverride)
 	{
-		static glm::vec3 s_origAngles;
+		// Rotation gizmo computes the delta angle
 		static glm::vec4 s_startPoint;
+		static glm::vec3 s_lastPoint;
 		static float s_angle;
 
 		ImGui3DContext& g = *GImGui3D;
@@ -25,6 +26,7 @@ namespace ImGui3D {
 		// Scale gizmo based on distance
 		const float s = g.Style.GizmoSize * glm::distance(g.ViewMatrix * glm::vec4(pos, 1), glm::vec4(0, 0, 0, 1)) / g.ScreenSize.x;
 
+		// Draw circles
 		const glm::mat4 T = glm::translate(pos);
 		int segments = g.Style.RotationGizmoSegments;
 		const float delta_angle = glm::two_pi<float>() / segments;
@@ -42,6 +44,8 @@ namespace ImGui3D {
 
 		ImGuiIO& io = ImGui::GetIO();
 		bool retVal = false;
+
+		// Check each axis for input
 		for (int axis = 0; axis < 3; ++axis) {
 			const ImGuiID id = ImGui3D::GetID("axis" + axis);
 			const glm::vec4 col = g.Style.getColor(static_cast<ImGui3DColors>(ImGui3DCol_xAxis + 2 * axis));
@@ -49,19 +53,19 @@ namespace ImGui3D {
 
 			
 			if (io.MouseClicked[0] && ImGui3D::IsItemActive()) {
+				// First mouse click
 				auto [o, d] = worldCameraRay(io.MousePos);
 				s_startPoint = closestPointOnUnitCircle(o, d, glm::vec4(pos, 1), getAxis4(axis));
-				s_origAngles = glm::vec3(_angles[0], _angles[1], _angles[2]);
-				s_angle = 0;
+				s_lastPoint = s_startPoint;
 			}
 			else if (ImGui::IsMouseDragging(0) && ImGui3D::IsItemActive()) {
 				// Get current angle
 				auto [o, d] = worldCameraRay(io.MousePos);
 				glm::vec4 currentPoint = closestPointOnUnitCircle(o, d, glm::vec4(pos, 1), getAxis4(axis));
-				float angle = glm::orientedAngle(glm::vec3(s_startPoint) - pos, glm::vec3(currentPoint) - pos, getAxis3(axis));
+				float angle = glm::orientedAngle(glm::vec3(s_lastPoint) - pos, glm::vec3(currentPoint) - pos, getAxis3(axis));
 
 				// Check if we can "fix" the angle
-				const float delta_angle = std::abs(s_angle - angle);
+				const float delta_angle = std::abs(angle);
 				if (std::abs(s_angle - angle - glm::two_pi<float>()) < delta_angle) {
 					angle += glm::two_pi<float>();
 				}
@@ -74,14 +78,18 @@ namespace ImGui3D {
 				if (angle < -glm::two_pi<float>()) {
 					angle += glm::two_pi<float>();
 				}
-				_angles[axis] = s_origAngles[axis] + angle;
 				retVal = true;
 
+				// Visualize angle
+				float composedAngle = glm::orientedAngle(glm::vec3(s_startPoint) - pos, glm::vec3(currentPoint) - pos, getAxis3(axis));
+				_angles[axis] = composedAngle;
 				g.currentDrawList()->AddFilledSemiCircle(
 					pos, 
 					s * glm::vec3(s_startPoint - glm::vec4(pos, 1)), 
-					getAxis3(axis), s_angle,
+					getAxis3(axis), composedAngle,
 					g.Style.Colors[ImGui3DCol_xRotation_circle + axis], 24);
+
+				s_lastPoint = currentPoint;
 			}
 		}
 		ImGui3D::PopID();
@@ -176,22 +184,32 @@ namespace ImGui3D {
 
 	bool TransformGizmo(float _T[16])
 	{
-		float angles[3];
-		glm::extractEulerAngleXYZ(glm::make_mat4(_T), angles[0], angles[1], angles[2]);
+		static bool s_rotation_active = false;
+		static glm::mat4 s_Told;
 
 		ImGuiID rotId = GetID(_T, false);
-		bool retVal = RotationGizmo(&_T[4 * 3], angles, rotId);
-		retVal |= TranslationGizmo(&_T[4 * 3]);
+		float angles[3];
+		bool rUpdating = RotationGizmo(&_T[4 * 3], angles, rotId);
+		bool tUpdating = TranslationGizmo(&_T[4 * 3]);
 
-		if (retVal) {
-			glm::mat4 T = glm::eulerAngleXYZ(angles[0], angles[1], angles[2]);
+		if (rUpdating) {
+			if (!s_rotation_active) {
+				// This is the first time the rotation is updated
+				s_Told = glm::make_mat4(_T);
+				s_rotation_active = true;
+			}
+			glm::mat4 T = glm::eulerAngleXYZ(angles[0], angles[1], angles[2]) * s_Told;
 			for (int i = 0; i < 3; ++i) {
 				for (int j = 0; j < 3; ++j) {
 					_T[4 * i + j] = T[i][j];
 				}
 			}
 		}
-		return retVal;
+		else
+		{
+			s_rotation_active = false;
+		}
+		return rUpdating || tUpdating;
 	}
 	bool TransformGizmo(glm::mat4& T)
 	{
