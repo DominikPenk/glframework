@@ -5,6 +5,7 @@
 namespace gl {
 
 	std::shared_ptr<gl::Shader> textureDispShader();
+	std::shared_ptr<gl::Shader> scalarDispShader();
 
 	template<typename... Uniforms>
 	void fullscreenTriangle(int x, int y, int width, int height, gl::Shader& shader, Uniforms... uniforms);
@@ -15,6 +16,9 @@ namespace gl {
 
 	void displayTexture(int x, int y, int width, int height, std::shared_ptr<gl::Texture> tex, glm::vec2 uvmin = glm::vec2(0), glm::vec2 umax = glm::vec2(1));
 	void displayTexture(int x, int y, int width, int height, gl::Texture& tex, glm::vec2 uvmin = glm::vec2(0), glm::vec2 uvmax = glm::vec2(1));
+
+	void displayScalars(int x, int y, int width, int height, std::shared_ptr<gl::Texture> tex, glm::vec2 range, glm::vec4 minColor=glm::vec4(1), glm::vec4 maxColor=glm::vec4(1, 0, 0, 1), glm::vec2 uvmin = glm::vec2(0), glm::vec2 uvmax = glm::vec2(1));
+	void displayScalars(int x, int y, int width, int height, gl::Texture& tex, glm::vec2 range, glm::vec4 minColor = glm::vec4(1), glm::vec4 maxColor = glm::vec4(1, 0, 0, 1), glm::vec2 uvmin = glm::vec2(0), glm::vec2 uvmax = glm::vec2(1));
 
 }
 

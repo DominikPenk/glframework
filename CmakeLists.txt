@@ -29,7 +29,6 @@ if(${WITH_ASSIMP})
 endif()
 
 # Gather Imgui
-if(NOT IMGUI_SRC)
 set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/imgui)
 # Set the imgui sources
 file(GLOB IMGUI_SRC ${IMGUI_DIR}/*.h ${IMGUI_DIR}/*.cpp)
@@ -40,7 +39,6 @@ set(IMGUI_SRC
 	${IMGUI_DIR}/examples/imgui_impl_opengl3.cpp
 	${IMGUI_DIR}/examples/imgui_impl_glfw.h
 	${IMGUI_DIR}/examples/imgui_impl_glfw.cpp)
-endif()
 source_group("imgui" FILES ${IMGUI_SRC})
 
 set(MESH_FILES
@@ -120,8 +118,8 @@ source_group("Meshes" FILES ${MESH_FILES})
 source_group("Dear Imgui" FILES ${IMGUI_FILES})
 source_group("Dear Imgui 3D" FILES ${IMGUI_3D_FILES})
 
-add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${LENS_FILES} ${IMGUI_3D_FILES})
-target_link_libraries(glframework PUBLIC ${OPENGL_gl_LIBRARY} glfw glad::glad ${OpenCV_LIBRARIES})
+add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${IMGUI_3D_FILES})
+target_link_libraries(glframework PUBLIC ${OPENGL_gl_LIBRARY} glfw glad::glad glm)
 target_compile_definitions(glframework PUBLIC -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 target_compile_definitions(glframework PUBLIC -DIMGUI_DEFINE_MATH_OPERATORS)
 if(${WITH_OPENMESH})
@@ -145,7 +143,6 @@ target_include_directories(glframework PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 	$<BUILD_INTERFACE:${IMGUI_DIR}>
 	$<BUILD_INTERFACE:${IMGUI_DIR}/examples>
-	${OpenCV_INCLUDE_DIRS}
 	${OPENGL_INCLUDE_DIRS} 
 	${GLM_INCLUDE_DIRS}
 	$<INSTALL_INTERFACE:include/glframework>
