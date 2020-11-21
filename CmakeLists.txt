@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(GL-Framework LANGUAGES CXX)
 
-option(WITH_OPENMESH "WITH_OpenMesh" ON)
-option(WITH_ASSIMP "WITH_Assimp" ON)
-option(BUILD_FRAMEWORK_TEST "BUILD_FRAMEWORK_TEST" OFF)
+set(WITH_OPENMESH ON CACHE BOOL "Build with OpenMesh")
+set(WITH_ASSIMP ON CACHE BOOL "Build with assimp")
+option(BUILD_FRAMEWORK_TEST "Build framework tests" OFF)
 
 # Find Opengl libs
 find_package(OpenGL REQUIRED)
@@ -16,7 +16,7 @@ if(${WITH_OPENMESH})
 	find_package(OpenMesh QUIET)
 	if(NOT ${OpenMesh_FOUND})
 		message(STATUS "Did not find OpenMesh, turning it off")
-		set(${WITH_OPENMESH} OFF)
+		set(WITH_OPENMESH OFF CACHE BOOL "Build with OpenMesh" FORCE)
 	endif()
 endif()
 
@@ -24,7 +24,7 @@ if(${WITH_ASSIMP})
 	find_package(ASSIMP QUIET)
 	if(NOT ${ASSIMP_FOUND})
 		message(STATUS "Did not find Assimp, turning off")
-		set(${WITH_ASSIMP} OFF)
+		set(WITH_ASSIMP OFF CACHE BOOL "Build with assimp" FORCE)
 	endif()
 endif()
 
