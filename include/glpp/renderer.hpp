@@ -148,17 +148,25 @@ namespace gl {
 		void pushResizeCallback(std::function<void(Renderer*)> fn);
 		std::vector<std::function<void(Renderer*)>> resizeCallbacks();
 
-		std::shared_ptr<Framebuffer> framebuffer() { return mFrameBuffer; }
+		void resizeBuffers(int width, int height) {
+			mPrePostroBuffer->resize(width, height);
+			mFrameBuffer->resize(width, height);
+		}
 
 		std::mutex& getLock(std::shared_ptr<Mesh> obj);
 		std::mutex& getLock(std::shared_ptr<UIWindow> window);
 
 	private:
+		friend class RendererDebugWindow;
+		friend class OutlinerWindow;
+
 		void ImGui3d_ImplRenderer_Init(std::shared_ptr<ImGui3D::ImGui3DContext> ctx);
 
 		std::unique_ptr<UIWindow> mOutliner;
 		std::unique_ptr<UIWindow> mDebugWindow;
 
+		// Used prior to 
+		std::shared_ptr<Framebuffer> mPrePostroBuffer;
 		std::shared_ptr<Framebuffer> mFrameBuffer;
 
 		std::vector<std::shared_ptr<Mesh>> mMeshes;

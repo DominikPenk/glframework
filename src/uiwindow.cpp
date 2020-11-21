@@ -92,8 +92,8 @@ void gl::RendererDebugWindow::onDraw(Renderer* env)
 		"Uncharted 2" 
 	};
 
-	std::shared_ptr<gl::Texture> colorTexture = env->framebuffer()->getRenderTexture(0);
-	std::shared_ptr<gl::Texture> idTexture = env->framebuffer()->getRenderTexture(1);
+	std::shared_ptr<gl::Texture> colorTexture = env->mFrameBuffer->getRenderTexture(0);
+	std::shared_ptr<gl::Texture> idTexture = env->mFrameBuffer->getRenderTexture(1);
 
 	if (ImGui::BeginCombo("HDR Mapping", hdrmappings[(int)env->toneMapping()])) {
 		for (int i = 0; i < IM_ARRAYSIZE(hdrmappings); ++i) {
@@ -118,7 +118,7 @@ void gl::RendererDebugWindow::onDraw(Renderer* env)
 
 	// Get color under the cursor
 	ImVec2 mouse = ImGui::GetIO().MousePos;
-	glm::uvec4 color = env->framebuffer()->readColorPixel((int)mouse.x, (int)mouse.y, 1);
+	glm::uvec4 color = env->mFrameBuffer->readColorPixel((int)mouse.x, (int)mouse.y, 1);
 	ImGuiID id = ImGui3D::ColorToID(color.r, color.g, color.b);
 
 	ImGui::Text("Mouse at (%d, %d) over color [%d, %d, %d], Id: %d", (int)mouse.x, (int)mouse.y, color.x, color.y, color.z, id);

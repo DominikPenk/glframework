@@ -32,7 +32,7 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	}
 
 	// Resize frame buffer
-	renderer->framebuffer()->resize(width, height);
+	renderer->resizeBuffers(width, height);
 	glViewport(0, 0, width, height);
 }
 
@@ -44,7 +44,7 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	showDebug(false),
 	showMeshWatch(false),
 	gammaCorrection(true),
-	mToneMapping(ToneMapping::Linear),
+	mToneMapping(ToneMapping::Reinhard),
 	gamma(1.2f),
 	mPostProShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "displayShader.glsl"),
 	mDisplayShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "copyShader.glsl")
@@ -112,10 +112,14 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	// ---------------
 	glEnable(GL_DEPTH_TEST);
 
-	// Create the frame buffer for rendering
+	// Create the frame buffers with shared depth
+	mPrePostroBuffer = std::make_shared<gl::Framebuffer>(mCamera->ScreenWidth, mCamera->ScreenHeight);
+	mPrePostroBuffer->setRenderTexture(0, nullptr);
+	auto depthTexture = mPrePostroBuffer->setDepthTexture(nullptr);
 	mFrameBuffer = std::make_shared<gl::Framebuffer>(mCamera->ScreenWidth, mCamera->ScreenHeight);
 	mFrameBuffer->setRenderTexture(0, nullptr);
 	mFrameBuffer->appendRenderTexture(nullptr);
+	mFrameBuffer->setDepthTexture(depthTexture);
 
 	// enable imgui
 	// ---------------
@@ -190,9 +194,9 @@ void gl::Renderer::endFrame()
 	if (glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED))
 		return;
 
-	mFrameBuffer->bind();
+	mPrePostroBuffer->bind();
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.w);
-	mFrameBuffer->clear({ clearColor, glm::vec4(0, 0, 0, 1) });
+	mPrePostroBuffer->clear({ clearColor });
 	
 	// These should be rendered with depth test
 	glEnable(GL_DEPTH_TEST);
@@ -208,13 +212,17 @@ void gl::Renderer::endFrame()
 	}
 	
 	// Do post processing
+	mFrameBuffer->bind();
 	if (mToneMapping != ToneMapping::Linear || gammaCorrection) {
-		glDisable(GL_DEPTH_TEST);
 		fullscreenTriangle(0, 0, mCamera->ScreenWidth, mCamera->ScreenHeight,
 			mPostProShader,
 			"gamma", gammaCorrection ? gamma : 1.0f,
 			"hdr", hdr,
-			"renderTexture", mFrameBuffer->getRenderTexture(0));
+			"renderTexture", mPrePostroBuffer->getRenderTexture(0));
+	}
+	else {
+		// Just copy over
+		displayTexture(0, 0, mCamera->ScreenWidth, mCamera->ScreenHeight, mPrePostroBuffer->getRenderTexture(0));
 	}
 
 	mFrameBuffer->clearColorAttachment(1, glm::vec4(0, 0, 0, 1));
@@ -238,12 +246,7 @@ void gl::Renderer::endFrame()
 	mFrameBuffer->unbind();
 
 	// Draw Result to screen
-	glDisable(GL_DEPTH_TEST);
-	mDisplayShader.use();
-	mFrameBuffer->getRenderTexture(0)->bind(0);
-	mDummyVAO.bind();
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	mDummyVAO.unbind();
+	displayTexture(0, 0, mCamera->ScreenWidth, mCamera->ScreenHeight, mFrameBuffer->getRenderTexture(0));
 
 	for (auto hook : mPreImGuiHook) {
 		hook(this);
