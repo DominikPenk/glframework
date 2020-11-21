@@ -184,7 +184,7 @@ namespace gl {
 			std::disjunction_v<is_any<Types,
 			glm::vec4, glm::vec3, glm::vec2,
 			glm::uvec4, glm::uvec3, glm::uvec2,
-			Eigen::Vector4f, Eigen::Vector3f,
+			//Eigen::Vector4f, Eigen::Vector3f,
 			unsigned int, int, float>...>;
 
 		template<typename T, bool _Condition, class _First_integral, class... _Traits>
@@ -205,16 +205,16 @@ namespace gl {
 
 		template<typename T>
 		static constexpr GLenum to_glenum_v = select_value_v<GLenum,
-			is_any<T, glm::vec4, glm::vec3, glm::vec2, Eigen::Vector4f, Eigen::Vector3f, Eigen::Vector2f, float>, std::integral_constant<GLenum, GL_FLOAT>,
+			is_any<T, glm::vec4, glm::vec3, glm::vec2, /*Eigen::Vector4f, Eigen::Vector3f, Eigen::Vector2f,*/ float>, std::integral_constant<GLenum, GL_FLOAT>,
 			is_any<T, glm::uvec4, glm::uvec3, glm::uvec3, unsigned int, ImGuiID>, std::integral_constant<GLenum, GL_UNSIGNED_INT>,
 			std::bool_constant<true>, std::integral_constant<GLenum, GL_INT>
 		>;
 
 		template<typename T>
 		static constexpr GLuint to_size_v = select_value_v<GLuint,
-			is_any<T, glm::uvec4, glm::vec4, Eigen::Vector4f>, std::integral_constant<GLuint, 4>,
-			is_any<T, glm::uvec3, glm::vec3, Eigen::Vector3f>, std::integral_constant<GLuint, 3>,
-			is_any<T, glm::uvec2, glm::vec2, Eigen::Vector2f>, std::integral_constant<GLuint, 2>,
+			is_any<T, glm::uvec4, glm::vec4/*, Eigen::Vector4f*/>, std::integral_constant<GLuint, 4>,
+			is_any<T, glm::uvec3, glm::vec3/*, Eigen::Vector3f*/>, std::integral_constant<GLuint, 3>,
+			is_any<T, glm::uvec2, glm::vec2/*, Eigen::Vector2f*/>, std::integral_constant<GLuint, 2>,
 			std::bool_constant<true>, std::integral_constant<GLuint, 1>
 		>;
 
@@ -226,13 +226,13 @@ namespace gl {
 
 		template<typename T>
 		static constexpr bool is_floating_point_v = 
-			is_any_v<T, glm::vec4, glm::vec3, glm::vec2, Eigen::Vector4f, Eigen::Vector3f, Eigen::Vector2f, float>;
+			is_any_v<T, glm::vec4, glm::vec3, glm::vec2, /*Eigen::Vector4f, Eigen::Vector3f, Eigen::Vector2f,*/ float>;
 
 		template<typename T>
 		static constexpr size_t get_dimension_v = select_value_v<size_t,
-			is_any<T, glm::vec4, Eigen::Vector4f>,	std::integral_constant<std::size_t, 4>,
-			is_any<T, glm::vec3, Eigen::Vector3f>,	std::integral_constant<std::size_t, 3>,
-			is_any<T, glm::vec2, Eigen::Vector2f>,	std::integral_constant<std::size_t, 2>,
+			is_any<T, glm::vec4/*, Eigen::Vector4f*/>,	std::integral_constant<std::size_t, 4>,
+			is_any<T, glm::vec3/*, Eigen::Vector3f*/>,	std::integral_constant<std::size_t, 3>,
+			is_any<T, glm::vec2/*, Eigen::Vector2f*/>,	std::integral_constant<std::size_t, 2>,
 			is_any<T, glm::vec<1, float, glm::defaultp>>, std::integral_constant<std::size_t, 1>>;
 
 

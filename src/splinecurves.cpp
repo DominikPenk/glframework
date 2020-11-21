@@ -21,7 +21,7 @@ void computeCatmulRomData(
 			(uint)((i + 1) % points.size()),
 			(uint)((i + 2) % points.size())
  		});
-		p->push_back(Eigen::Vector3f(point.x, point.y, point.z));
+		p->push_back(point);
 	}
 }
 
@@ -116,7 +116,7 @@ bool gl::CatmullRomSpline::handleIO(const Renderer* env, ImGuiIO& io)
 {
 	bool wasChanged = false;
 	for (unsigned int i = 0; i < mPoints->size(); ++i) {
-		wasChanged |= ImGui3D::Vertex(&(mPoints->at(i).x()));
+		wasChanged |= ImGui3D::Vertex(&(mPoints->at(i).x));
 	}
 	mPoints->setDirty(wasChanged);
 	return wasChanged;

@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <streambuf>
 #include <filesystem>

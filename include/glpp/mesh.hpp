@@ -15,9 +15,6 @@
 #include <sstream>
 #include <unordered_set>
 
-#include <eigen3/Eigen/Core>
-
-
 class Heightmap;
 struct ImGuiIO;
 
@@ -74,7 +71,7 @@ namespace gl {
 	class TriangleMesh : public Mesh {
 	public:
 		TriangleMesh();
-		TriangleMesh(const std::vector<Eigen::Vector3f>& vertices, std::vector<Eigen::Vector3i>& indices);
+		TriangleMesh(const std::vector<glm::vec3>& vertices, std::vector<glm::ivec3>& indices);
 
 		TriangleMesh(const std::string& path);
 
@@ -82,7 +79,7 @@ namespace gl {
 
 		virtual void drawOutliner() override;
 
-		void addTriangles(std::vector<Eigen::Vector3f>& vertices);
+		void addTriangles(std::vector<glm::vec3>& vertices);
 
 		void setColor(float r, float g, float b) { mColor = glm::vec4(r, g, b, 1); }
 

@@ -2,8 +2,6 @@
 #include "glpp/renderer.hpp"
 
 #include <numeric>
-#include <eigen3/Eigen/Geometry>
-
 #include <glm/gtx/matrix_cross_product.hpp>
 
 #include "glpp/imgui3d/imgui_3d.h"
@@ -15,7 +13,6 @@
 #endif
 
 using namespace gl;
-using namespace Eigen;
 
 gl::TriangleMesh::TriangleMesh() :
 	Mesh(),
@@ -29,19 +26,18 @@ gl::TriangleMesh::TriangleMesh() :
 	mVertexData = mBatch.addVertexAttributes<glm::vec3, glm::vec2, glm::vec3>(0);
 }
 
-gl::TriangleMesh::TriangleMesh(const std::vector<Eigen::Vector3f>& vertices, std::vector<Eigen::Vector3i>& indices) :
+gl::TriangleMesh::TriangleMesh(const std::vector<glm::vec3>& vertices, std::vector<glm::ivec3>& indices) :
 	gl::TriangleMesh()
 {
-	for (const Eigen::Vector3f& p : vertices) {
-		glm::vec3 _p(p.x(), p.y(), p.z());
-		mVertexData->push_back(_p, glm::vec2(0), glm::vec3(1, 0, 0));
+	for (const glm::vec3& p : vertices) {
+		mVertexData->push_back(p, glm::vec2(0), glm::vec3(1, 0, 0));
 	}
 	gl::IndexBuffer& indexBuffer = getIndexBuffer();
 	indexBuffer.resize(indices.size() * 3);
 	for (size_t i = 0; i < indices.size(); ++i) {
-		indexBuffer(3 * i) = indices[i].x();
-		indexBuffer(3 * i + 1) = indices[i].y();
-		indexBuffer(3 * i + 2) = indices[i].z();
+		indexBuffer(3 * i) = indices[i].x;
+		indexBuffer(3 * i + 1) = indices[i].y;
+		indexBuffer(3 * i + 2) = indices[i].z;
 	}
 	computeNormals();
 }
@@ -109,13 +105,13 @@ void gl::TriangleMesh::drawOutliner()
 	ImGui::ColorEdit4("Surface color", &mColor.x);
 }
 
-void gl::TriangleMesh::addTriangles(std::vector<Eigen::Vector3f>& vertices)
+void gl::TriangleMesh::addTriangles(std::vector<glm::vec3>& vertices)
 {
 	assert(vertices.size() % 3 == 0);
 	unsigned int i0 = mVertexData->size();
 	for(int i = 0; i < vertices.size(); ++i) {
 		mVertexData->push_back(
-			glm::vec3(vertices[i].x(), vertices[i].y(), vertices[i].z()),
+			vertices[i],
 			glm::vec2(0),
 			glm::vec3(0));
 		mBatch.indexBuffer->push_back(i0 + i);
@@ -176,7 +172,7 @@ gl::CoordinateFrame::CoordinateFrame(float length) :
 	Mesh(),
 	axisLength(length)
 {
-	mPoints.push_back(Eigen::Vector3f(0, 0, 0));
+	mPoints.push_back(glm::vec3(0));
 	mPoints.target() = GL_ARRAY_BUFFER;
 	mPoints.usage() = GL_DYNAMIC_DRAW;
 

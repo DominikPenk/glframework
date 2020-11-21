@@ -4,8 +4,6 @@
 
 #include <glm/glm.hpp>
 
-#include <eigen3/Eigen/Core>
-
 #include "glpp/imgui.hpp"
 #include "glpp/gl_internal.hpp"
 

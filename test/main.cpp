@@ -44,7 +44,7 @@ int main(int argc, const char* argv[]) {
 		ImGui::DragInt("GridSize", &gridSize, 1.f, 1, 10);
 		ImGui::DragInt("Subdivisions", &subdivs, 1.f, 1, 10);
 	});
-	std::vector<Eigen::Vector3f> vertices = {
+	std::vector<glm::vec3> vertices = {
 		{ -1, -1,  1 },
 		{  1, -1,  1 },
 		{  1,  1,  1 },
@@ -54,7 +54,7 @@ int main(int argc, const char* argv[]) {
 		{  1,  1, -1 },
 		{ -1,  1, -1 }
 	};
-	std::vector<Eigen::Vector3i> faces = {
+	std::vector<glm::ivec3> faces = {
 		{ 0, 1, 2 }, { 0, 2, 3 },
 		{ 7, 6, 5 }, { 7, 5, 4 },
 		{ 1, 0, 4 }, { 1, 4, 5 },

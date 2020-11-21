@@ -3,8 +3,6 @@
 
 #include <glad/glad.h>
 
-#include <eigen3/Eigen/Core>
-
 #include <glm/glm.hpp>
 
 #include "glpp/framebuffer.hpp"
@@ -75,13 +73,10 @@ namespace gl {
 		struct ConditionalType { typedef Then type; };
 		template<typename Then, typename Else>
 		struct ConditionalType<false, Then, Else> { typedef Else type; };
-		typedef typename ConditionalType<n == 1, T, Eigen::Matrix<T, n, 1>>::type value_type;
-		typedef glm::vec<n, T> glm_value_type;
+		typedef typename ConditionalType<n == 1, T, glm::vec<n, T>>::type value_type;
 
 		typedef typename std::vector<value_type>::iterator iterator;
 		typedef typename std::vector<value_type>::const_iterator const_iterator;
-
-		typedef typename std::vector<glm_value_type>::const_iterator glm_const_iterator;
 
 		VertexBufferObject() :
 			VertexBufferObjectBase(n * sizeof(T))
@@ -149,17 +144,6 @@ namespace gl {
 
 		void push_back(const value_type& element) { mData.push_back(element); mUpdated = true; }
 
-		void push_back(const glm_value_type& element) {
-			static_assert(n <= 4, "only valid for sizes less than 5");
-			if constexpr (n == 1) {
-				mData.push_back(element[0]);
-			}
-			else {
-				mData.push_back(Eigen::Map<const value_type>(&element[0]));
-			}
-			mUpdated = true;
-		}
-
 		void insert(const_iterator position, std::initializer_list<value_type> data) {
 			mUpdated = true;
 			mData.insert(position, data);
@@ -169,19 +153,6 @@ namespace gl {
 			mData.insert(position, start, end);
 		}
 		
-		void extend(glm_const_iterator start, glm_const_iterator end) {
-			mUpdated = true;
-			for (auto it = start; it != end; it = std::next(it)) {
-				push_back(*it);
-			}
-		}
-		void extend(std::initializer_list<glm_value_type> data) {
-			mUpdated = true;
-			for (const glm_value_type& e : data) {
-				push_back(e);
-			}
-		}
-
 		void erase(const_iterator position) { mData.erase(position); }
 		void erase(const_iterator first, const_iterator last) { mData.erase(first, last); }
 
