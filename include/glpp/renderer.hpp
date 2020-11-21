@@ -158,7 +158,6 @@ namespace gl {
 
 		std::unique_ptr<UIWindow> mOutliner;
 		std::unique_ptr<UIWindow> mDebugWindow;
-		std::unique_ptr<UIWindow> mMeshWatch;
 
 		std::shared_ptr<Framebuffer> mFrameBuffer;
 

@@ -1,7 +1,7 @@
-#include "openmesh_mesh.h"
+#include "glpp/openmesh_mesh.hpp"
 #include <OpenMesh/Core/IO/MeshIO.hh>
 
-#include "renderer.hpp"
+#include "glpp/renderer.hpp"
 
 gl::OpenMeshMesh::OpenMeshMesh() :
 	Mesh(),
@@ -10,13 +10,11 @@ gl::OpenMeshMesh::OpenMeshMesh() :
 	edgeColor(.1f, .1f, .1f, 1.f),
 	vertexColor(.1f, .1f, .1f, 1.f),
 	drawEdges(false),
-	displayNormals(false)
+	visualizeNormals(false)
 {
-	batch.shader = std::make_shared<Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
-	triangleShader = batch.shader;
+	mShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
 	normalShader = std::make_shared<Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle_normal.glsl");
-	vertices = batch.addVertexAttribute<float, 3>(0);
-	normals = batch.addVertexAttribute<float, 3>(1);
+	mVertexData = mBatch.addVertexAttributes<glm::vec3, glm::vec2, glm::vec3>(0);
 }
 
 gl::OpenMeshMesh::OpenMeshMesh(OpenMesh::TriangleMesh3f mesh) : 
@@ -58,23 +56,20 @@ void gl::OpenMeshMesh::render(const gl::RendererBase * env)
 	glm::mat4 V = env->camera()->viewMatrix;
 	glm::mat4 MVP = P * V * ModelMatrix;
 	glDisable(GL_BLEND);
-	if (displayNormals) {
-		batch.shader = normalShader;
-		batch.execute(
-			"MVP", MVP,
-			"M", ModelMatrix);
-	}
-	else {
-		batch.shader = triangleShader;
-		batch.execute("MVP", MVP, "color", faceColor);
-	}
+	
+	Mesh::render(mShader,
+		"MVP", MVP,
+		"M", ModelMatrix,
+		"color", faceColor);
 
 
 	if (drawEdges) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glEnable(GL_POLYGON_OFFSET_LINE);
 		glPolygonOffset(-1.f, 1.f);
-		batch.execute("MVP", MVP, "color", edgeColor);
+		Mesh::render(mShader,
+			"MVP", MVP, 
+			"color", edgeColor);
 		glDisable(GL_POLYGON_OFFSET_LINE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
@@ -83,7 +78,7 @@ void gl::OpenMeshMesh::render(const gl::RendererBase * env)
 void gl::OpenMeshMesh::drawOutliner()
 {
 	ImGui::Checkbox("Draw Wireframe", &drawEdges);
-	ImGui::Checkbox("Visualize Normals", &displayNormals);
+	ImGui::Checkbox("Visualize Normals", &visualizeNormals);
 	if (ImGui::TreeNode("Color")) {
 		ImGui::ColorPicker4("Surface color", &faceColor.x);
 		ImGui::ColorPicker4("Wireframe color", &edgeColor.x);
@@ -106,12 +101,13 @@ void gl::OpenMeshMesh::update(bool force)
 {
 	if (dirty || force) {
 		// Copy vertices
-		vertices->resize(mesh.n_vertices());
-		std::copy(mesh.points(), mesh.points() + mesh.n_vertices(), reinterpret_cast<glm::vec3*>(vertices->data()));
-		// Copy normals
-		normals->resize(mesh.n_vertices());
-		std::copy(mesh.vertex_normals(), mesh.vertex_normals() + mesh.n_vertices(), reinterpret_cast<glm::vec3*>(normals->data()));
-		IndexBuffer& indexBuffer = *batch.indexBuffer;
+		mVertexData->resize(mesh.n_vertices());
+		for (size_t i = 0; i < mesh.n_vertices(); ++i) {
+			glm::vec3 p = mesh.points()[i];
+			glm::vec3 n = mesh.vertex_normals()[i];
+			mVertexData->at(i) = { p, glm::vec2(0), n };
+		}
+		IndexBuffer& indexBuffer = *mBatch.indexBuffer;
 		indexBuffer.reserve(3 * mesh.n_faces());
 		for (auto face : mesh.faces()) {
 			auto heh = face.halfedge();
@@ -132,95 +128,4 @@ void gl::OpenMeshMesh::computeVertexNormals()
 	}
 	mesh.update_normals();
 	dirty = true;
-}
-
-void gl::OpenMeshMesh::watch(OpenMesh::VertexHandle vh)
-{
-#ifdef _DEBUG
-	mesh.watch(vh);
-#endif
-}
-
-void gl::OpenMeshMesh::watch(OpenMesh::EdgeHandle eh)
-{
-#ifdef _DEBUG
-	mesh.watch(eh);
-#endif
-}
-
-void gl::OpenMeshMesh::watch(OpenMesh::HalfedgeHandle heh)
-{
-#ifdef _DEBUG
-	mesh.watch(heh);
-#endif
-}
-
-void gl::OpenMeshMesh::watch(OpenMesh::FaceHandle fh)
-{
-#ifdef _DEBUG
-	mesh.watch(fh);
-#endif
-}
-
-void gl::OpenMeshMesh::addBreakpoint(OpenMesh::VertexHandle vh, const std::function<void()>& callback, OpenMesh::Conditional condition)
-{
-#ifdef _DEBUG
-	mesh.addBreakpoint(vh, callback, condition);
-#endif
-}
-
-void gl::OpenMeshMesh::addBreakpoint(OpenMesh::EdgeHandle eh, const std::function<void()>& callback, OpenMesh::Conditional condition)
-{
-#ifdef _DEBUG
-	mesh.addBreakpoint(eh, callback, condition);
-#endif
-}
-
-void gl::OpenMeshMesh::addBreakpoint(OpenMesh::HalfedgeHandle heh, const std::function<void()>& callback, OpenMesh::Conditional condition)
-{
-#ifdef _DEBUG
-	mesh.addBreakpoint(heh, callback, condition);
-#endif
-}
-
-void gl::OpenMeshMesh::addBreakpoint(OpenMesh::FaceHandle fh, const std::function<void()>& callback, OpenMesh::Conditional condition)
-{
-#ifdef _DEBUG
-	mesh.addBreakpoint(fh, callback, condition);
-#endif
-}
-
-void gl::OpenMeshMesh::stopWatch(OpenMesh::VertexHandle vh)
-{
-#ifdef _DEBUG
-	mesh.stopWatch(vh);
-#endif
-}
-
-void gl::OpenMeshMesh::stopWatch(OpenMesh::EdgeHandle eh)
-{
-#ifdef _DEBUG
-	mesh.stopWatch(eh);
-#endif
-}
-
-void gl::OpenMeshMesh::stopWatch(OpenMesh::HalfedgeHandle heh)
-{
-#ifdef _DEBUG
-	mesh.stopWatch(heh);
-#endif
-}
-
-void gl::OpenMeshMesh::stopWatch(OpenMesh::FaceHandle fh)
-{
-#ifdef _DEBUG
-	mesh.stopWatch(fh);
-#endif
-}
-
-void gl::OpenMeshMesh::disableBreakPointCheck(bool value)
-{
-#ifdef _DEBUG
-	mesh.disableCheck = value;
-#endif
 }

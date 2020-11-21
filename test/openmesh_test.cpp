@@ -5,6 +5,7 @@
 #include <glpp/texture.hpp>
 #include <glpp/framebuffer.hpp>
 #include <glpp/intermediate.h>
+#include <glpp/openmesh_mesh.hpp>
 
 
 #include <iostream>
@@ -22,7 +23,7 @@ int main(int argc, const char* argv[]) {
 	renderer.showOutliner = false;
 
 	//gl::TriangleMesh mesh(std::string(TEST_DIR) + "teapot.obj");
-	auto mesh = renderer.addMesh<gl::TriangleMesh>("Teapot", std::string(TEST_DIR) + "teapot.obj");
+	auto mesh = renderer.addMesh<gl::OpenMeshMesh>("Teapot", std::string(TEST_DIR) + "teapot.obj");
 
 	// Create a frame buffer to draw to
 	gl::Framebuffer buffer(cam->ScreenWidth, cam->ScreenHeight);
@@ -31,7 +32,7 @@ int main(int argc, const char* argv[]) {
 	// Show offscreen rendering result using intermediate rendering
 	renderer.addRenderHook(gl::Renderer::RenderHook::Pre2DGui, [&](gl::Renderer* env) {
 		gl::displayTexture(0, 0, cam->ScreenWidth * 0.25, cam->ScreenHeight * 0.25, buffer.getRenderTexture(0));
-	});
+		});
 
 	renderer.pushResizeCallback([&](gl::Renderer* env) {
 		buffer.resize(cam->ScreenWidth, cam->ScreenHeight);

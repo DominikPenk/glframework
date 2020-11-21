@@ -9,10 +9,7 @@
 #include "glpp/IconsFontAwesome5.h"
 #include "glpp/uiwindow.hpp"
 #include "glpp/gl_internal.hpp"
-
-#ifdef WITH_OPENMESH
-#include "OpenMeshExtension/MeshDebugWindow.h"
-#endif
+#include "glpp/intermediate.h"
 
 using namespace gl;
 
@@ -43,16 +40,11 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	RendererBase(cam),
 	mOutliner(std::make_unique<OutlinerWindow>()),
 	mDebugWindow(std::make_unique<RendererDebugWindow>()),
-#if defined(WITH_OPENMESH) && defined(_DEBUG)
-	mMeshWatch(std::make_unique<MeshDebugWindow>()),
-#else
-	mMeshWatch(nullptr),
-#endif
 	showOutliner(true),
 	showDebug(false),
 	showMeshWatch(false),
 	gammaCorrection(true),
-	mToneMapping(ToneMapping::Reinhard),
+	mToneMapping(ToneMapping::Linear),
 	gamma(1.2f),
 	mPostProShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "displayShader.glsl"),
 	mDisplayShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "copyShader.glsl")
@@ -185,9 +177,6 @@ bool gl::Renderer::startFrame()
 	if (showDebug) {
 		mDebugWindow->draw(this);
 	}
-	if (mMeshWatch != nullptr && showMeshWatch) {
-		mMeshWatch->draw(this);
-	}
 
 	return true;
 }
@@ -221,14 +210,11 @@ void gl::Renderer::endFrame()
 	// Do post processing
 	if (mToneMapping != ToneMapping::Linear || gammaCorrection) {
 		glDisable(GL_DEPTH_TEST);
-		mPostProShader.use();
-		mPostProShader.setUniform("gamma", gammaCorrection ? gamma : 1.0f);
-		mPostProShader.setUniform("hdr", hdr);
-		mFrameBuffer->getRenderTexture(0)->bind(0);
-		mDummyVAO.bind();
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		mDummyVAO.unbind();
-		glEnable(GL_DEPTH_TEST);
+		fullscreenTriangle(0, 0, mCamera->ScreenWidth, mCamera->ScreenHeight,
+			mPostProShader,
+			"gamma", gammaCorrection ? gamma : 1.0f,
+			"hdr", hdr,
+			"renderTexture", mFrameBuffer->getRenderTexture(0));
 	}
 
 	mFrameBuffer->clearColorAttachment(1, glm::vec4(0, 0, 0, 1));

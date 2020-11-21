@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(GL-Framework LANGUAGES CXX)
 
 set(WITH_ASSIMP ON CACHE BOOL "Build with assimp")
+set(WITH_OPENMESH ON CACHE BOOL "Build with OpenMesh")
 option(BUILD_FRAMEWORK_TEST "Build framework tests" OFF)
 
 # Find Opengl libs
@@ -108,11 +109,15 @@ source_group("Dear Imgui 3D" FILES ${IMGUI_3D_FILES})
 add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${IMGUI_3D_FILES})
 target_link_libraries(glframework PUBLIC ${OPENGL_gl_LIBRARY} glfw glad::glad glm)
 target_compile_definitions(glframework PUBLIC -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
-# if(${WITH_OPENMESH})
-# 	target_link_libraries(glframework PUBLIC OpenMeshCore)
-# 	target_compile_definitions(glframework PUBLIC -D_USE_MATH_DEFINES -DWITH_OPENMESH)
-# 	target_sources(glframework PRIVATE src/openmesh_ext.h ${OPENMESH_EXT})
-# endif()
+if(${WITH_OPENMESH})
+	target_link_libraries(glframework PUBLIC OpenMeshCore)
+	target_compile_definitions(glframework PUBLIC -D_USE_MATH_DEFINES -DWITH_OPENMESH)
+#	target_sources(glframework PRIVATE src/openmesh_ext.h ${OPENMESH_EXT)
+	target_sources(glframework PRIVATE
+		${INCLUDE_DIR}/openmesh_mesh.hpp
+		${INCLUDE_DIR}/openmesh_ext.hpp
+		src/openmesh_mesh.cpp)
+endif()
 if(${WITH_ASSIMP})
 	target_link_libraries(glframework PUBLIC ${ASSIMP_LIBRARIES})
 	target_link_directories(glframework PUBLIC ${ASSIMP_INCLUDE_DIRECTORIES})
@@ -133,15 +138,5 @@ target_include_directories(glframework PUBLIC
 	${GLM_INCLUDE_DIRS})
 
 if(${BUILD_FRAMEWORK_TEST})
-	add_executable(gl-test test/main.cpp)
-	target_link_libraries(gl-test PUBLIC glframework)
-	if(${WITH_ASSIMP})
-		add_executable(gl-test-framebuffer test/framebuffer_test.cpp)
-		target_link_libraries(gl-test-framebuffer PUBLIC glframework)
-		target_compile_definitions(gl-test-framebuffer PRIVATE -DTEST_DIR="${PROJECT_SOURCE_DIR}/test/")
-
-		add_executable(gl-test-offscreen test/offscreen_test.cpp)
-		target_link_libraries(gl-test-offscreen PUBLIC glframework)
-		target_compile_definitions(gl-test-offscreen PRIVATE -DTEST_DIR="${PROJECT_SOURCE_DIR}/test/")
-	endif()
+	add_subdirectory(test/)
 endif()

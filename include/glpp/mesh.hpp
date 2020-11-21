@@ -7,7 +7,7 @@
 #include "glpp/draw_batch.hpp"
 
 #ifdef WITH_OPENMESH
-#include "openmesh_ext.h"
+#include "glpp/openmesh_ext.hpp"
 #endif
 
 #include <opencv2/core.hpp>
@@ -75,9 +75,7 @@ namespace gl {
 	public:
 		TriangleMesh();
 		TriangleMesh(const std::vector<Eigen::Vector3f>& vertices, std::vector<Eigen::Vector3i>& indices);
-#ifdef WITH_OPENMESH
-		TriangleMesh(const OpenMesh::TriangleMesh3f& mesh);
-#endif
+
 		TriangleMesh(const std::string& path);
 
 		void render(const RendererBase* env);

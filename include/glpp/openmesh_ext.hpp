@@ -5,7 +5,7 @@
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <OpenMesh/Core/Geometry/VectorT.hh>
 
-#include "OpenMeshExtension/DebuggableTriMesh_ArrayKernelT.h"
+// #include "OpenMeshExtension/DebuggableTriMesh_ArrayKernelT.h"
 
 namespace OpenMesh {
 	template<int d, typename Scalar>
@@ -40,11 +40,11 @@ namespace OpenMesh {
 		typedef glm::vec<d, T> Point;
 		typedef glm::vec<d, T> Normal;
 	};
-#ifdef _DEBUG
-	typedef DebuggableTriMesh_ArrayKernelT<GLMTraits<float, 3>>  TriangleMesh3f;
-	typedef DebuggableTriMesh_ArrayKernelT<GLMTraits<double, 3>> TriangleMesh3d;
-#else
+//#ifdef _DEBUG
+//	typedef DebuggableTriMesh_ArrayKernelT<GLMTraits<float, 3>>  TriangleMesh3f;
+//	typedef DebuggableTriMesh_ArrayKernelT<GLMTraits<double, 3>> TriangleMesh3d;
+//#else
 	typedef TriMesh_ArrayKernelT<GLMTraits<float, 3>>  TriangleMesh3f;
 	typedef TriMesh_ArrayKernelT<GLMTraits<double, 3>> TriangleMesh3d;
-#endif
+// #endif
 }
