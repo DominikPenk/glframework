@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-#include "imgui.h"
+#include "glpp/imgui.hpp"
 
 namespace ImGui3D {
 

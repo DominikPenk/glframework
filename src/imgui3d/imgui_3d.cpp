@@ -2,8 +2,8 @@
 
 #include <GLFW/glfw3.h>
 
-#include "imgui.h"
-#include "imgui_internal.h"
+#include "glpp/imgui.hpp"
+
 
 
 #define GLMCOLCHAR2FLOAT(r, g, b, a) glm::vec4(static_cast<float>(r) / 255, static_cast<float>(g) / 255, static_cast<float>(b)/255, static_cast<float>(a) / 255);

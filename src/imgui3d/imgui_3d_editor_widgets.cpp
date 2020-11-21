@@ -1,7 +1,6 @@
 #include "glpp/imgui3d/imgui_3d_editor_widgets.h"
 
-#include "imgui.h"
-#include "imgui_internal.h"
+#include "glpp/imgui.hpp"
 
 #include "glpp/imgui3d/imgui_3d_geometry.h"
 #include "glpp/imgui3d/imgui_3d_utils.h"

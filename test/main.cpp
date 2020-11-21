@@ -4,7 +4,7 @@
 #include <glpp/camera.hpp>
 #include <glpp/controls.hpp>
 #include <glpp/splinecurves.hpp>
-#include "imgui.h"
+#include <glpp/imgui.hpp>
 
 #include <glpp/imgui3d/imgui_3d.h>
 #include <glpp/imgui3d/imgui_3d_editor_widgets.h>

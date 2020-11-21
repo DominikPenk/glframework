@@ -2,7 +2,7 @@
 
 #include <glm/gtx/intersect.hpp>
 
-#include "imgui.h"
+#include "glpp/imgui.hpp"
 
 #include "glpp/renderer.hpp"
 

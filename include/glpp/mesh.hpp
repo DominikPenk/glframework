@@ -1,10 +1,10 @@
 #pragma once
 #include <glad/glad.h>
 
-#include "shadermanager.hpp"
-#include "buffers.hpp"
-#include "camera.hpp"
-#include "draw_batch.hpp"
+#include "glpp/shadermanager.hpp"
+#include "glpp/buffers.hpp"
+#include "glpp/camera.hpp"
+#include "glpp/draw_batch.hpp"
 
 #ifdef WITH_OPENMESH
 #include "openmesh_ext.h"

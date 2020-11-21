@@ -4,8 +4,7 @@
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-#include "imgui.h"
-#include "imgui_internal.h"
+#include "glpp/imgui.hpp"
 
 #include "glpp/imgui3d/imgui_3d_geometry.h"
 #include "glpp/imgui3d/imgui_3d_utils.h"

@@ -2,10 +2,10 @@
 #include <memory>
 #include <unordered_map>
 
-#include <imgui.h>
 
 #include <glm/glm.hpp>
 
+#include "glpp/imgui.hpp"
 #include "glpp/buffers.hpp"
 #include "glpp/shadermanager.hpp"
 #include "glpp/texture.hpp"

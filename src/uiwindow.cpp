@@ -1,7 +1,6 @@
 #include "glpp/uiwindow.hpp"
 
-#include <imgui.h>
-#include <imgui_internal.h>
+#include "glpp/imgui.hpp"
 
 #include "glpp/renderer.hpp"
 #include "glpp/IconsFontAwesome5.h"

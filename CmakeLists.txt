@@ -27,6 +27,8 @@ if(${WITH_ASSIMP})
 	endif()
 endif()
 
+set(INCLUDE_DIR include/glpp)
+
 # Gather Imgui
 set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/imgui)
 # Set the imgui sources
@@ -34,13 +36,17 @@ file(GLOB IMGUI_SRC ${IMGUI_DIR}/*.h ${IMGUI_DIR}/*.cpp)
 # Add glfw impl
 set(IMGUI_SRC 
 	${IMGUI_SRC}
+	# Implementation
 	${IMGUI_DIR}/examples/imgui_impl_opengl3.h
 	${IMGUI_DIR}/examples/imgui_impl_opengl3.cpp
 	${IMGUI_DIR}/examples/imgui_impl_glfw.h
-	${IMGUI_DIR}/examples/imgui_impl_glfw.cpp)
+	${IMGUI_DIR}/examples/imgui_impl_glfw.cpp
+	# Custom extensions
+	${INCLUDE_DIR}/imgui.hpp
+	${INCLUDE_DIR}/imgui_ext.hpp
+	src/imgui_ext.cpp)
 source_group("imgui" FILES ${IMGUI_SRC})
 
-set(INCLUDE_DIR include/glpp)
 
 set(MESH_FILES
 	${INCLUDE_DIR}/mesh.hpp
@@ -102,7 +108,6 @@ source_group("Dear Imgui 3D" FILES ${IMGUI_3D_FILES})
 add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${IMGUI_3D_FILES})
 target_link_libraries(glframework PUBLIC ${OPENGL_gl_LIBRARY} glfw glad::glad glm)
 target_compile_definitions(glframework PUBLIC -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
-target_compile_definitions(glframework PUBLIC -DIMGUI_DEFINE_MATH_OPERATORS)
 # if(${WITH_OPENMESH})
 # 	target_link_libraries(glframework PUBLIC OpenMeshCore)
 # 	target_compile_definitions(glframework PUBLIC -D_USE_MATH_DEFINES -DWITH_OPENMESH)

@@ -4,7 +4,7 @@
 
 #include <glm/gtx/matrix_cross_product.hpp>
 
-#include "imgui.h"
+#include "glpp/imgui.hpp"
 
 #include "glpp/camera.hpp"
 

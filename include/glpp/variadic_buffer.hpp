@@ -6,7 +6,7 @@
 
 #include <eigen3/Eigen/Core>
 
-#include "imgui.h"
+#include "glpp/imgui.hpp"
 #include "glpp/gl_internal.hpp"
 
 namespace gl {
