@@ -1,8 +1,8 @@
-#include "pointcloud.hpp"
+#include "glpp/pointcloud.hpp"
+
+#include "glpp/renderer.hpp"
 
 #include <numeric>
-
-#include "renderer.hpp"
 
 gl::PointCloud::PointCloud() :
 	Mesh(),

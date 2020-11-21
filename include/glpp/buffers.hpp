@@ -7,9 +7,8 @@
 
 #include <glm/glm.hpp>
 
-#include "framebuffer.hpp"
-
-#include "gl_internal.hpp"
+#include "glpp/framebuffer.hpp"
+#include "glpp/gl_internal.hpp"
 
 namespace gl {
 

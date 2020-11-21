@@ -1,11 +1,11 @@
 #pragma once
 
 #ifdef __INTELLISENSE__
-#include "draw_batch.hpp"
-#include "buffers.hpp"
+#include "glpp/draw_batch.hpp"
+#include "glpp/buffers.hpp"
 #endif
 
-#include "gl_internal.hpp"
+#include "glpp/gl_internal.hpp"
 
 namespace gl {
 

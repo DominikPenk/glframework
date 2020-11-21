@@ -1,6 +1,6 @@
-#include "imgui_3d_surfaces.h"
+#include "glpp/imgui3d/imgui_3d_surfaces.h"
 
-#include "imgui3d/imgui_3d.h"
+#include "glpp/imgui3d/imgui_3d.h"
 
 void ImGui3D::ParametricSurface(std::function<glm::vec3(float, float)> S, glm::vec4 color, ImVec4 domain, ImVec2 gridSize, unsigned int subdivions)
 {

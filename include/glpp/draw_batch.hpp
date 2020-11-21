@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "buffers.hpp"
-#include "shadermanager.hpp"
+#include "glpp/buffers.hpp"
+#include "glpp/shadermanager.hpp"
 
 namespace gl {
 
@@ -47,4 +47,4 @@ namespace gl {
 	};
 }
 
-#include "draw_batch.inl.hpp"
+#include "glpp/draw_batch.inl.hpp"

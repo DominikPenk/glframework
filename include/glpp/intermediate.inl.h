@@ -1,9 +1,8 @@
 #pragma once
 
-#include "gl_internal.hpp"
-
-#include "buffers.hpp"
-#include "intermediate.h"
+#include "glpp/gl_internal.hpp"
+#include "glpp/buffers.hpp"
+#include "glpp/intermediate.h"
 
 template<typename ...Uniforms>
 void gl::fullscreenTriangle(int x, int y, int width, int height, gl::Shader& shader, Uniforms... uniforms)

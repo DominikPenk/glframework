@@ -1,6 +1,6 @@
 #pragma once
 
-#include <shadermanager.hpp>
+#include "glpp/shadermanager.hpp"
 
 namespace gl {
 
@@ -22,4 +22,4 @@ namespace gl {
 
 }
 
-#include "intermediate.inl.h"
+#include "glpp/intermediate.inl.h"

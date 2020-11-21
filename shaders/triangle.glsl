@@ -25,8 +25,19 @@ out vec4 FragColor;
 
 
 void main() {
-	vec3 L = normalize(vec3(0, 0, 5) - pos);
+	float k_ambi = 0.25f;
+	float k_diff = 0.75f;
+	float k_spec = 0.20f;
+	float n = 30.0f;
+	vec3 lightpos = vec3(0, 0, 5);
+
+	vec3 L = normalize(lightpos - pos);
+	vec3 E = normalize(-pos);
+	vec3 R = normalize(-reflect(L, N)); 
+	
+	vec4 Iambi = color;
 	vec4 Idiff = color * max(dot(N, L), 0.0);
-	Idiff = clamp(Idiff, 0.0, 1.0);
-	FragColor = Idiff;
+	vec4 Ispec = vec4(1, 1, 1, 1) * pow(max(dot(R, E), 0.0), 0.3*n);
+
+	FragColor = k_ambi * Iambi + k_diff * Idiff + k_spec * Ispec;
 }

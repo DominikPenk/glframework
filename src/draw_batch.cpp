@@ -1,4 +1,4 @@
-#include "draw_batch.hpp"
+#include "glpp/draw_batch.hpp"
 
 gl::DrawBatch::DrawBatch() :
 	mVertexAttributes(),

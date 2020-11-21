@@ -1,10 +1,10 @@
-#include "imgui_3d_editor_widgets.h"
+#include "glpp/imgui3d/imgui_3d_editor_widgets.h"
 
 #include "imgui.h"
 #include "imgui_internal.h"
 
-#include "imgui3d/imgui_3d_geometry.h"
-#include "imgui3d/imgui_3d_utils.h"
+#include "glpp/imgui3d/imgui_3d_geometry.h"
+#include "glpp/imgui3d/imgui_3d_utils.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>

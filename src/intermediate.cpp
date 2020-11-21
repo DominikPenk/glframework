@@ -1,4 +1,4 @@
-#include "intermediate.h"
+#include "glpp/intermediate.h"
 
 const std::string vertex_display_shader = R"(
 #version 430

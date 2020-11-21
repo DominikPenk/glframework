@@ -93,6 +93,8 @@ namespace gl {
 
 		virtual bool handleIO(const Renderer* env, ImGuiIO& io) override;
 
+		void computeNormals();
+
 		bool visualizeNormals;
 	protected:
 		std::shared_ptr<gl::PositionUVNormalBuffer3f> mVertexData;

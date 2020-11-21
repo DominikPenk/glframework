@@ -1,13 +1,13 @@
 #pragma once
 
-#include "camera.hpp"
-#include "mesh.hpp"
+#include "glpp/camera.hpp"
+#include "glpp/mesh.hpp"
+#include "glpp/framebuffer.hpp"
 
 #include <functional>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "framebuffer.hpp"
 
 
 namespace ImGui3D {

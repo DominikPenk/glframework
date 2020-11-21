@@ -6,10 +6,10 @@
 
 #include <glm/glm.hpp>
 
-#include "buffers.hpp"
-#include "shadermanager.hpp"
-#include "texture.hpp"
-#include "draw_batch.hpp"
+#include "glpp/buffers.hpp"
+#include "glpp/shadermanager.hpp"
+#include "glpp/texture.hpp"
+#include "glpp/draw_batch.hpp"
 
 namespace gl {
 	class Renderer;

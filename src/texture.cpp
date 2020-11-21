@@ -1,4 +1,4 @@
-#include "texture.hpp"
+#include "glpp/texture.hpp"
 
 #include <stdexcept>
 #include <string>

@@ -1,12 +1,12 @@
-#include "mesh.hpp"
-#include "renderer.hpp"
+#include "glpp/mesh.hpp"
+#include "glpp/renderer.hpp"
 
 #include <numeric>
 #include <eigen3/Eigen/Geometry>
 
 #include <glm/gtx/matrix_cross_product.hpp>
 
-#include "imgui3d/imgui_3d.h"
+#include "glpp/imgui3d/imgui_3d.h"
 
 #ifdef WITH_ASSIMP
 #include <assimp/Importer.hpp>
@@ -34,7 +34,7 @@ gl::TriangleMesh::TriangleMesh(const std::vector<Eigen::Vector3f>& vertices, std
 {
 	for (const Eigen::Vector3f& p : vertices) {
 		glm::vec3 _p(p.x(), p.y(), p.z());
-		mVertexData->push_back(_p, glm::vec2(0), glm::vec3(0));
+		mVertexData->push_back(_p, glm::vec2(0), glm::vec3(1, 0, 0));
 	}
 	gl::IndexBuffer& indexBuffer = getIndexBuffer();
 	indexBuffer.resize(indices.size() * 3);
@@ -43,6 +43,7 @@ gl::TriangleMesh::TriangleMesh(const std::vector<Eigen::Vector3f>& vertices, std
 		indexBuffer(3 * i + 1) = indices[i].y();
 		indexBuffer(3 * i + 2) = indices[i].z();
 	}
+	computeNormals();
 }
 
 #ifdef WITH_OPENMESH
@@ -149,6 +150,28 @@ bool gl::TriangleMesh::handleIO(const Renderer* env, ImGuiIO& io)
 	//}
 	//mVertices->setDirty(updated);
 	return updated;
+}
+
+void gl::TriangleMesh::computeNormals()
+{
+	std::vector<glm::vec3> vertexNormals(mVertexData->size(), glm::vec3(0));
+	gl::IndexBuffer& indexBuffer = getIndexBuffer();
+	for (int i = 0; i < indexBuffer.size(); i += 3) {
+		const int i0 = indexBuffer[i];
+		const int i1 = indexBuffer[i + 1];
+		const int i2 = indexBuffer[i + 2];
+		const glm::vec3 p0 = mVertexData->at<0>(i0);
+		const glm::vec3 p1 = mVertexData->at<0>(i1);
+		const glm::vec3 p2 = mVertexData->at<0>(i2);
+		const glm::vec3 n = glm::cross(p1 - p0, p2 - p0);
+		vertexNormals[i0] += n;
+		vertexNormals[i1] += n;
+		vertexNormals[i2] += n;
+	}
+
+	for (int i = 0; i < (int)vertexNormals.size(); ++i) {
+		mVertexData->get<2>(i) = glm::normalize(vertexNormals[i]);
+	}
 }
 
 gl::Mesh::Mesh() :

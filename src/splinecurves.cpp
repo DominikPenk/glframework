@@ -1,12 +1,12 @@
-#include "splinecurves.hpp"
+#include "glpp/splinecurves.hpp"
 
 #include <glm/gtx/intersect.hpp>
 
 #include "imgui.h"
 
-#include "renderer.hpp"
+#include "glpp/renderer.hpp"
 
-#include "imgui3d/imgui_3d.h"
+#include "glpp/imgui3d/imgui_3d.h"
 
 void computeCatmulRomData(
 	const std::vector<glm::vec3>& points,

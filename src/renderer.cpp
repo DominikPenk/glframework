@@ -1,14 +1,14 @@
-#include "renderer.hpp"
+#include "glpp/renderer.hpp"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "imgui3d/imgui_3d.h"
+#include "glpp/imgui3d/imgui_3d.h"
 
-#include "IconsFontAwesome5.h"
-#include "uiwindow.hpp"
-#include "gl_internal.hpp"
+#include "glpp/IconsFontAwesome5.h"
+#include "glpp/uiwindow.hpp"
+#include "glpp/gl_internal.hpp"
 
 #ifdef WITH_OPENMESH
 #include "OpenMeshExtension/MeshDebugWindow.h"

@@ -1,55 +1,38 @@
-#include "renderer.hpp"
-#include "camera.hpp"
-#include "controls.hpp"
-#include "splinecurves.hpp"
-#include "openmesh_mesh.h"
-#include "texture.hpp"
+#include <glpp/renderer.hpp>
+#include <glpp/camera.hpp>
+#include <glpp/controls.hpp>
+#include <glpp/splinecurves.hpp>
+#include <glpp/texture.hpp>
+#include <glpp/framebuffer.hpp>
+#include <glpp/intermediate.h>
 
-#include "framebuffer.hpp"
 
 #include <iostream>
-
-#include <OpenMesh/Core/IO/MeshIO.hh>
 
 
 int main(int argc, const char* argv[]) {
 	auto cam = std::make_shared<gl::Camera>(
-		glm::vec3(3.0f, .0f, -2.0f),
+		glm::vec3(0.0f, 5.0f, 6.0f),
 		glm::vec3(0, 0, 0));
-	cam->Far = 200;
-	gl::OrbitControl control(cam);
+	cam->Far = -1.f;
+	cam->Near = 0.01f;
+	gl::FlyingControl control(cam);
 
 	gl::Renderer renderer(1024, 720, cam, "Test Window", false);
 	renderer.showOutliner = false;
 
-	// Create a triangle
-	OpenMesh::TriangleMesh3f teapot;
-	if (!OpenMesh::IO::read_mesh(teapot, std::string(TEST_DIR) + "teapot.obj")) {
-		std::cout << "Could not load teapot!\n";
-		return EXIT_FAILURE;
-	}
-	gl::OpenMeshMesh mesh(teapot);
-	mesh.getShader() = gl::Shader(std::string(TEST_DIR) + "test-shader.glsl");
+	//gl::TriangleMesh mesh(std::string(TEST_DIR) + "teapot.obj");
+	auto mesh = renderer.addMesh<gl::TriangleMesh>("Teapot", std::string(TEST_DIR) + "teapot.obj");
 	auto coo = renderer.addMesh<gl::CoordinateFrame>("Frame");
 
 	// Create a frame buffer to draw to
 	gl::Framebuffer buffer(cam->ScreenWidth, cam->ScreenHeight);
 	buffer.setRenderTexture(0, nullptr);
 
-	// Generate an index texture
-	std::shared_ptr<gl::Texture> index_texture = std::make_shared<gl::Texture>(
-		cam->ScreenWidth, cam->ScreenHeight,
-		GL_RED_INTEGER, GL_R32UI, GL_UNSIGNED_INT);
-	index_texture->magFilterType = GL_NEAREST;
-	index_texture->minFilterType = GL_NEAREST;
-	index_texture->generateMipMap = false;
-	buffer.appendRenderTexture(index_texture);
-
-	// Window that will display the offscreen result
-	renderer.addUIWindow("Offscreen Result", [&](gl::Renderer* env) {
-		GLuint tid = buffer.getRenderTexture(0)->id;
-		ImGui::Image((GLvoid*)tid, ImVec2(cam->ScreenWidth, cam->ScreenHeight));
-		});
+	// Show offscreen rendering result using intermediate rendering
+	renderer.addRenderHook(gl::Renderer::RenderHook::Pre2DGui, [&](gl::Renderer* env) {
+		gl::displayTexture(0, 0, cam->ScreenWidth * 0.25, cam->ScreenHeight * 0.25, buffer.getRenderTexture(0));
+	});
 
 	renderer.pushResizeCallback([&](gl::Renderer* env) {
 		buffer.resize(cam->ScreenWidth, cam->ScreenHeight);
@@ -63,7 +46,7 @@ int main(int argc, const char* argv[]) {
 		// Render teapot offscreen
 		buffer.bind();
 		buffer.clear({ glm::vec4(0, 0, 0, 1) });
-		mesh.render(&renderer);
+		mesh->render(&renderer);
 		buffer.unbind();
 
 		renderer.endFrame();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "imgui3d/imgui_3d.h"
+#include "glpp/imgui3d/imgui_3d.h"
 
 namespace ImGui3D {
 

@@ -1,4 +1,4 @@
-#include "imgui_3d_utils.h"
+#include "glpp/imgui3d/imgui_3d_utils.h"
 
 std::pair<glm::vec4, glm::vec4> ImGui3D::worldCameraRay(ImVec2 mouse)
 {

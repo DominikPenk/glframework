@@ -1,4 +1,4 @@
-#include "offscreen_renderer.hpp"
+#include "glpp/offscreen_renderer.hpp"
 
 gl::OffscreenRenderer::OffscreenRenderer(std::shared_ptr<Camera> cam) :
 	gl::RendererBase(cam)

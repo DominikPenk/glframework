@@ -31,8 +31,8 @@ namespace gl {
 			float fov = 50.0f) :
 			
 			fov(fov),
-			Near(-1.f),
-			Far(100.0f),
+			Near(0.01f),
+			Far(-5.0f),
 			ScreenWidth(1),
 			ScreenHeight(1)
 		{

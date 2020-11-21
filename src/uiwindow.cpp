@@ -1,12 +1,12 @@
-#include "uiwindow.hpp"
+#include "glpp/uiwindow.hpp"
 
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include "renderer.hpp"
-#include "IconsFontAwesome5.h"
-#include "texture.hpp"
-#include "imgui3d/imgui_3d.h"
+#include "glpp/renderer.hpp"
+#include "glpp/IconsFontAwesome5.h"
+#include "glpp/texture.hpp"
+#include "glpp/imgui3d/imgui_3d.h"
 
 
 namespace gl {

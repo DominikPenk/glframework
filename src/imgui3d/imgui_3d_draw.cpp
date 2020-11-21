@@ -1,7 +1,7 @@
-#include "imgui3d/imgui_3d.h"
+#include "glpp/imgui3d/imgui_3d.h"
 
-#include "imgui3d/imgui_3d_geometry.h"
-#include "imgui3d/imgui_3d_utils.h"
+#include "glpp/imgui3d/imgui_3d_geometry.h"
+#include "glpp/imgui3d/imgui_3d_utils.h"
 
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/transform.hpp>

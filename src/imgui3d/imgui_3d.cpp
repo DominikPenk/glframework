@@ -1,4 +1,4 @@
-#include "imgui3d/imgui_3d.h"
+#include "glpp/imgui3d/imgui_3d.h"
 
 #include <GLFW/glfw3.h>
 

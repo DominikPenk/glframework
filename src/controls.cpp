@@ -1,4 +1,4 @@
-#include "controls.hpp"
+#include "glpp/controls.hpp"
 
 #include <algorithm>
 
@@ -6,7 +6,7 @@
 
 #include "imgui.h"
 
-#include "camera.hpp"
+#include "glpp/camera.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

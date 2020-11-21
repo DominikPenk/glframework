@@ -1,9 +1,9 @@
-#include "framebuffer.hpp"
+#include "glpp/framebuffer.hpp"
 
 #include <iostream>
 #include <stdexcept>
 
-#include "texture.hpp"
+#include "glpp/texture.hpp"
 
 
 namespace internal {

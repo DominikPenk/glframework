@@ -1,4 +1,4 @@
-#include "imgui3d/imgui_3d.h"
+#include "glpp/imgui3d/imgui_3d.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/vector_angle.hpp>
@@ -7,8 +7,8 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
-#include "imgui3d/imgui_3d_geometry.h"
-#include "imgui3d/imgui_3d_utils.h"
+#include "glpp/imgui3d/imgui_3d_geometry.h"
+#include "glpp/imgui3d/imgui_3d_utils.h"
 
 namespace ImGui3D {
 

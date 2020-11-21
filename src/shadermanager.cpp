@@ -1,4 +1,5 @@
-#include "shadermanager.hpp"
+#include "glpp/shadermanager.hpp"
+
 #include <fstream>
 #include <string>
 #include <iostream>

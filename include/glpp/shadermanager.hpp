@@ -10,8 +10,8 @@
 #include <string>
 #include <filesystem>
 
-#include "buffers.hpp"
-#include "texture.hpp"
+#include "glpp/buffers.hpp"
+#include "glpp/texture.hpp"
 
 namespace gl {
 	struct Layout {
