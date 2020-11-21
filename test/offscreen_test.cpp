@@ -1,10 +1,10 @@
 #include "CImg.h"
 
-#include "glpp/offscreen_renderer.hpp"
-#include "glpp/camera.hpp"
-#include "glpp/controls.hpp"
-#include "glpp/splinecurves.hpp"
-#include "glpp/texture.hpp"
+#include <glpp/offscreen_renderer.hpp>
+#include <glpp/camera.hpp>
+#include <glpp/controls.hpp>
+#include <glpp/meshes.hpp>
+#include <glpp/texture.hpp>
 
 #include <iostream>
 

@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "glpp/mesh.hpp"
+#include "glpp/meshes/mesh.hpp"
 #include "glpp/openmesh_ext.hpp"
 
 namespace gl {

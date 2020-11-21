@@ -1,4 +1,4 @@
-#include "glpp/openmesh_mesh.hpp"
+#include "glpp/meshes/openmesh_mesh.hpp"
 #include <OpenMesh/Core/IO/MeshIO.hh>
 
 #include "glpp/renderer.hpp"

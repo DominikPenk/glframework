@@ -50,12 +50,17 @@ source_group("imgui" FILES ${IMGUI_SRC})
 
 
 set(MESH_FILES
-	${INCLUDE_DIR}/mesh.hpp
-	src/mesh.cpp
-	${INCLUDE_DIR}/splinecurves.hpp
-	src/splinecurves.cpp
-	${INCLUDE_DIR}/pointcloud.hpp
-	src/pointcloud.cpp)
+	${INCLUDE_DIR}/meshes.hpp
+	${INCLUDE_DIR}/meshes/mesh.hpp
+	src/meshes/mesh.cpp
+	${INCLUDE_DIR}/meshes/triangle_mesh.hpp
+	src/meshes/triangle_mesh.cpp
+	${INCLUDE_DIR}/meshes/coordinate_frame.hpp
+	src/meshes/coordinate_frame.cpp
+	${INCLUDE_DIR}/meshes/splinecurves.hpp
+	src/meshes/splinecurves.cpp
+	${INCLUDE_DIR}/meshes/pointcloud.hpp
+	src/meshes/pointcloud.cpp)
 
 set(IMGUI_3D_FILES
 	${INCLUDE_DIR}/imgui3d/imgui_3d.h
@@ -114,9 +119,9 @@ if(${WITH_OPENMESH})
 	target_compile_definitions(glframework PUBLIC -D_USE_MATH_DEFINES -DWITH_OPENMESH)
 #	target_sources(glframework PRIVATE src/openmesh_ext.h ${OPENMESH_EXT)
 	target_sources(glframework PRIVATE
-		${INCLUDE_DIR}/openmesh_mesh.hpp
+		${INCLUDE_DIR}/meshes/openmesh_mesh.hpp
 		${INCLUDE_DIR}/openmesh_ext.hpp
-		src/openmesh_mesh.cpp)
+		src/meshes/openmesh_mesh.cpp)
 endif()
 if(${WITH_ASSIMP})
 	target_link_libraries(glframework PUBLIC ${ASSIMP_LIBRARIES})

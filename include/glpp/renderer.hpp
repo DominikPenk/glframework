@@ -1,14 +1,14 @@
 #pragma once
 
 #include "glpp/camera.hpp"
-#include "glpp/mesh.hpp"
+#include "glpp/meshes/mesh.hpp"
 #include "glpp/framebuffer.hpp"
 
 #include <functional>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-
+#include <mutex>
 
 namespace ImGui3D {
 	struct ImGui3DContext;

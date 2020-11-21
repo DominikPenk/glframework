@@ -1,4 +1,4 @@
-#include "glpp/splinecurves.hpp"
+#include "glpp/meshes/splinecurves.hpp"
 
 #include <glm/gtx/intersect.hpp>
 
@@ -16,10 +16,10 @@ void computeCatmulRomData(
 	for (int i = 0; i < (int)points.size(); ++i) {
 		const glm::vec3 point = points[i];
 		indices.insert(indices.end(), {
-			(uint)(i == 0 ? points.size() - 1 : i - 1),
-			(uint)(i),
-			(uint)((i + 1) % points.size()),
-			(uint)((i + 2) % points.size())
+			(unsigned int)(i == 0 ? points.size() - 1 : i - 1),
+			(unsigned int)(i),
+			(unsigned int)((i + 1) % points.size()),
+			(unsigned int)((i + 2) % points.size())
  		});
 		p->push_back(point);
 	}

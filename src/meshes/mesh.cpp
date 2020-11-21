@@ -1,4 +1,4 @@
-#include "glpp/mesh.hpp"
+#include "glpp/meshes/mesh.hpp"
 #include "glpp/renderer.hpp"
 
 gl::Mesh::Mesh() :

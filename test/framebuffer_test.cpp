@@ -1,7 +1,7 @@
 #include <glpp/renderer.hpp>
 #include <glpp/camera.hpp>
 #include <glpp/controls.hpp>
-#include <glpp/splinecurves.hpp>
+#include <glpp/meshes.hpp>
 #include <glpp/texture.hpp>
 #include <glpp/framebuffer.hpp>
 #include <glpp/intermediate.h>

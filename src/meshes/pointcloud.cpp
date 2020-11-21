@@ -1,4 +1,4 @@
-#include "glpp/pointcloud.hpp"
+#include "glpp/meshes/pointcloud.hpp"
 
 #include "glpp/renderer.hpp"
 

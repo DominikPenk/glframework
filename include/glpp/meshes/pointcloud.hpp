@@ -1,7 +1,7 @@
 #pragma once
 
-#include "buffers.hpp"
-#include "mesh.hpp"
+#include "glpp/buffers.hpp"
+#include "glpp/meshes/mesh.hpp"
 
 
 namespace gl {

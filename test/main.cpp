@@ -3,7 +3,7 @@
 #include <glpp/renderer.hpp>
 #include <glpp/camera.hpp>
 #include <glpp/controls.hpp>
-#include <glpp/splinecurves.hpp>
+#include <glpp/meshes.hpp>
 #include <glpp/imgui.hpp>
 
 #include <glpp/imgui3d/imgui_3d.h>

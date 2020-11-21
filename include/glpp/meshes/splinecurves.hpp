@@ -1,5 +1,5 @@
 #pragma once
-#include "mesh.hpp"
+#include "glpp/meshes/mesh.hpp"
 
 #include <glm/glm.hpp>
 
