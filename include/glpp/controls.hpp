@@ -11,8 +11,11 @@ namespace gl {
 
 	class Control {
 	public:
-		virtual void update(std::shared_ptr<Camera> camera) = 0;
+		Control();
+		virtual void update(std::shared_ptr<Camera> camera);
 		virtual void reset(std::shared_ptr<Camera> camera) = 0;
+
+		int keyFrontalView, keyTopView, keyRightView;
 	};
 
 	class OrbitControl : public Control {

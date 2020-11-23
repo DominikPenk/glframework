@@ -101,6 +101,8 @@ gl::OrbitControl::OrbitControl(std::shared_ptr<gl::Camera> cam)
 
 void gl::OrbitControl::update(std::shared_ptr<Camera> camera)
 {
+	gl::Control::update(camera);
+
 	ImGuiIO io = ImGui::GetIO();
 
 	if (!io.WantCaptureKeyboard && !io.WantCaptureMouse) {
@@ -236,6 +238,8 @@ gl::FlyingControl::FlyingControl(std::shared_ptr<Camera> cam) :
 
 void gl::FlyingControl::update(std::shared_ptr<Camera> camera)
 {
+	gl::Control::update(camera);
+
 	const glm::vec3 Front = camera->forward();
 	const glm::vec3 Right = glm::normalize(glm::cross(Front, camera->up()));
 	const glm::vec3 Up = camera->up();
@@ -297,8 +301,40 @@ void gl::FlyingControl::update(std::shared_ptr<Camera> camera)
 			hadUserInteraction = true;
 		}
 	}
+	io.WantCaptureKeyboard = true;
+	io.WantCaptureMouse = true;
 }
 
 void gl::FlyingControl::reset(std::shared_ptr<Camera> camera)
 {
+}
+
+gl::Control::Control() :
+	keyFrontalView(GLFW_KEY_KP_1),
+	keyTopView(GLFW_KEY_KP_7),
+	keyRightView(GLFW_KEY_KP_3)
+{
+}
+
+void gl::Control::update(std::shared_ptr<Camera> camera)
+{
+
+	ImGuiIO io = ImGui::GetIO();
+	if (!io.WantCaptureKeyboard && !io.WantCaptureMouse) {
+		float forward = ImGui::IsKeyDown(GLFW_KEY_LEFT_CONTROL) ? -1.0f : 1.0f;
+		float radius = glm::length(camera->position());
+		if (ImGui::IsKeyPressed(keyFrontalView, false)) {
+			camera->lookAt(glm::vec3(0), glm::vec3(0, 0, forward * radius));
+			io.WantCaptureKeyboard = true;
+		} 
+		else if (ImGui::IsKeyPressed(keyTopView, false)) {
+			camera->lookAt(glm::vec3(1e-3f, 0, 0), glm::vec3(0, forward * radius, 0));
+			io.WantCaptureKeyboard = true;
+		}
+		else if (ImGui::IsKeyPressed(keyRightView, false))
+		{
+			camera->lookAt(glm::vec3(0), glm::vec3(forward * radius, 0, 0));
+			io.WantCaptureKeyboard = true;
+		}
+	}
 }
