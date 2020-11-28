@@ -46,8 +46,6 @@ set(IMGUI_SRC
 	${INCLUDE_DIR}/imgui.hpp
 	${INCLUDE_DIR}/imgui_ext.hpp
 	src/imgui_ext.cpp)
-source_group("imgui" FILES ${IMGUI_SRC})
-
 
 set(MESH_FILES
 	${INCLUDE_DIR}/meshes.hpp
@@ -77,6 +75,12 @@ set(IMGUI_3D_FILES
 
 set(IMGUI_FILES ${IMGUI_SRC})
 
+SET(RENDER_2D_FILES
+	${INCLUDE_DIR}/2d/canvas.hpp
+	src/2d/canvas.cpp
+	${INCLUDE_DIR}/2d/sprite.hpp
+	src/2d/sprite.cpp)
+
 set(GL_FILES
 	${MESH_FILES}
 	${INCLUDE_DIR}/texture.hpp
@@ -91,6 +95,7 @@ set(GL_FILES
 	src/intermediate.cpp
 	${INCLUDE_DIR}/variadic_buffer.hpp
 	${INCLUDE_DIR}/shadermanager.hpp
+	${INCLUDE_DIR}/shadermanager.inl.hpp
 	src/shadermanager.cpp
 	${INCLUDE_DIR}/controls.hpp
 	src/controls.cpp
@@ -110,8 +115,9 @@ set(GL_FILES
 source_group("Meshes" FILES ${MESH_FILES})
 source_group("Dear Imgui" FILES ${IMGUI_FILES})
 source_group("Dear Imgui 3D" FILES ${IMGUI_3D_FILES})
+source_group("2D rendering" FILES ${RENDER_2D_FILES})
 
-add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${IMGUI_3D_FILES})
+add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${IMGUI_3D_FILES} ${RENDER_2D_FILES})
 target_link_libraries(glframework PUBLIC ${OPENGL_gl_LIBRARY} glfw glad::glad glm)
 target_compile_definitions(glframework PUBLIC -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 if(${WITH_OPENMESH})

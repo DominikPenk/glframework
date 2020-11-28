@@ -13,6 +13,10 @@
 #include "glpp/buffers.hpp"
 #include "glpp/texture.hpp"
 
+#ifdef INTELLISENSE
+#include "glpp/shadermanager.inl.hpp"
+#endif
+
 namespace gl {
 	struct Layout {
 		GLint index;
@@ -124,6 +128,9 @@ namespace gl {
 			glUniform1i(glGetUniformLocation(mProgram, name.c_str()), value);
 		}
 
+		template<typename ...Uniforms>
+		void setUniforms(Uniforms... uniforms);
+
 		template<typename T, int n>
 		inline void setShaderStorageBuffer(VertexBufferObject<T, n>& buffer, GLuint index) const {
 			buffer.bind(GL_SHADER_STORAGE_BUFFER);
@@ -179,3 +186,5 @@ namespace gl {
 		long long mLastUpdated;
 	};
 }
+
+#include "glpp/shadermanager.inl.hpp"

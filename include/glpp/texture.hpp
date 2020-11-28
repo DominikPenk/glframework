@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include "glpp/imgui.hpp"
 
+#include <string>
+
 namespace gl {
 	class Texture {
 	public:
@@ -12,6 +14,7 @@ namespace gl {
 			GLenum internalFormat = GL_RGBA,
 			GLenum dataType = GL_UNSIGNED_BYTE,
 			unsigned char* data = nullptr);
+		Texture(std::string path, bool flipY = true);
 		~Texture();
 
 		inline operator GLuint() const { return id; }

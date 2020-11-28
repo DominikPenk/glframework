@@ -4,6 +4,9 @@
 #include <string>
 #include <cassert>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "3rdparty/stb_image.h"
+
 namespace impl {
 	GLenum textureType(int dimensions) {
 		switch (dimensions) {
@@ -18,6 +21,32 @@ namespace impl {
 				"Invalid number of texture dimensions was " 
 				+ std::to_string(dimensions) 
 				+ " but should be in range [1, 3]");
+		}
+	}
+
+	GLenum getInternalByteFormat(int channels) {
+		switch (channels) {
+		case 1:
+			return GL_R8;
+		case 2:
+			return GL_RG8;
+		case 3:
+			return GL_RGB8;
+		case 4:
+			return GL_RGBA8;
+		}
+	}
+
+	GLenum getFormat(int channels) {
+		switch (channels) {
+		case 1:
+			return GL_LUMINANCE;
+		case 2:
+			return GL_RG;
+		case 3:
+			return GL_RGB;
+		case 4:
+			return GL_RGBA;
 		}
 	}
 }
@@ -38,7 +67,7 @@ gl::Texture::Texture() :
 	mDimensions(2),
 	mExternalFormat(GL_RGBA),
 	mId(0),
-	mUpdated(false),
+	mUpdated(true),
 	mResized(false),
 	mDataPtr(nullptr),
 	mTextureType(impl::textureType(dimensions)),
@@ -70,6 +99,29 @@ gl::Texture::Texture(int cols, int rows,
 	}
 }
 
+gl::Texture::Texture(std::string path, bool flipY) :
+	Texture()
+{
+	int channels;
+	mDataPtr = stbi_load(path.c_str(), &mCols, &mRows, &channels, 0);
+	if(mDataPtr == NULL) {
+		throw std::runtime_error("Could not load texture from \"" + path + "\"");
+	}
+	if (flipY) {
+		for (int j = 0; j < mRows / 2; ++j) {
+			for (int i = 0; i < mCols; ++i) {
+				for (int c = 0; c < channels; ++c) {
+					std::swap(mDataPtr[channels * (j * mCols + i) + c], mDataPtr[channels * ((mRows - 1 - j) * mCols + i) + c]);
+				}
+			}
+		}
+	}
+	mInternalFormat = impl::getInternalByteFormat(channels);
+	mExternalFormat = impl::getFormat(channels);
+	setData(mDataPtr, mExternalFormat);
+	stbi_image_free(mDataPtr);
+}
+
 gl::Texture::~Texture()
 {
 	if (mId != 0) {
@@ -80,9 +132,8 @@ gl::Texture::~Texture()
 
 void gl::Texture::setData(unsigned char* data, GLenum dataFormat)
 {
-	if (mId == 0) {
-		init();
-	}
+	mUpdated = true;
+	update();
 	glBindTexture(mTextureType, mId);
 	switch (mDimensions) {
 	case 1:
