@@ -3,6 +3,7 @@
 
 
 #include <glpp/renderer.hpp>
+#include <glpp/imgui.hpp>
 
 int main() {
 	auto cam = std::make_shared<gl::Camera>(
@@ -26,10 +27,24 @@ int main() {
 
 	auto sprite2 = canvas.addSprite<gl::Sprite>("Image", std::string(TEST_DIR) + "lena.jpg");
 	sprite2->position = glm::vec2(100, 0);
+	sprite2->layer = 200;
 
 
 	renderer.addRenderHook(gl::Renderer::RenderHook::Pre2DGui, [&](gl::Renderer* env) {
 		canvas.draw();
+	});
+
+	renderer.addUIWindow("Canvas", [&](gl::Renderer* env) {
+		ImGuiIO io =ImGui::GetIO();
+		int x = io.MousePos.x;
+		int y = cam->ScreenHeight - io.MousePos.y - 1;
+		auto spritesUnderCursor = canvas.getIntersectingSprites(x, y);
+		ImGui::ColorEdit3("Lena color", &sprite2->color.x);
+		ImGui::Text("Mouse Position %d %d", x, y);
+		ImGui::Text("Sprites under the cursor:");
+		for (auto sprite : spritesUnderCursor) {
+			ImGui::Text("%s (Layer: %d)", sprite->name.c_str(), sprite->layer);
+		}
 	});
 
 	while (!renderer.shouldClose()) {

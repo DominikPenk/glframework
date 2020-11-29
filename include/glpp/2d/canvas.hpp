@@ -26,6 +26,8 @@ namespace gl {
 			return sprite;
 		}
 
+		std::vector<std::shared_ptr<gl::Sprite>> getIntersectingSprites(int global_x, int global_y);
+
 		glm::ivec2 position;
 		glm::ivec2 size;
 		int maxLayers;

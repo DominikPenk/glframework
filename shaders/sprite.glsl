@@ -3,7 +3,7 @@
 // --vertex
 out vec2 texCoord;
 
-uniform vec4 tl;
+uniform vec4 bl;
 uniform vec2 size;
 uniform vec2 uvmin;
 uniform vec2 uvmax;
@@ -14,7 +14,7 @@ void main()
 			float(((uint(gl_VertexID) + 2u) / 3u)%2u),
 			float(((uint(gl_VertexID) + 1u) / 3u)%2u));
     texCoord = mix(uvmin, uvmax, uv);
-	gl_Position = vec4(tl.xy + uv * size, tl.z, 1);
+	gl_Position = vec4(bl.xy + uv * size, bl.z, 1);
 }
 
 

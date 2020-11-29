@@ -20,7 +20,7 @@ void main()
 			float(((uint(gl_VertexID) + 2u) / 3u)%2u),
 			float(((uint(gl_VertexID) + 1u) / 3u)%2u));
     texCoord = mix(uvmin, uvmax, uv);
-	gl_Position = vec4(tl.xy + uv * size, 0, 1);
+	gl_Position = vec4(tl.xy + uv * size, tl.z, 1);
 }
 )";
 
@@ -63,17 +63,17 @@ void gl::Sprite::render(int width, int height, int layers)
 {
 	// Compute position
 	const glm::vec2 canvasSize(width, height);
-	const glm::vec3 tl(
+	const glm::vec3 bl(
 		-1.0f + 2.0f * position / canvasSize,
 		 1.0f - 2.0f * std::clamp(layer, 1, layers - 1) / layers);
-	const glm::vec2 relSize = size / canvasSize;
+	const glm::vec2 relSize = 2.0f * size / canvasSize;
 	
 	// Enable depth test
 	GLboolean depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
 
 	auto _ = shader->use();
 	shader->setUniforms(
-		"tl", glm::vec4(tl, 1.0f),
+		"bl", glm::vec4(bl, 1.0f),
 		"uvmin", minUV,
 		"uvmax", maxUV,
 		"size", relSize,
@@ -105,6 +105,11 @@ std::shared_ptr<gl::Texture> gl::Sprite::setTexture(std::string path, bool flipY
 		maxUV = glm::vec2(1, 0);
 	}
 	return texture;
+}
+
+bool gl::Sprite::overlaps(int x, int y) const
+{
+	return (x >= position.x && x < position.x + size.x) && (y >= position.y && y < position.y + size.y);
 }
 
 std::shared_ptr<gl::Shader> gl::defaultSpriteShader()

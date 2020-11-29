@@ -23,6 +23,8 @@ namespace gl {
 		void setTexture(std::shared_ptr<gl::Texture> texture);
 		std::shared_ptr<gl::Texture> setTexture(std::string path, bool flipY = false);
 
+		virtual bool overlaps(int x, int y) const;
+
 		std::shared_ptr<gl::Texture> texture;
 		glm::vec3 color;
 		glm::vec2 position;
