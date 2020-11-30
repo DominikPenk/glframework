@@ -45,12 +45,10 @@ void gl::Canvas::handleEvents()
 		for (auto element : elements) {
 			int state = element->onMouseDown(lx, ly);
 			if (state == CanvasElement::START_DRAG) {
-				std::printf("Start dragging\n");
 				mDraggedElement = element;
 				break;
 			}
 			else if (state == CanvasElement::STOP) {
-				std::printf("Mouse click stop\n");
 				break;
 			}
 		}
