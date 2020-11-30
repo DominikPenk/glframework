@@ -1,6 +1,6 @@
 #include <glpp/2d/canvas.hpp>
 #include <glpp/2d/sprite.hpp>
-
+#include <glpp/2d/selector.hpp>
 
 #include <glpp/renderer.hpp>
 #include <glpp/imgui.hpp>
@@ -19,32 +19,40 @@ int main() {
 
 	gl::Canvas canvas(0, 0, cam->ScreenWidth, cam->ScreenHeight);
 
-	auto sprite1 = canvas.addSprite<gl::Sprite>("Block");
+	auto sprite1 = canvas.addElement<gl::Sprite>("Block");
 	sprite1->color = glm::vec3(1, 0, 0);
 	sprite1->size = glm::vec2(250, 125);
 	sprite1->position = glm::vec2(100, 500);
 	sprite1->layer = 100;
 
-	auto sprite2 = canvas.addSprite<gl::Sprite>("Image", std::string(TEST_DIR) + "lena.jpg");
+	auto sprite2 = canvas.addElement<gl::Sprite>("Image", std::string(TEST_DIR) + "lena.jpg");
 	sprite2->position = glm::vec2(100, 0);
 	sprite2->layer = 200;
 
 
+	auto selector = canvas.addElement<gl::BoxSelector>("Selector", glm::vec2(cam->ScreenWidth, cam->ScreenHeight) * 0.5f, glm::vec2(100, 300));
+	selector->layer = 1000;
+
 	renderer.addRenderHook(gl::Renderer::RenderHook::Pre2DGui, [&](gl::Renderer* env) {
+		canvas.handleEvents();
 		canvas.draw();
 	});
 
 	renderer.addUIWindow("Canvas", [&](gl::Renderer* env) {
 		ImGuiIO io =ImGui::GetIO();
 		int x = io.MousePos.x;
-		int y = cam->ScreenHeight - io.MousePos.y - 1;
-		auto spritesUnderCursor = canvas.getIntersectingSprites(x, y);
+		int y = io.MousePos.y;
+		auto spritesUnderCursor = canvas.getIntersectingElements(x, y, false, true);
 		ImGui::ColorEdit3("Lena color", &sprite2->color.x);
 		ImGui::Text("Mouse Position %d %d", x, y);
+		ImGui::Text("Selector: [(%.1f %.1f) - (%.1f %.1f)]",
+			selector->position().x, selector->position().y,
+			selector->size().x, selector->size().y);
 		ImGui::Text("Sprites under the cursor:");
 		for (auto sprite : spritesUnderCursor) {
 			ImGui::Text("%s (Layer: %d)", sprite->name.c_str(), sprite->layer);
 		}
+
 	});
 
 	while (!renderer.shouldClose()) {

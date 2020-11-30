@@ -42,15 +42,16 @@ void main()
 #pragma endregion
 
 gl::Sprite::Sprite() :
+	CanvasElement(),
 	texture(defaultSpriteTexture()),
 	shader(defaultSpriteShader()),
 	color(1),
 	position(0, 0),
 	size(-1, -1),
-	layer(0),
 	minUV(0),
 	maxUV(1)
 {
+	hasInteractions = false;
 }
 
 gl::Sprite::Sprite(std::string image, bool flipY) :
@@ -59,7 +60,7 @@ gl::Sprite::Sprite(std::string image, bool flipY) :
 	setTexture(image, flipY);
 }
 
-void gl::Sprite::render(int width, int height, int layers)
+void gl::Sprite::draw(int width, int height, int layers)
 {
 	// Compute position
 	const glm::vec2 canvasSize(width, height);
@@ -68,8 +69,7 @@ void gl::Sprite::render(int width, int height, int layers)
 		 1.0f - 2.0f * std::clamp(layer, 1, layers - 1) / layers);
 	const glm::vec2 relSize = 2.0f * size / canvasSize;
 	
-	// Enable depth test
-	GLboolean depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
+	
 
 	auto _ = shader->use();
 	shader->setUniforms(
@@ -81,13 +81,9 @@ void gl::Sprite::render(int width, int height, int layers)
 		"color", glm::vec4(color, 1.0f)
 	);
 
-	glEnable(GL_DEPTH_TEST);
 	gl::VertexArrayObject::bindDummy();
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	if (depthTestEnabled) {
-		glEnable(GL_DEPTH_TEST);
-	}
 }
 
 void gl::Sprite::setTexture(std::shared_ptr<gl::Texture> texture)

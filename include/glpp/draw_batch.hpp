@@ -33,6 +33,17 @@ namespace gl {
 
 		template<typename ...Args>
 		void addVertexAttributes(GLuint initialIndex, std::shared_ptr<CompactVertexBufferObject<Args...>> buffer);
+		
+		template<typename Buffertype = VertexBufferObjectBase>
+		std::shared_ptr<Buffertype> getAttirbute(int index);
+
+		void clear() {
+			for (auto attribute : mVertexAttributes) {
+				attribute->clear();
+			}
+			indexBuffer->clear();
+		}
+
 
 		std::shared_ptr<IndexBuffer> indexBuffer;
 		GLenum primitiveType;

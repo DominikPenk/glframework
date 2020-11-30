@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "glpp/2d/canvas.hpp"
+
 #include <glm/glm.hpp>
 #include <string>
 
@@ -14,11 +16,11 @@ namespace gl {
 	std::shared_ptr<gl::Shader> defaultSpriteShader();
 	std::shared_ptr<gl::Texture> defaultSpriteTexture();
 
-	class Sprite {
+	class Sprite : public CanvasElement {
 	public:
 		Sprite();
 		Sprite(std::string image, bool flipY = false);
-		virtual void render(int width, int height, int layers);
+		virtual void draw(int width, int height, int layers) override;
 
 		void setTexture(std::shared_ptr<gl::Texture> texture);
 		std::shared_ptr<gl::Texture> setTexture(std::string path, bool flipY = false);
@@ -30,9 +32,8 @@ namespace gl {
 		glm::vec2 position;
 		glm::vec2 size;
 		glm::vec2 minUV, maxUV;
-		int layer;
 		std::shared_ptr<gl::Shader> shader;
-		std::string name;
+
 	};
 
 }

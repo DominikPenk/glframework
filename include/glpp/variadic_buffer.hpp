@@ -89,7 +89,7 @@ namespace gl {
 			return mData[i];
 		}
 	
-		void clear() {
+		void clear() override {
 			mData.clear();
 			mUpdated = true;
 		}

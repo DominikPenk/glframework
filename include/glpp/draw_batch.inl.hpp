@@ -109,6 +109,13 @@ namespace gl {
 		mVertexAttributes.push_back(buffer);
 	}
 
+	template<typename Buffertype>
+	inline std::shared_ptr<Buffertype> DrawBatch::getAttirbute(int index)
+	{
+		assert(index >= 0 && index < mVertexAttributes.size(), "Index out of bounds");
+		return std::dynamic_pointer_cast<Buffertype>(mVertexAttributes[index]);
+	}
+
 	template<typename ...Args>
 	inline void DrawBatch::execute(gl::Shader& shader, const Args& ...uniforms)
 	{
@@ -123,8 +130,9 @@ namespace gl {
 		}
 
 		auto _ = shader.use();
+
 		if constexpr (sizeof...(Args) > 0) {
-			impl::SetUniforms(shader, uniforms...);
+			shader.setUniforms(uniforms...);
 		}
 
 		glBindVertexArray(VAO);

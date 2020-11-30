@@ -54,6 +54,7 @@ namespace gl {
 		inline GLuint id() const { return mId; }
 
 		virtual std::size_t size() const = 0;
+		virtual void clear() = 0;
 
 	protected:
 		virtual const void* dataPtr() const = 0;
@@ -194,7 +195,7 @@ namespace gl {
 		inline void reserve(size_t size) {
 			mData.reserve(size);
 		}
-		inline void clear() {
+		inline void clear() override {
 			mUpdated = true;
 			mData.clear();
 		}
@@ -238,6 +239,10 @@ namespace gl {
 		{
 			return mSize;
 		}
+		virtual void clear() override
+		{
+			throw std::runtime_error("Cannot clear VertexBufferObjectMap");
+		}
 	protected:
 		virtual const void* dataPtr() const override
 		{
@@ -247,6 +252,7 @@ namespace gl {
 	private:
 		const T* mDataPtr;
 		size_t mSize;
+
 	};
 
 #pragma region typedefs
