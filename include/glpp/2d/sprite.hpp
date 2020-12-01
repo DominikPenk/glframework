@@ -20,6 +20,7 @@ namespace gl {
 	public:
 		Sprite();
 		Sprite(std::string image, bool flipY = false);
+		Sprite(std::shared_ptr<gl::Texture> texture);
 		virtual void draw(int width, int height, int layers) override;
 
 		void setTexture(std::shared_ptr<gl::Texture> texture);

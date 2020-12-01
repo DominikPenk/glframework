@@ -60,6 +60,12 @@ gl::Sprite::Sprite(std::string image, bool flipY) :
 	setTexture(image, flipY);
 }
 
+gl::Sprite::Sprite(std::shared_ptr<gl::Texture> texture) :
+	Sprite()
+{
+	setTexture(texture);
+}
+
 void gl::Sprite::draw(int width, int height, int layers)
 {
 	// Compute position

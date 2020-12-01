@@ -4,7 +4,8 @@ gl::BoxSelector::BoxSelector(glm::vec2 position, glm::vec2 size) :
 	CanvasElement(),
 	mHandleSize(10),
 	mDraggedHandle(-1),
-	color(233.f / 255.f, 196.f / 255.f, 106.f / 255.f, 1.f)
+	color(233.f / 255.f, 196.f / 255.f, 106.f / 255.f, 1.f),
+	mUpdated(true)
 {
 	// TODO get the correct shader
 	mShader = std::make_shared<gl::Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "2d_handles.glsl");
@@ -19,18 +20,11 @@ gl::BoxSelector::BoxSelector(glm::vec2 position, glm::vec2 size) :
 	mHandles.push_back(BoxHandle(position, glm::vec2(mHandleSize), glm::vec4(1, 1, 1, 1)));
 	mHandles.push_back(BoxHandle(position, size, glm::vec4(1, 1, 1, 0.25f)));
 	mHandles.back().ignoreInteractions = true;
-
-	for (BoxHandle& handle : mHandles) {
-		handle.createGeometry(mBatch);
-	}
 }
 
 void gl::BoxSelector::draw(int width, int height, int layers)
 {
 	if (mDraggedHandle != -1) {
-		// Clear Buffer
-		mBatch.clear();
-
 		// Update all handles
 		glm::vec2 min, max;
 		switch(mDraggedHandle) {
@@ -62,10 +56,16 @@ void gl::BoxSelector::draw(int width, int height, int layers)
 		mHandles[4].position = 0.5f * (min + max);
 		mHandles[5].position = 0.5f * (min + max);
 		mHandles[5].size = glm::abs(max - min);
+		
+		mUpdated = true;
+	}
 
+	if (mUpdated) {
+		mBatch.clear();
 		for (BoxHandle& handle : mHandles) {
 			handle.createGeometry(mBatch);
 		}
+		mUpdated = false;
 	}
 	
 	float zOrder = 1.0f - 2.0f * std::clamp(layer, 1, layers - 1) / layers;
@@ -110,6 +110,18 @@ int gl::BoxSelector::onMouseUp(int xx, int xy)
 {
 	mDraggedHandle = -1;
 	return CanvasElement::STOP;
+}
+
+void gl::BoxSelector::update(glm::vec2 position, glm::vec2 size)
+{
+	mHandles[4].position = mHandles[5].position = position;
+	mHandles[5].size = size;
+
+	mHandles[0].position = position + glm::vec2(-0.5f, -0.5f) * size;
+	mHandles[1].position = position + glm::vec2( 0.5f, -0.5f) * size;
+	mHandles[2].position = position + glm::vec2( 0.5f,  0.5f) * size;
+	mHandles[3].position = position + glm::vec2(-0.5f,  0.5f) * size;
+	mUpdated = true;
 }
 
 glm::vec2 gl::BoxSelector::position() const

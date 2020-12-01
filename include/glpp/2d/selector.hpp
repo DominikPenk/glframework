@@ -18,11 +18,14 @@ namespace gl {
 		virtual int onMouseDrag(int dx, int dy);
 		virtual int onMouseUp(int xx, int xy);
 
+		void update(glm::vec2 position, glm::vec2 size);
+
 		glm::vec2 position() const;
 		glm::vec2 size() const;
 		glm::vec4 color;
 
 	private:
+		bool mUpdated;
 		int mHandleSize;
 		int mDraggedHandle;
 		gl::DrawBatch mBatch;
