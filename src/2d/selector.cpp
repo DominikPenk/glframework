@@ -13,11 +13,17 @@ gl::BoxSelector::BoxSelector(glm::vec2 position, glm::vec2 size) :
 	mShader = std::make_shared<gl::Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "2d_handles.glsl");
 	mBatch.addVertexAttributes<glm::vec2, glm::vec4>(0);
 
-	// Center
+	// Corner Handles
 	mHandles.push_back(BoxHandle(position + glm::vec2(-0.5f, -0.5f) * size, glm::vec2(mHandleSize), glm::vec4(1, 1, 1, 1)));
 	mHandles.push_back(BoxHandle(position + glm::vec2( 0.5f, -0.5f) * size, glm::vec2(mHandleSize), glm::vec4(1, 1, 1, 1)));
 	mHandles.push_back(BoxHandle(position + glm::vec2( 0.5f,  0.5f) * size, glm::vec2(mHandleSize), glm::vec4(1, 1, 1, 1)));
 	mHandles.push_back(BoxHandle(position + glm::vec2(-0.5f,  0.5f) * size, glm::vec2(mHandleSize), glm::vec4(1, 1, 1, 1)));
+
+	// Edge Handles
+	mHandles.push_back(BoxHandle(position + glm::vec2(-0.5f,  0.0f) * size, glm::vec2(mHandleSize), glm::vec4(1, 1, 1, 1)));
+	mHandles.push_back(BoxHandle(position + glm::vec2( 0.5f,  0.0f) * size, glm::vec2(mHandleSize), glm::vec4(1, 1, 1, 1)));
+	mHandles.push_back(BoxHandle(position + glm::vec2( 0.0f, -0.5f) * size, glm::vec2(mHandleSize), glm::vec4(1, 1, 1, 1)));
+	mHandles.push_back(BoxHandle(position + glm::vec2( 0.0f,  0.5f) * size, glm::vec2(mHandleSize), glm::vec4(1, 1, 1, 1)));
 
 	mHandles.push_back(BoxHandle(position, glm::vec2(mHandleSize), glm::vec4(1, 1, 1, 1)));
 	mHandles.push_back(BoxHandle(position, size, glm::vec4(1, 1, 1, 0.25f)));
@@ -47,17 +53,43 @@ void gl::BoxSelector::draw(int width, int height, int layers)
 			max = glm::vec2(mHandles[2].position.x, mHandles[3].position.y);
 			break;
 		case 4:
-			min = mHandles[4].position - 0.5f * mHandles[5].size;
-			max = mHandles[4].position + 0.5f * mHandles[5].size;
+			min = glm::vec2(mHandles[4].position.x, mHandles[0].position.y);
+			max = mHandles[2].position;
+			break;
+		case 5:
+			min = mHandles[0].position;
+			max = glm::vec2(mHandles[5].position.x, mHandles[2].position.y);
+			break;
+		case 6:
+			min = glm::vec2(mHandles[0].position.x, mHandles[6].position.y);
+			max = mHandles[2].position;
+			break;
+		case 7:
+			min = mHandles[0].position;
+			max = glm::vec2(mHandles[2].position.x, mHandles[7].position.y);
+			break;
+		case 8:
+			min = mHandles[8].position - 0.5f * mHandles[9].size;
+			max = mHandles[8].position + 0.5f * mHandles[9].size;
 		}
 
+		// Corners
 		mHandles[0].position = min;
 		mHandles[1].position = glm::vec2(max.x, min.y);
 		mHandles[2].position = max;
 		mHandles[3].position = glm::vec2(min.x, max.y);
-		mHandles[4].position = 0.5f * (min + max);
-		mHandles[5].position = 0.5f * (min + max);
-		mHandles[5].size = glm::abs(max - min);
+		
+		// Edges
+		glm::vec2 pos = 0.5f * (min + max);
+		mHandles[4].position = glm::vec2(min.x, pos.y);
+		mHandles[5].position = glm::vec2(max.x, pos.y);
+		mHandles[6].position = glm::vec2(pos.x, min.y);
+		mHandles[7].position = glm::vec2(pos.x, max.y);
+
+		// Center
+		mHandles[8].position = pos;
+		mHandles[9].position = pos;
+		mHandles[9].size = glm::abs(max - min);
 		
 		mUpdated = true;
 	}
@@ -124,13 +156,22 @@ gl::EventState gl::BoxSelector::onDragEnd(float x, float y)
 
 void gl::BoxSelector::update(glm::vec2 position, glm::vec2 size)
 {
-	mHandles[4].position = mHandles[5].position = position;
-	mHandles[5].size = size;
+	// center
+	mHandles[8].position = mHandles[8].position = position;
+	mHandles[9].size = size;
 
+	// Corners
 	mHandles[0].position = position + glm::vec2(-0.5f, -0.5f) * size;
 	mHandles[1].position = position + glm::vec2( 0.5f, -0.5f) * size;
 	mHandles[2].position = position + glm::vec2( 0.5f,  0.5f) * size;
 	mHandles[3].position = position + glm::vec2(-0.5f,  0.5f) * size;
+	
+	// Edges
+	mHandles[4].position = position + glm::vec2(-0.5f,  0.0f) * size;
+	mHandles[5].position = position + glm::vec2( 0.5f,  0.0f) * size;
+	mHandles[6].position = position + glm::vec2( 0.0f, -0.5f) * size;
+	mHandles[7].position = position + glm::vec2( 0.0f,  0.5f) * size;
+	
 	mUpdated = true;
 }
 
