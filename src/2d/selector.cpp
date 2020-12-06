@@ -96,6 +96,40 @@ void gl::BoxSelector::draw(int width, int height, int layers)
 
 	if (mUpdated) {
 		mBatch.clear();
+		// Add outline
+		const glm::vec2 q = position();
+		const glm::vec2 s = size();
+		const float w = 2.0f;
+		glm::vec2 p0(q.x - 0.5f * (s.x + w), q.y - 0.5f * (s.y + w));
+		glm::vec2 p1(q.x - 0.5f * (s.x + w), q.y + 0.5f * (s.y + w));
+		glm::vec2 p2(q.x + 0.5f * (s.x + w), q.y + 0.5f * (s.y + w));
+		glm::vec2 p3(q.x + 0.5f * (s.x + w), q.y - 0.5f * (s.y + w));
+
+		glm::vec2 q0(q.x - 0.5f * (s.x - w), q.y - 0.5f * (s.y - w));
+		glm::vec2 q1(q.x - 0.5f * (s.x - w), q.y + 0.5f * (s.y - w));
+		glm::vec2 q2(q.x + 0.5f * (s.x - w), q.y + 0.5f * (s.y - w));
+		glm::vec2 q3(q.x + 0.5f * (s.x - w), q.y - 0.5f * (s.y - w));
+
+		auto data = mBatch.getAttirbute<gl::CompactVertexBufferObject<glm::vec2, glm::vec4>>(0);
+		data->push_back(p0, glm::vec4(1));
+		data->push_back(q0, glm::vec4(1));
+		data->push_back(p1, glm::vec4(1));
+		data->push_back(q1, glm::vec4(1));
+		data->push_back(p2, glm::vec4(1));
+		data->push_back(q2, glm::vec4(1));
+		data->push_back(p3, glm::vec4(1));
+		data->push_back(q3, glm::vec4(1));
+		mBatch.indexBuffer->insert(mBatch.indexBuffer->end(), {
+			0, 1, 2,
+			1, 2, 3,
+			2, 3, 4,
+			3, 4, 5,
+			4, 5, 6,
+			5, 6, 7,
+			6, 7, 0,
+			7, 0, 1
+		});
+
 		for (BoxHandle& handle : mHandles) {
 			handle.createGeometry(mBatch);
 		}
