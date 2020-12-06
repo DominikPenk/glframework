@@ -2,22 +2,26 @@
 
 #include "glpp/draw_batch.hpp"
 
-int gl::Handle::mNextId = 0;
 
 gl::Handle::Handle() :
-    mId(mNextId),
-    hid(mId),
-    ignoreInteractions(false)
+    ignoreInteractions(false),
+    constrain(Constraint::None),
+    position(0),
+    color(1)
 {
-    mNextId += 1;
+}
+
+gl::Handle::Handle(glm::vec2 position, glm::vec4 color) :
+    ignoreInteractions(false),
+    constrain(Constraint::None),
+    position(position), 
+    color(color)
+{
 }
 
 gl::BoxHandle::BoxHandle(glm::vec2 position, glm::vec2 size, glm::vec4 color) :
-    Handle(),
-    color(color),
-    position(position),
-    size(size),
-    mIsActive(false)
+    Handle(position, color),
+    size(size)
 {
 }
 
@@ -42,16 +46,24 @@ bool gl::BoxHandle::overlaps(int x, int y) const
     return (x >= position.x - 0.5f * size.x && x < position.x + 0.5f * size.x) && (y >= position.y - 0.5f * size.y && y < position.y + 0.5f * size.y);
 }
 
-gl::EventState gl::BoxHandle::onMouseDown(float x, float y)
+gl::EventState gl::Handle::onMouseDown(float x, float y)
 {
     if (ignoreInteractions) return gl::EventState::Pass;
     return gl::EventState::StartDrag;
 }
 
-gl::EventState gl::BoxHandle::onDrag(float dx, float dy)
+gl::EventState gl::Handle::onDrag(float dx, float dy)
 {
     if (ignoreInteractions) return gl::EventState::Pass;
-    position += glm::vec2(dx, dy);
+    if (constrain == Constraint::XAxis) {
+        position.x += dx;
+    }
+    else if (constrain == Constraint::YAxsis) {
+        position.y += dy;
+    }
+    else {
+        position += glm::vec2(dx, dy);
+    }
     return gl::EventState::Stop;
 }
 

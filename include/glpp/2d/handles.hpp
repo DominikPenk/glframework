@@ -9,23 +9,29 @@ namespace gl {
 
 	class DrawBatch;
 
-
 	class Handle : public EventReceiver {
 	public:
+		enum Constraint {
+			XAxis,
+			YAxsis,
+			None
+		};
+		
 		Handle();
+		Handle(glm::vec2 position, glm::vec4 color);
 
 		virtual void createGeometry(DrawBatch& batch) = 0;
 		virtual bool overlaps(int x, int y) const = 0;
 
-		const int& hid;
-
+		virtual gl::EventState onMouseDown(float x, float y) override;
+		virtual gl::EventState onDrag(float dx, float dy) override;
+		
 		bool ignoreInteractions;
+		glm::vec4 color;
+		glm::vec2 position;
+		Constraint constrain;
 
 	protected:
-		int mId;
-
-	private:
-		static int mNextId;
 	};
 
 	class BoxHandle : public Handle {
@@ -35,15 +41,7 @@ namespace gl {
 		virtual void createGeometry(DrawBatch& batch) override;
 		virtual bool overlaps(int x, int y) const override;
 
-		virtual gl::EventState onMouseDown(float x, float y) override;
-		virtual gl::EventState onDrag(float dx, float dy) override;
-			
-		glm::vec4 color;
-		glm::vec2 position;
 		glm::vec2 size;
-
-	private:
-		bool mIsActive;
 	};
 
 }
