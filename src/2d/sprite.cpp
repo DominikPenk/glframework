@@ -51,7 +51,6 @@ gl::Sprite::Sprite() :
 	minUV(0),
 	maxUV(1)
 {
-	hasInteractions = false;
 }
 
 gl::Sprite::Sprite(std::string image, bool flipY) :
@@ -109,10 +108,11 @@ std::shared_ptr<gl::Texture> gl::Sprite::setTexture(std::string path, bool flipY
 	return texture;
 }
 
-bool gl::Sprite::overlaps(int x, int y) const
+bool gl::Sprite::overlaps(float x, float y) const
 {
 	return (x >= position.x && x < position.x + size.x) && (y >= position.y && y < position.y + size.y);
 }
+
 
 std::shared_ptr<gl::Shader> gl::defaultSpriteShader()
 {

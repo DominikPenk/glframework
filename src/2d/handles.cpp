@@ -42,16 +42,16 @@ bool gl::BoxHandle::overlaps(int x, int y) const
     return (x >= position.x - 0.5f * size.x && x < position.x + 0.5f * size.x) && (y >= position.y - 0.5f * size.y && y < position.y + 0.5f * size.y);
 }
 
-int gl::BoxHandle::onMouseDown(int x, int y)
+gl::EventState gl::BoxHandle::onMouseDown(float x, float y)
 {
-    if (ignoreInteractions) return CanvasElement::PASS;
-    return CanvasElement::START_DRAG;
+    if (ignoreInteractions) return gl::EventState::Pass;
+    return gl::EventState::StartDrag;
 }
 
-int gl::BoxHandle::onMouseDrag(int dx, int dy)
+gl::EventState gl::BoxHandle::onDrag(float dx, float dy)
 {
-    if (ignoreInteractions) return CanvasElement::PASS;
+    if (ignoreInteractions) return gl::EventState::Pass;
     position += glm::vec2(dx, dy);
-    return CanvasElement::STOP;
+    return gl::EventState::Stop;
 }
 

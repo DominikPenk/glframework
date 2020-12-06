@@ -1,5 +1,7 @@
 #include "glpp/2d/selector.hpp"
 
+#include "glpp/2d/eventsystem.hpp"
+
 gl::BoxSelector::BoxSelector(glm::vec2 position, glm::vec2 size) :
 	CanvasElement(),
 	mHandleSize(10),
@@ -76,7 +78,7 @@ void gl::BoxSelector::draw(int width, int height, int layers)
 		"z", zOrder);
 }
 
-bool gl::BoxSelector::overlaps(int x, int y) const
+bool gl::BoxSelector::overlaps(float x, float y) const
 {
 	bool ret = false;
 	for (const gl::BoxHandle& h : mHandles) {
@@ -89,27 +91,35 @@ bool gl::BoxSelector::overlaps(int x, int y) const
 	return false;
 }
 
-int gl::BoxSelector::onMouseDown(int x, int y)
+gl::EventState gl::BoxSelector::onMouseDown(float x, float y)
 {
 	for (int i = 0; i < (int)mHandles.size(); ++i) {
-		if (mHandles[i].overlaps(x, y) && mHandles[i].onMouseDown(x, y) == CanvasElement::START_DRAG) {
+		if (mHandles[i].overlaps(x, y) && mHandles[i].onMouseDown(x, y) == EventState::StartDrag) {
 			mDraggedHandle = i;
-			return CanvasElement::START_DRAG;
+			return EventState::StartDrag;
 		}
 	}
-	return CanvasElement::PASS;
+	return EventState::Pass;
 }
 
-int gl::BoxSelector::onMouseDrag(int dx, int dy)
+gl::EventState gl::BoxSelector::onDrag(float dx, float dy)
 {
-	assert(mDraggedHandle != -1);
-	return mHandles[mDraggedHandle].onMouseDrag(dx, dy);
+	assert(mDraggedHandle >= 0);
+	mUpdated = true;
+	return mHandles[mDraggedHandle].onDrag(dx, dy);
 }
 
-int gl::BoxSelector::onMouseUp(int xx, int xy)
+gl::EventState gl::BoxSelector::onDragEnd(float x, float y)
 {
 	mDraggedHandle = -1;
-	return CanvasElement::STOP;
+	glm::vec2 min = glm::min(mHandles[0].position, glm::min(mHandles[1].position, glm::min(mHandles[2].position, mHandles[3].position)));
+	glm::vec2 max = glm::max(mHandles[0].position, glm::max(mHandles[1].position, glm::max(mHandles[2].position, mHandles[3].position)));
+	
+	glm::vec2 position = 0.5f * (min + max);
+	glm::vec2 size = max - min;
+	update(position, size);
+
+	return EventState::Stop;
 }
 
 void gl::BoxSelector::update(glm::vec2 position, glm::vec2 size)

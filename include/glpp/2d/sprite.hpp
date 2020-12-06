@@ -26,7 +26,7 @@ namespace gl {
 		void setTexture(std::shared_ptr<gl::Texture> texture);
 		std::shared_ptr<gl::Texture> setTexture(std::string path, bool flipY = false);
 
-		virtual bool overlaps(int x, int y) const;
+		virtual bool overlaps(float x, float y) const;
 
 		std::shared_ptr<gl::Texture> texture;
 		glm::vec3 color;
@@ -34,7 +34,6 @@ namespace gl {
 		glm::vec2 size;
 		glm::vec2 minUV, maxUV;
 		std::shared_ptr<gl::Shader> shader;
-
 	};
 
 }

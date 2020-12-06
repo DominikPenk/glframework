@@ -1,4 +1,5 @@
 #include <glpp/2d/canvas.hpp>
+#include <glpp/2d/eventsystem.hpp>
 #include <glpp/2d/sprite.hpp>
 #include <glpp/2d/selector.hpp>
 
@@ -18,6 +19,7 @@ int main() {
 	renderer.showOutliner = false;
 
 	gl::Canvas canvas(0, 0, cam->ScreenWidth, cam->ScreenHeight);
+	gl::EventSystem events;
 
 	auto sprite1 = canvas.addElement<gl::Sprite>("Block");
 	sprite1->color = glm::vec3(1, 0, 0);
@@ -34,7 +36,7 @@ int main() {
 	selector->layer = 1000;
 
 	renderer.addRenderHook(gl::Renderer::RenderHook::Pre2DGui, [&](gl::Renderer* env) {
-		canvas.handleEvents();
+		events.handleEvents(canvas);
 		canvas.draw();
 	});
 
@@ -42,7 +44,7 @@ int main() {
 		ImGuiIO io =ImGui::GetIO();
 		int x = io.MousePos.x;
 		int y = io.MousePos.y;
-		auto spritesUnderCursor = canvas.getIntersectingElements(x, y, false, true);
+		auto spritesUnderCursor = canvas.getIntersectingElements(x, y, true);
 		ImGui::ColorEdit3("Lena color", &sprite2->color.x);
 		ImGui::Text("Mouse Position %d %d", x, y);
 		ImGui::Text("Selector: [(%.1f %.1f) - (%.1f %.1f)]",

@@ -78,6 +78,8 @@ set(IMGUI_FILES ${IMGUI_SRC})
 SET(RENDER_2D_FILES
 	${INCLUDE_DIR}/2d/canvas.hpp
 	src/2d/canvas.cpp
+	${INCLUDE_DIR}/2d/eventsystem.hpp
+	src/2d/eventsystem.cpp
 	${INCLUDE_DIR}/2d/sprite.hpp
 	src/2d/sprite.cpp
 	

@@ -1,22 +1,25 @@
 #pragma once
 
 #include "glpp/2d/canvas.hpp"
+#include "glpp/2d/eventsystem.hpp"
 #include "glpp/2d/handles.hpp"
 #include "glpp/draw_batch.hpp"
 
+#include <tuple>
+
 namespace gl {
 
-	class BoxSelector : public CanvasElement {
+	class BoxSelector : public EventReceiver, public CanvasElement  {
 	public:
 		BoxSelector(glm::vec2 position, glm::vec2 size);
 
 		virtual void draw(int width, int height, int layers);
 
-		virtual bool overlaps(int x, int y) const;
+		virtual bool overlaps(float x, float y) const;
 
-		virtual int onMouseDown(int x, int y); 
-		virtual int onMouseDrag(int dx, int dy);
-		virtual int onMouseUp(int xx, int xy);
+		virtual gl::EventState onMouseDown(float x, float y) override;
+		virtual gl::EventState onDrag(float dx, float dy) override;
+		virtual gl::EventState onDragEnd(float x, float y) override;
 
 		void update(glm::vec2 position, glm::vec2 size);
 

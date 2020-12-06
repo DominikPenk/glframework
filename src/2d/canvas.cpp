@@ -11,48 +11,8 @@
 gl::Canvas::Canvas(int x, int y, int width, int height) :
 	position(x, y),
 	size(width, height),
-	maxLayers(1024),
-	shouldHandleEvents(true),
-	mDraggedElement(nullptr)
+	maxLayers(1024)
 {
-}
-
-void gl::Canvas::handleEvents()
-{
-	if (!shouldHandleEvents) return;
-
-	ImGuiIO io = ImGui::GetIO();
-	int w, h;
-	glfwGetWindowSize(glfwGetCurrentContext(), &w, &h);
-	const int lx = io.MousePos.x - position.x;
-	const int ly = h - io.MousePos.y - 1 - position.y;
-
-	if (mDraggedElement != nullptr) {
-		int state = CanvasElement::PASS;
-		if (!io.MouseDown[0]) {
-			state = mDraggedElement->onMouseUp(lx, ly);
-			mDraggedElement = nullptr;
-		}
-		else {
-			state = mDraggedElement->onMouseDrag((int)io.MouseDelta.x, -(int)io.MouseDelta.y);
-		}
-		if (state != CanvasElement::PASS) {
-			return;
-		}
-	}
-	else if(io.MouseClicked[0]) {
-		auto elements = getIntersectingElements(lx, ly, true);
-		for (auto element : elements) {
-			int state = element->onMouseDown(lx, ly);
-			if (state == CanvasElement::START_DRAG) {
-				mDraggedElement = element;
-				break;
-			}
-			else if (state == CanvasElement::STOP) {
-				break;
-			}
-		}
-	}
 }
 
 void gl::Canvas::draw()
@@ -92,7 +52,7 @@ void gl::Canvas::addElement(const std::string& name, std::shared_ptr<gl::CanvasE
 	element->name = name;
 }
 
-std::vector<std::shared_ptr<gl::CanvasElement>> gl::Canvas::getIntersectingElements(int x, int y, bool interactiveOnly, bool global)
+std::vector<std::shared_ptr<gl::CanvasElement>> gl::Canvas::getIntersectingElements(int x, int y, bool global)
 {
 	if (global) {
 		ImGuiIO io = ImGui::GetIO();
@@ -107,7 +67,7 @@ std::vector<std::shared_ptr<gl::CanvasElement>> gl::Canvas::getIntersectingEleme
 	std::vector<std::shared_ptr<gl::CanvasElement>> activeElements;
 	for (auto element : mElements) 
 	{
-		if (element->overlaps(x, y) && (!interactiveOnly || element->hasInteractions)) {
+		if (element->overlaps(x, y) && element->blocksRaycasts) {
 			activeElements.push_back(element);
 		}
 	}
@@ -122,6 +82,7 @@ std::vector<std::shared_ptr<gl::CanvasElement>> gl::Canvas::getIntersectingEleme
 
 gl::CanvasElement::CanvasElement() :
 	layer(0),
+	blocksRaycasts(true),
 	name("Canvas Element")
 {
 }
