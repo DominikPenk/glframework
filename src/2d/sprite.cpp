@@ -134,7 +134,7 @@ std::shared_ptr<gl::Texture> gl::defaultSpriteTexture()
 	if (tex == nullptr) {
 		unsigned char texData[] = { 255, 255, 255, 255 };
 		tex = std::make_shared<gl::Texture>(1, 1);
-		tex->setData(texData, GL_RGBA);
+		tex->setData(texData);
 	}
 	return tex;
 }

@@ -10,22 +10,19 @@ namespace internal {
 	std::shared_ptr<gl::Texture> createAndCheckColorTexture(int width, int height, std::shared_ptr<gl::Texture> texture) {
 		if (texture == nullptr) {
 			// Create a new texture
-			texture = std::make_shared<gl::Texture>(height, width);
-			texture->magFilterType = GL_NEAREST;
-			texture->minFilterType = GL_NEAREST;
-			texture->generateMipMap = false;
+			texture = std::make_shared<gl::Texture>(height, width, gl::PixelFormat::RGBA, gl::PixelType::UByte, gl::No_Mipmap | gl::Filter_Nearest);
 		}
 
 		// Check texture attributes
-		assert(texture->magFilterType == GL_NEAREST && texture->minFilterType == GL_NEAREST);
-		assert(texture->textureType == GL_TEXTURE_2D);
+		assert(texture->magFilter() == gl::FilterType::Nearest && texture->minFilter() == gl::FilterType::Nearest);
+		assert(texture->type == gl::TextureType::D2);
 
 		if (texture->cols != width || texture->rows != height) {
 			std::cout << "WARNING: Attached texture with a different size than framebuffer. Going to resize texture" << std::endl;
 			texture->resize(width, height);
 		}
 		
-		if (texture->generateMipMap) {
+		if (texture->hasMipmap()) {
 			std::cout << "WARNING: Used a texture which indicates mip map generation for a render target" << std::endl;
 		}
 
@@ -33,38 +30,25 @@ namespace internal {
 	}
 
 	std::shared_ptr<gl::Texture> createAndCheckDepthTexture(int width, int height, std::shared_ptr<gl::Texture> texture, bool depthAndStencil) {
-		GLenum internalFormat = depthAndStencil ? GL_DEPTH24_STENCIL8 : GL_DEPTH_COMPONENT24;
-		GLenum format = depthAndStencil ? GL_DEPTH_STENCIL : GL_DEPTH_COMPONENT;
-		GLenum type = depthAndStencil ? GL_UNSIGNED_INT_24_8 : GL_FLOAT;
-		
+		gl::PixelFormat pixelFormat = depthAndStencil ? gl::PixelFormat::DEPTH_STENCIL : gl::PixelFormat::DEPTH;
+		gl::PixelType   dataType    = depthAndStencil ? gl::PixelType::UIntByte : gl::PixelType::Float;
+
 		if (texture == nullptr) {
 			// Create a new texture
-			texture = std::make_shared<gl::Texture>(height, width, 
-				format, 
-				internalFormat, 
-				type);
-			texture->magFilterType = GL_NEAREST;
-			texture->minFilterType = GL_NEAREST;
-			texture->generateMipMap = false;
-			
+			texture = std::make_shared<gl::Texture>(height, width, pixelFormat, dataType, gl::No_Mipmap | gl::Filter_Nearest);
 		}
 
 		// Check texture attributes
-		assert(texture->magFilterType == GL_NEAREST && texture->minFilterType == GL_NEAREST);
-		assert(texture->textureType == GL_TEXTURE_2D);
+		assert(texture->magFilter() == gl::FilterType::Nearest && texture->minFilter() == gl::FilterType::Nearest);
+		assert(texture->type == gl::TextureType::D2);
 
 		if (texture->cols != width || texture->rows != height) {
 			std::cout << "WARNING: Attached texture with a different size than framebuffer. Going to resize texture" << std::endl;
 			texture->resize(width, height);
 		}
 
-		if (texture->generateMipMap) {
+		if (texture->hasMipmap()) {
 			std::cout << "WARNING: Used a texture which indicates mip map generation for a render target" << std::endl;
-		}
-
-		// Check data types
-		if (texture->internalFormat != internalFormat || texture->exposedFormat != format || texture->dataType != type) {
-			std::cout << "WARNING: Unexpected internal format" << std::endl;
 		}
 
 		return texture;
@@ -275,8 +259,8 @@ void gl::Framebuffer::readColorAttachment(int slot, int x, int y, int width, int
 	bind();
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + slot);
 	glReadPixels(x, y, width, height,
-		mColorAttachments[slot].targetTexture->exposedFormat,
-		mColorAttachments[slot].targetTexture->dataType,
+		mColorAttachments[slot].targetTexture->glFormat(),
+		mColorAttachments[slot].targetTexture->glType(),
 		buffer);
 }
 
@@ -305,9 +289,6 @@ gl::Framebuffer::FramebufferAttachment::FramebufferAttachment(GLenum attachment,
 	targetBuffer(0),
 	attachment(attachment)
 {
-	// Make sure that the texture is actually created
-	if(targetTexture != nullptr) 
-		targetTexture->update();
 }
 
 gl::Framebuffer::FramebufferAttachment::FramebufferAttachment(FramebufferAttachment&& other)
@@ -355,7 +336,6 @@ void gl::Framebuffer::FramebufferAttachment::attach(GLuint framebuffer, int widt
 	if (targetTexture != nullptr) {
 		targetTexture->resize(width, height);
 		// Ensure that resize actually is updated
-		targetTexture->update();
 		targetTexture->bind();
 		glFramebufferTexture(GL_FRAMEBUFFER, attachment, targetTexture->id, 0);
 	}
