@@ -76,17 +76,18 @@ set(IMGUI_3D_FILES
 set(IMGUI_FILES ${IMGUI_SRC})
 
 SET(RENDER_2D_FILES
-	${INCLUDE_DIR}/2d/canvas.hpp
-	src/2d/canvas.cpp
-	${INCLUDE_DIR}/2d/eventsystem.hpp
-	src/2d/eventsystem.cpp
-	${INCLUDE_DIR}/2d/sprite.hpp
-	src/2d/sprite.cpp
+	# ${INCLUDE_DIR}/2d/canvas.hpp
+	# src/2d/canvas.cpp
+	# ${INCLUDE_DIR}/2d/eventsystem.hpp
+	# src/2d/eventsystem.cpp
+	# ${INCLUDE_DIR}/2d/sprite.hpp
+	# src/2d/sprite.cpp
 	
-	${INCLUDE_DIR}/2d/handles.hpp
-	src/2d/handles.cpp
-	${INCLUDE_DIR}/2d/selector.hpp
-	src/2d/selector.cpp)
+	# ${INCLUDE_DIR}/2d/handles.hpp
+	# src/2d/handles.cpp
+	# ${INCLUDE_DIR}/2d/selector.hpp
+	# src/2d/selector.cpp
+	)
 
 set(GL_FILES
 	${MESH_FILES}
