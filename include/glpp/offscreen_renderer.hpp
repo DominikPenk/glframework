@@ -8,5 +8,10 @@ namespace gl {
 		~OffscreenRenderer();
 		
 		void startRender(size_t width, size_t height);
+		virtual void endFrame() override;
+	protected:
+		virtual bool startFrame() override;
+		std::shared_ptr<gl::Camera> mCamera;
+
 	};
 }

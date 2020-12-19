@@ -30,5 +30,9 @@ namespace ImGui {
 	// A square handle to adust positions
 	bool SquareHandle(const char* id, float pos[2], ImVec2 size, ImU32 color);
 	bool DotHandle(const char* id, float pos[2], float radius, ImU32 color);
-	bool AxisAlignedBoundingBox(const char* id, float center[2], float size[2], ImU32 color, float alpha = 0.25f, float handleSize = 10.f);
+	bool AxisAlignedBox(const char* id, float center[2], float size[2], ImU32 color, float alpha = 0.25f, float handleSize = 10.f);
+
+	// A Rotation gizmo. The angle is given in degrees
+	bool Rotation(const char* id, float* angle, float pivot[2], float radius, ImU32 color);
+
 }

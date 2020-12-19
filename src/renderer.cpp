@@ -36,26 +36,14 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std::string& title, bool maximized) :
-	RendererBase(cam),
-	mOutliner(std::make_unique<OutlinerWindow>()),
-	mDebugWindow(std::make_unique<RendererDebugWindow>()),
-	showOutliner(true),
-	showDebug(false),
-	showMeshWatch(false),
-	gammaCorrection(true),
-	mToneMapping(ToneMapping::Reinhard),
-	gamma(1.2f),
-	mPostProShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "displayShader.glsl"),
-	mDisplayShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "copyShader.glsl")
+gl::RendererBase::RendererBase(int width, int height, std::string title, bool maximized) :
+	mWindow(NULL)
 {
-
-	mCamera->ScreenWidth = width;
-	mCamera->ScreenHeight = height;
-	
-	clearColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
+	mVersion[0] = 4;
+	mVersion[1] = 3;
 
 	// Create window to get a context
+	// ---------------
 	if (glfwInit() == 0) throw std::runtime_error("Failed to init GLFW");
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, mVersion[0]);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, mVersion[1]);
@@ -72,6 +60,8 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	}
 	glfwMakeContextCurrent(mWindow);
 
+	// Load opengl functions
+	// ---------------
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		throw std::runtime_error("Failed to initialize GLAD");
@@ -80,16 +70,8 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	glfwMakeContextCurrent(mWindow);
 	glfwSetWindowUserPointer(mWindow, this);
 
-	if (maximized) {
-		glfwGetWindowSize(mWindow, &mCamera->ScreenWidth, &mCamera->ScreenHeight);
-	}
-	else {
-		glfwSetWindowSize(mWindow, mCamera->ScreenWidth, mCamera->ScreenHeight);
-	} 
-
-	// set callbacks
-	glfwSetFramebufferSizeCallback(mWindow, framebuffer_size_callback);
-
+	// Add debug  context if possible
+	// ---------------
 #if _DEBUG
 	if (glDebugMessageCallback) {
 		std::cout << "Register OpenGL debug callback " << std::endl;
@@ -108,11 +90,71 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 		std::cout << "glDebugMessageCallback not available" << std::endl;
 #endif
 
+	// enable imgui
+	// ---------------
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
+	ImGui_ImplOpenGL3_Init(NULL);
+
+	ImGuiIO& io = ImGui::GetIO();
+	// Enable Keyboard Controls and Docking
+	// ---------------
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	// add icons
+	// See https://github.com/juliettef/IconFontCppHeaders#example-code
+	// ---------------
+	io.Fonts->AddFontDefault();
+	static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+	std::string fontFile = std::string(GL_FRAMEWORK_FONT_DIR) + FONT_ICON_FILE_NAME_FAS;
+	io.Fonts->AddFontFromFileTTF(fontFile.c_str(), 13.0f, &icons_config, icons_ranges);
+}
+
+void gl::RendererBase::setTitle(const std::string& title)
+{
+	glfwSetWindowTitle(mWindow, title.c_str());
+}
+
+Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std::string& title, bool maximized) :
+	RendererBase(width, height, title, maximized),
+	mOutliner(std::make_unique<OutlinerWindow>()),
+	mDebugWindow(std::make_unique<RendererDebugWindow>()),
+	mCamera(cam),
+	showOutliner(true),
+	showDebug(false),
+	showMeshWatch(false),
+	gammaCorrection(true),
+	mToneMapping(ToneMapping::Reinhard),
+	gamma(1.2f),
+	mPostProShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "displayShader.glsl"),
+	mDisplayShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "copyShader.glsl")
+{
+	// Update camera dimensions if maximized
+	// ---------------
+	if (maximized) {
+		glfwGetWindowSize(mWindow, &mCamera->ScreenWidth, &mCamera->ScreenHeight);
+	}
+
+	// set callbacks (TODO: Make sure we do not need this)
+	// ---------------
+	glfwSetFramebufferSizeCallback(mWindow, framebuffer_size_callback);
+
+	// Set up ImGui3D
+	// ---------------
+	ImGui3d_ImplRenderer_Init(ImGui3D::CreateContext());
+	ImGui3D::GImGui3D->GetHoveredIdImpl = [&](ImVec2 mouse) -> glm::uvec4 {
+		return mFrameBuffer->readColorPixel((int)mouse.x, (int)mouse.y, 1);
+	};
+
 	// we enable depth
 	// ---------------
 	glEnable(GL_DEPTH_TEST);
 
 	// Create the frame buffers with shared depth
+	// ---------------
 	mPrePostroBuffer = std::make_shared<gl::Framebuffer>(mCamera->ScreenWidth, mCamera->ScreenHeight);
 	mPrePostroBuffer->setRenderTexture(0, nullptr);
 	auto depthTexture = mPrePostroBuffer->setDepthTexture(nullptr);
@@ -121,33 +163,10 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	mFrameBuffer->appendRenderTexture(nullptr);
 	mFrameBuffer->setDepthTexture(depthTexture);
 
-	// enable imgui
+	// Initialize with with default data
 	// ---------------
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
-	ImGui_ImplOpenGL3_Init(NULL);
-	ImGui3d_ImplRenderer_Init(ImGui3D::CreateContext());
-
-	// add icons
-	// See https://github.com/juliettef/IconFontCppHeaders#example-code
-	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontDefault();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-
-	static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
-	std::string fontFile = std::string(GL_FRAMEWORK_FONT_DIR) + FONT_ICON_FILE_NAME_FAS;
-	io.Fonts->AddFontFromFileTTF(fontFile.c_str(), 13.0f, &icons_config, icons_ranges);
-
-	// Add callback to imgui3d impl
-	ImGui3D::GImGui3D->GetHoveredIdImpl = [&](ImVec2 mouse) -> glm::uvec4 {
-		return mFrameBuffer->readColorPixel((int)mouse.x, (int)mouse.y, 1);
-	};
-
 	setToneMapping(mToneMapping);
+	clearColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
 }
 
 Renderer::~Renderer() {
@@ -256,6 +275,7 @@ void gl::Renderer::endFrame()
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 	
 	glEnable(GL_DEPTH_TEST);
 	glfwSwapBuffers(mWindow);
@@ -266,11 +286,6 @@ size_t gl::Renderer::addMesh(const std::string& name, std::shared_ptr<Mesh> mesh
 	mMeshes.push_back(mesh);
 	mesh->name = name;
 	return mMeshes.size() - 1;
-}
-
-void gl::Renderer::setTitle(const std::string& title)
-{
-	glfwSetWindowTitle(mWindow, title.c_str());
 }
 
 const std::vector<std::shared_ptr<Mesh>>& gl::Renderer::objects() const
@@ -343,10 +358,4 @@ std::shared_ptr<GenericUIWindow> gl::Renderer::addUIWindow(std::string title, st
 	return addUIWindow<GenericUIWindow>(title, drawFn);
 }
 
-gl::RendererBase::RendererBase(std::shared_ptr<Camera> cam) :
-	mCamera(cam),
-	mWindow(NULL)
-{
-	mVersion[0] = 4;
-	mVersion[1] = 3;
-}
+

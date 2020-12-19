@@ -29,12 +29,35 @@ namespace gl {
 
 	class RendererBase {
 	public:
-		RendererBase(std::shared_ptr<Camera> cam);
-		std::shared_ptr<Camera> camera() { return mCamera; }
-		const std::shared_ptr<Camera> camera() const { return mCamera; }
+		RendererBase(int initialWidth, int initialHeight, std::string title, bool maximized);
+
+		/// <summary>This function initializes a new frame and polls for user input.</summary>
+		/// <remarks>Call this function as soon as possible in your render loop. 
+		/// In most cases you should call this first.</remarks>
+		/// <returns>True if the window will be drawn or false otherwise (e.g. if window is iconyfied)</returns>
+		virtual bool startFrame() = 0;
+
+		/// <summary>This function finalizes the frame by drawing UI and geometry.</summary>
+		/// <remarks>Call this function as late as possbile in your render loop. In most cases this is the last function called.</remarks>
+		virtual void endFrame() = 0;
+
+		// Setters
+		void setTitle(const std::string& title);
+
+		// -> End setters
+
+		// Getters
+		// TODO: Refactor this
+		virtual std::shared_ptr<Camera> camera() { throw std::runtime_error("This renderer has no camera"); }
+		virtual const std::shared_ptr<Camera> camera() const { throw std::runtime_error("This renderer has no camera"); }
+		inline const GLFWwindow* window() const { return mWindow; }
+		inline bool shouldClose() const { return glfwWindowShouldClose(mWindow); }
+		inline bool isMinified() const { glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED); }
+
+		// -> End getters
+
 	protected:
 		GLFWwindow* mWindow;
-		std::shared_ptr<Camera> mCamera;
 		int mVersion[2];
 	};
 
@@ -60,11 +83,11 @@ namespace gl {
 		/// <remarks>Call this function as soon as possible in your render loop. 
 		/// In most cases you should call this first.</remarks>
 		/// <returns>True if the window will be drawn or false otherwise (e.g. if window is iconyfied)</returns>
-		bool startFrame();
+		virtual bool startFrame() override;
 
 		/// <summary>This function finalizes the frame by drawing UI and geometry.</summary>
 		/// <remarks>Call this function as late as possbile in your render loop. In most cases this is the last function called.</remarks>
-		void endFrame();
+		virtual void endFrame() override;
 
 		/// <summary>Construct a new window and add it to the ui.</summary>
 		/// <param name="args">Parameters for the constructor of the new window.</param>
@@ -86,11 +109,6 @@ namespace gl {
 		/// <param name="drawFn">Function drawing the window contents.</param>
 		/// <returns>A shared pointer to the newly constructed ui window.</returns>
 		std::shared_ptr<GenericUIWindow> addUIWindow(std::string title, std::function<void(Renderer*)> drawFn);
-
-		inline void setSize(size_t width, size_t height) {
-			mCamera->ScreenHeight = static_cast<int>(height);
-			mCamera->ScreenWidth  = static_cast<int>(width);
-		}
 
 		size_t addMesh(const std::string& name, std::shared_ptr<Mesh> mesh); 
 
@@ -117,17 +135,13 @@ namespace gl {
 			mMeshes.erase(mMeshes.begin() + index);
 		}
 
-		inline const GLFWwindow* window() const { return mWindow; }
-
-		void setTitle(const std::string& title);
-
 		PointLight& light() { return mLight; }
 		PointLight light() const { return mLight; }
 
-		size_t numMeshes() const { return mMeshes.size(); }
+		virtual std::shared_ptr<Camera> camera() override { return mCamera; }
+		virtual const std::shared_ptr<Camera> camera() const override { return mCamera; }
 
-		bool shouldClose() const { return glfwWindowShouldClose(mWindow); }
-		bool isMinified() const { glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED); }
+		size_t numMeshes() const { return mMeshes.size(); }
 
 		const std::vector<std::shared_ptr<Mesh>>& objects() const;
 		std::vector<std::shared_ptr<Mesh>>& objects();
@@ -155,11 +169,13 @@ namespace gl {
 
 		std::mutex& getLock(std::shared_ptr<Mesh> obj);
 		std::mutex& getLock(std::shared_ptr<UIWindow> window);
-
-	private:
+	
+	protected:
 		friend class RendererDebugWindow;
 		friend class OutlinerWindow;
+		std::shared_ptr<Camera> mCamera;
 
+	private:
 		void ImGui3d_ImplRenderer_Init(std::shared_ptr<ImGui3D::ImGui3DContext> ctx);
 
 		std::unique_ptr<UIWindow> mOutliner;

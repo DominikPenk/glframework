@@ -15,6 +15,9 @@
 
 #include <glm/glm.hpp>
 
+typedef typename glm::mat2 ImMat2;
+
+
 template<typename T>
 inline ImVec2 glm2ImGui(glm::vec<2, T> v) {
 	return ImVec2(v.x, v.y);
@@ -25,11 +28,14 @@ inline ImVec4 glm2ImGui(glm::vec<4, T> v) {
 	return ImVec4(v.x, v.y, v.z, v.w);
 }
 
-
 inline glm::vec2 imGui2Glm(ImVec2 v) {
 	return glm::vec2(v.x, v.y);
 }
 
-inline glm::vec4 glm2ImGui(ImVec4 v) {
+inline glm::vec4 imgui2ImGlm(ImVec4 v) {
 	return glm::vec4(v.x, v.y, v.z, v.w);
+}
+
+inline ImVec2 operator*(const glm::mat2& A, const ImVec2 v) {
+	return glm2ImGui(A * glm::vec2(v.x, v.y));
 }

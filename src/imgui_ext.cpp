@@ -2,6 +2,9 @@
 #include "glpp/imgui.hpp"
 #include "glpp/texture.hpp"
 
+#include <glm/gtx/vector_angle.hpp>
+
+#include <cmath>
 #include <iostream>
 
 void ImGui::Image(std::shared_ptr<gl::Texture> tex, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, const ImVec4& tint_col, const ImVec4& border_col)
@@ -88,7 +91,7 @@ bool ImGui::DotHandle(const char* id, float pos[2], float radius, ImU32 color)
 	return change;
 }
 
-bool ImGui::AxisAlignedBoundingBox(const char* id, float center[2], float size[2], ImU32 color, float alpha, float handleSize)
+bool ImGui::AxisAlignedBox(const char* id, float center[2], float size[2], ImU32 color, float alpha, float handleSize)
 {
 	ImGui::PushID(id);
 
@@ -149,6 +152,44 @@ bool ImGui::AxisAlignedBoundingBox(const char* id, float center[2], float size[2
 
 	ImGui::PopID();
 	return centerChanged || tlChanged || trChanged || blChanged || brChanged;
+}
+
+bool ImGui::Rotation(const char* id, float* angle, float pivot[2], float radius, ImU32 col)
+{
+	const float c = std::cos(glm::radians(*angle));
+	const float s = std::sin(glm::radians(*angle));
+	const ImVec2 dir(s, -c);
+
+	const ImVec2 offset = ImGui::GetWindowPos();
+	const ImVec2 oldCursorPos = ImGui::GetCursorPos();
+	const ImVec2 localPos(pivot[0], pivot[1]);
+
+	const ImVec2 globalPivot = localPos + offset;
+	const ImVec2 globalHandle = globalPivot + dir * radius;
+
+	ImGui::GetWindowDrawList()->AddLine(globalPivot, globalHandle, col, 2.f);
+	ImGui::GetWindowDrawList()->AddCircleFilled(globalPivot, 5.f, col);
+
+	ImGui::SetCursorPos(globalHandle - ImVec2(5, 5));
+	ImGui::InvisibleButton(id, ImVec2(10, 10));
+	ImGui::GetWindowDrawList()->AddRectFilled(globalHandle - ImVec2(5, 5), globalHandle + ImVec2(5, 5), col);
+
+	bool change = false;
+	if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0)) {
+		glm::vec2 dir = imGui2Glm(ImGui::GetIO().MousePos - globalPivot);
+		const float l = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+		if (l > 1e-6f) {
+			dir /= l;
+			*angle = glm::degrees(glm::orientedAngle(glm::vec2(0, -1), dir));
+			if (*angle < 0) {
+				*angle += 360.f;
+			}
+			change = true;
+		}
+	}
+
+	ImGui::SetCursorPos(oldCursorPos);
+	return change;
 }
 
 bool ImGui::BeginCanvas(const char* name, ImVec2 position, ImVec2 size)
