@@ -2,6 +2,8 @@
 #include "glpp/imgui.hpp"
 #include "glpp/texture.hpp"
 
+#include <iostream>
+
 void ImGui::Image(std::shared_ptr<gl::Texture> tex, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, const ImVec4& tint_col, const ImVec4& border_col)
 {
 	ImGui::Image(*tex, size, uv0, uv1, tint_col, border_col);
@@ -29,4 +31,130 @@ bool ImGui::InputUInt64(const char* label, uint64_t* v, int step, int step_fast,
 {
 	const char* format = (flags & ImGuiInputTextFlags_CharsHexadecimal) ? "%08X" : "%llu";
 	return InputScalar(label, ImGuiDataType_U64, (void*)v, (void*)(step > 0 ? &step : NULL), (void*)(step_fast > 0 ? &step_fast : NULL), format, flags);
+}
+
+ImU32 ImGui::ApplyAlpha(ImU32 col, float alpha)
+{
+	if (alpha >= 1.0f)
+		return col;
+	ImU32 a = (col & IM_COL32_A_MASK) >> IM_COL32_A_SHIFT;
+	a = (ImU32)(a * alpha);
+	return (col & ~IM_COL32_A_MASK) | (a << IM_COL32_A_SHIFT);
+
+}
+
+bool ImGui::SquareHandle(const char* id, float pos[2], ImVec2 size, ImU32 color)
+{
+	const ImVec2 offset = ImGui::GetWindowPos();
+	const ImVec2 oldCursorPos = ImGui::GetCursorPos();
+	const ImVec2 localPos(pos[0], pos[1]);
+
+	ImGui::SetCursorPos(localPos - size * 0.5f);
+	ImGui::InvisibleButton(id, size);
+	ImGui::GetWindowDrawList()->AddRectFilled(offset + localPos - size * 0.5f, offset + localPos + size * 0.5f, color);
+	bool change = false;
+	if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0)) {
+		ImVec2 delta = ImGui::GetIO().MouseDelta;
+		pos[0] += delta.x;
+		pos[1] += delta.y;
+		change = true;
+	}
+
+	// Reset cursor
+	ImGui::SetCursorPos(oldCursorPos);
+	return change;
+
+}
+
+bool ImGui::AxisAlignedBoundingBox(const char* id, float center[2], float size[2], ImU32 color, float alpha, float handleSize)
+{
+	ImGui::PushID(id);
+
+	ImVec2 hSize(handleSize, handleSize);
+	ImVec2 c(center[0], center[1]);
+
+	ImVec2 p00(center[0] - size[0] * 0.5f, center[1] - size[1] * 0.5f);
+	ImVec2 p01(center[0] + size[0] * 0.5f, center[1] - size[1] * 0.5f);
+	ImVec2 p10(center[0] - size[0] * 0.5f, center[1] + size[1] * 0.5f);
+	ImVec2 p11(center[0] + size[0] * 0.5f, center[1] + size[1] * 0.5f);
+
+	ImVec2 windowPos = ImGui::GetWindowPos();
+
+	auto DL = ImGui::GetWindowDrawList();
+	if (alpha > 0.f) {
+		DL->AddRectFilled(windowPos + p00, windowPos + p11, ApplyAlpha(color, 0.25));
+	}
+	DL->AddRect(windowPos + p00, windowPos + p11, color, 0.f, 15, 3.f);
+
+	ImVec2 min = p00;
+	ImVec2 max = p11;
+
+	bool deactivated = false;
+
+	bool centerChanged = ImGui::SquareHandle("##Center", center, hSize, color);
+	deactivated = deactivated || ImGui::IsItemDeactivated();
+
+	bool tlChanged = ImGui::SquareHandle("##TL", &min.x, hSize, color);
+	deactivated = deactivated || ImGui::IsItemDeactivated();
+	bool trChanged = ImGui::SquareHandle("##TR", &p01.x, hSize, color);
+	deactivated = deactivated || ImGui::IsItemDeactivated();
+	bool blChanged = ImGui::SquareHandle("##BL", &p10.x, hSize, color);
+	deactivated = deactivated || ImGui::IsItemDeactivated();
+	bool brChanged = ImGui::SquareHandle("##BR", &max.x, hSize, color);
+	deactivated = deactivated || ImGui::IsItemDeactivated();
+
+	if (trChanged) {
+		min.y = p01.y;
+		max.x = p01.x;
+	}
+	if (blChanged) {
+		min.x = p10.x;
+		max.y = p10.y;
+	}
+
+	if (tlChanged || trChanged || blChanged || brChanged) {
+		center[0] = 0.5f * (min.x + max.x);
+		center[1] = 0.5f * (min.y + max.y);
+
+		size[0] = max.x - min.x;
+		size[1] = max.y - min.y;
+	}
+
+	if (deactivated) {
+		size[0] = std::abs(size[0]);
+		size[1] = std::abs(size[1]);
+	}
+
+	ImGui::PopID();
+	return centerChanged || tlChanged || trChanged || blChanged || brChanged;
+}
+
+bool ImGui::BeginCanvas(const char* name, ImVec2 position, ImVec2 size)
+{
+	ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->GetWorkPos() + position);
+	ImGui::SetNextWindowSize(size);
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDocking;
+	bool success = ImGui::Begin(name, NULL, windowFlags);
+	ImGui::PopStyleVar(2);
+	return success;
+}
+
+bool ImGui::BeginCanvasFullscreen(const char* name)
+{
+	ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->GetWorkPos());
+	ImGui::SetNextWindowSize(viewport->GetWorkSize());
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDocking;
+	bool success = ImGui::Begin(name, NULL, windowFlags);
+	ImGui::PopStyleVar(2);
+	return success;
 }
