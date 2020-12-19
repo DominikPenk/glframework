@@ -66,6 +66,28 @@ bool ImGui::SquareHandle(const char* id, float pos[2], ImVec2 size, ImU32 color)
 
 }
 
+bool ImGui::DotHandle(const char* id, float pos[2], float radius, ImU32 color)
+{
+	const ImVec2 offset = ImGui::GetWindowPos();
+	const ImVec2 oldCursorPos = ImGui::GetCursorPos();
+	const ImVec2 localPos(pos[0], pos[1]);
+
+	ImGui::SetCursorPos(localPos - ImVec2(radius, radius));
+	ImGui::InvisibleButton(id, ImVec2(radius, radius) * 2.0f);
+	ImGui::GetWindowDrawList()->AddCircleFilled(localPos + offset, radius, color);
+	bool change = false;
+	if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0)) {
+		ImVec2 delta = ImGui::GetIO().MouseDelta;
+		pos[0] += delta.x;
+		pos[1] += delta.y;
+		change = true;
+	}
+
+	// Reset cursor
+	ImGui::SetCursorPos(oldCursorPos);
+	return change;
+}
+
 bool ImGui::AxisAlignedBoundingBox(const char* id, float center[2], float size[2], ImU32 color, float alpha, float handleSize)
 {
 	ImGui::PushID(id);
@@ -91,7 +113,7 @@ bool ImGui::AxisAlignedBoundingBox(const char* id, float center[2], float size[2
 
 	bool deactivated = false;
 
-	bool centerChanged = ImGui::SquareHandle("##Center", center, hSize, color);
+	bool centerChanged = ImGui::DotHandle("##Center", center, handleSize, color);
 	deactivated = deactivated || ImGui::IsItemDeactivated();
 
 	bool tlChanged = ImGui::SquareHandle("##TL", &min.x, hSize, color);
