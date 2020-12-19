@@ -12,3 +12,24 @@
 
 #include "glpp/IconsFontAwesome5.h"
 #include "glpp/imgui_ext.hpp"
+
+#include <glm/glm.hpp>
+
+template<typename T>
+inline ImVec2 glm2ImGui(glm::vec<2, T> v) {
+	return ImVec2(v.x, v.y);
+}
+
+template<typename T>
+inline ImVec4 glm2ImGui(glm::vec<4, T> v) {
+	return ImVec4(v.x, v.y, v.z, v.w);
+}
+
+
+inline glm::vec2 imGui2Glm(ImVec2 v) {
+	return glm::vec2(v.x, v.y);
+}
+
+inline glm::vec4 glm2ImGui(ImVec4 v) {
+	return glm::vec4(v.x, v.y, v.z, v.w);
+}
