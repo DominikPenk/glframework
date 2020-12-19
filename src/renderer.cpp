@@ -36,6 +36,10 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+// --------------------------------------
+//            Base Renderer            //
+// --------------------------------------
+
 gl::RendererBase::RendererBase(int width, int height, std::string title, bool maximized) :
 	mWindow(NULL)
 {
@@ -113,10 +117,19 @@ gl::RendererBase::RendererBase(int width, int height, std::string title, bool ma
 	io.Fonts->AddFontFromFileTTF(fontFile.c_str(), 13.0f, &icons_config, icons_ranges);
 }
 
+RendererBase::~RendererBase() {
+	if (NULL != mWindow) glfwTerminate();
+	mWindow = NULL;
+}
+
 void gl::RendererBase::setTitle(const std::string& title)
 {
 	glfwSetWindowTitle(mWindow, title.c_str());
 }
+
+// --------------------------------------
+//         Fullfleged Renderer         //   
+// --------------------------------------
 
 Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std::string& title, bool maximized) :
 	RendererBase(width, height, title, maximized),
@@ -167,11 +180,6 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	// ---------------
 	setToneMapping(mToneMapping);
 	clearColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
-}
-
-Renderer::~Renderer() {
-	if (NULL != mWindow) glfwTerminate();
-	mWindow = NULL;
 }
 
 bool gl::Renderer::startFrame()
