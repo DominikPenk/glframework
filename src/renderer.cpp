@@ -134,6 +134,8 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	// See https://github.com/juliettef/IconFontCppHeaders#example-code
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 
 	static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
