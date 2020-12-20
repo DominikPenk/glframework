@@ -347,7 +347,7 @@ int gl::Texture::channels() const
 void gl::Texture::init()
 {
 	glGenTextures(1, &mId);
-	resize(mRows, mCols, mDepth);
+	resize(mCols, mRows, mDepth);
 	setFilters(mMinFilterType, mMagFilterType);
 	setWrapping(mWrapType[0], mWrapType[1], mWrapType[2]);
 	createMipmap(mCreateMipmap);
