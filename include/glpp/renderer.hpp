@@ -29,7 +29,7 @@ namespace gl {
 
 	class RendererBase {
 	public:
-		RendererBase(int initialWidth, int initialHeight, std::string title, bool maximized);
+		RendererBase(int initialWidth, int initialHeight, std::string title, bool maximized, const RendererBase* shared = NULL);
 		~RendererBase();
 
 		/// <summary>This function initializes a new frame and polls for user input.</summary>

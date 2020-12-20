@@ -40,7 +40,7 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 //            Base Renderer            //
 // --------------------------------------
 
-gl::RendererBase::RendererBase(int width, int height, std::string title, bool maximized) :
+gl::RendererBase::RendererBase(int width, int height, std::string title, bool maximized, const gl::RendererBase* shared) :
 	mWindow(NULL)
 {
 	mVersion[0] = 4;
@@ -57,7 +57,7 @@ gl::RendererBase::RendererBase(int width, int height, std::string title, bool ma
 #endif
 	glfwWindowHint(GLFW_MAXIMIZED, maximized ? GLFW_TRUE : GLFW_FALSE);
 
-	mWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+	mWindow = glfwCreateWindow(width, height, title.c_str(), NULL, shared != NULL ? shared->mWindow : NULL);
 	if (mWindow == NULL)
 	{
 		throw std::runtime_error("Failed to create GLFW window");
