@@ -40,7 +40,7 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 //            Base Renderer            //
 // --------------------------------------
 
-gl::RendererBase::RendererBase(int width, int height, std::string title, bool maximized, const gl::RendererBase* shared) :
+gl::RendererBase::RendererBase(int width, int height, std::string title, bool maximized, bool enableImGui, const gl::RendererBase* shared) :
 	mWindow(NULL)
 {
 	mVersion[0] = 4;
@@ -96,25 +96,27 @@ gl::RendererBase::RendererBase(int width, int height, std::string title, bool ma
 
 	// enable imgui
 	// ---------------
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
-	ImGui_ImplOpenGL3_Init(NULL);
+	if (enableImGui && shared == NULL) {
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+		ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
+		ImGui_ImplOpenGL3_Init(NULL);
 
-	ImGuiIO& io = ImGui::GetIO();
-	// Enable Keyboard Controls and Docking
-	// ---------------
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	// add icons
-	// See https://github.com/juliettef/IconFontCppHeaders#example-code
-	// ---------------
-	io.Fonts->AddFontDefault();
-	static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
-	std::string fontFile = std::string(GL_FRAMEWORK_FONT_DIR) + FONT_ICON_FILE_NAME_FAS;
-	io.Fonts->AddFontFromFileTTF(fontFile.c_str(), 13.0f, &icons_config, icons_ranges);
+		ImGuiIO& io = ImGui::GetIO();
+		// Enable Keyboard Controls and Docking
+		// ---------------
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		// add icons
+		// See https://github.com/juliettef/IconFontCppHeaders#example-code
+		// ---------------
+		io.Fonts->AddFontDefault();
+		static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+		ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+		std::string fontFile = std::string(GL_FRAMEWORK_FONT_DIR) + FONT_ICON_FILE_NAME_FAS;
+		io.Fonts->AddFontFromFileTTF(fontFile.c_str(), 13.0f, &icons_config, icons_ranges);
+	}
 }
 
 RendererBase::~RendererBase() {
