@@ -45,6 +45,7 @@ set(IMGUI_SRC
 	# Custom extensions
 	${INCLUDE_DIR}/imgui.hpp
 	${INCLUDE_DIR}/imgui_ext.hpp
+	${INCLUDE_DIR}/imgui_ext.inl.hpp
 	src/imgui_ext.cpp)
 
 set(MESH_FILES

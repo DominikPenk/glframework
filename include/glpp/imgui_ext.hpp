@@ -1,5 +1,8 @@
 #pragma once
 #include <memory>
+#include <map>
+#include <string>
+#include <vector>
 #include "imgui.h"
 
 namespace gl {
@@ -14,6 +17,11 @@ namespace ImGui {
 	bool InputUInt(const char* label, uint32_t* v, int step = 1, int step_fast = 100, ImGuiInputTextFlags flags = 0);
 	bool InputInt64(const char* label, int64_t* v, int step = 1, int step_fast = 100, ImGuiInputTextFlags flags = 0);
 	bool InputUInt64(const char* label, uint64_t* v, int step = 1, int step_fast = 100, ImGuiInputTextFlags flags = 0);
+
+	template<typename T>
+	bool DropdownSelect(const char* label, T* current, const std::map<T, std::string>& choices);
+	bool DropdownSelect(const char* label, int* current, const std::vector<std::string>& choices);
+
 
 	ImU32 ApplyAlpha(ImU32 col, float alpha);
 
@@ -36,3 +44,5 @@ namespace ImGui {
 	bool Rotation(const char* id, float* angle, float pivot[2], float radius, ImU32 color);
 
 }
+
+#include "imgui_ext.inl.hpp"

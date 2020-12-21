@@ -36,6 +36,27 @@ bool ImGui::InputUInt64(const char* label, uint64_t* v, int step, int step_fast,
 	return InputScalar(label, ImGuiDataType_U64, (void*)v, (void*)(step > 0 ? &step : NULL), (void*)(step_fast > 0 ? &step_fast : NULL), format, flags);
 }
 
+bool ImGui::DropdownSelect(const char* label, int* current, const std::vector<std::string>& choices)
+{
+	bool changed = false;
+	if (ImGui::BeginCombo(label, choices[*current].c_str())) {
+		for (int i = 0; i < (int)choices.size(); ++i) {
+			ImGui::PushID(i);
+			bool isSelected = *current == i;
+			if (ImGui::Selectable(choices[i].c_str(), isSelected)) {
+				*current = i;
+				changed = true;
+			}
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+			ImGui::PopID();
+		}
+		ImGui::EndCombo();
+	}
+	return changed;
+}
+
 ImU32 ImGui::ApplyAlpha(ImU32 col, float alpha)
 {
 	if (alpha >= 1.0f)
