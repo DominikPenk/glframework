@@ -106,7 +106,7 @@ gl::RendererBase::RendererBase(int width, int height, std::string title, bool ma
 		ImGuiIO& io = ImGui::GetIO();
 		// Enable Keyboard Controls and Docking
 		// ---------------
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		// add icons
 		// See https://github.com/juliettef/IconFontCppHeaders#example-code
@@ -127,6 +127,27 @@ RendererBase::~RendererBase() {
 void gl::RendererBase::setTitle(const std::string& title)
 {
 	glfwSetWindowTitle(mWindow, title.c_str());
+}
+
+std::pair<uint32_t, uint32_t> gl::RendererBase::windowSize() const
+{
+	int width, height;
+	glfwGetWindowSize(mWindow, &width, &height);
+	return std::make_pair<uint32_t, uint32_t>((uint32_t)width, (uint32_t)height);
+}
+
+int gl::RendererBase::windowWidth() const
+{
+	int w, h;
+	glfwGetWindowSize(mWindow, &w, &h);
+	return w;
+}
+
+int gl::RendererBase::windowHeight() const
+{
+	int w, h;
+	glfwGetWindowSize(mWindow, &w, &h);
+	return h;
 }
 
 // --------------------------------------

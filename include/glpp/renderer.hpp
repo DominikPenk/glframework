@@ -53,7 +53,11 @@ namespace gl {
 		virtual const std::shared_ptr<Camera> camera() const { throw std::runtime_error("This renderer has no camera"); }
 		inline const GLFWwindow* window() const { return mWindow; }
 		inline bool shouldClose() const { return glfwWindowShouldClose(mWindow); }
-		inline bool isMinified() const { glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED); }
+		inline bool isMinified() const { return glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED); }
+		inline bool isMaximized() const { return glfwGetWindowAttrib(mWindow, GLFW_MAXIMIZED); }
+		std::pair<uint32_t, uint32_t> windowSize() const;
+		int windowWidth() const;
+		int windowHeight() const;
 
 		// -> End getters
 
