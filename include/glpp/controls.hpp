@@ -12,7 +12,7 @@ namespace gl {
 	class Control {
 	public:
 		Control();
-		virtual void update(std::shared_ptr<Camera> camera);
+		virtual void update(std::shared_ptr<Camera> camera, bool force = false);
 		virtual void reset(std::shared_ptr<Camera> camera) = 0;
 
 		int keyFrontalView, keyTopView, keyRightView;
@@ -22,7 +22,7 @@ namespace gl {
 	public:
 		OrbitControl(std::shared_ptr<Camera> cam);
 
-		virtual void update(std::shared_ptr<Camera> camera) override;
+		virtual void update(std::shared_ptr<Camera> camera, bool force = false) override;
 		
 		virtual void reset(std::shared_ptr<Camera> camera) override;
 
@@ -63,7 +63,7 @@ namespace gl {
 	public:
 		FlyingControl(std::shared_ptr<Camera> cam = nullptr);
 
-		virtual void update(std::shared_ptr<Camera> camera) override;
+		virtual void update(std::shared_ptr<Camera> camera, bool force = false) override;
 		virtual void reset(std::shared_ptr<Camera> camera) override;
 	
 		float cameraSpeed;
