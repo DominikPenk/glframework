@@ -46,7 +46,9 @@ set(IMGUI_SRC
 	${INCLUDE_DIR}/imgui.hpp
 	${INCLUDE_DIR}/imgui_ext.hpp
 	${INCLUDE_DIR}/imgui_ext.inl.hpp
-	src/imgui_ext.cpp)
+	src/imgui_ext.cpp
+	${INCLUDE_DIR}/imgui_vertical_tabs.hpp
+	src/imgui_vertical_tabs.cpp)
 
 set(MESH_FILES
 	${INCLUDE_DIR}/meshes.hpp
