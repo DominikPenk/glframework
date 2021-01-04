@@ -57,6 +57,28 @@ bool ImGui::DropdownSelect(const char* label, int* current, const std::vector<st
 	return changed;
 }
 
+bool ImGui::InputText(const char* label, std::string& str, size_t size)
+{
+	std::vector<char> buffer(size + 1, '\0');
+	std::copy_n(str.begin(), std::min(size, str.length()), buffer.begin());
+	bool change = ImGui::InputText(label, buffer.data(), size);
+	if (change) {
+		str = buffer.data();
+	}
+	return change;
+}
+
+bool ImGui::InlineInputText(const char* label, std::string& str, size_t size)
+{
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
+	ImGui::InputText(label, str, size);
+	ImGui::PopStyleColor();
+	ImGui::PopStyleVar(2);
+	return false;
+}
+
 ImU32 ImGui::ApplyAlpha(ImU32 col, float alpha)
 {
 	if (alpha >= 1.0f)

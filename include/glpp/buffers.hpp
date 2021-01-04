@@ -222,38 +222,7 @@ namespace gl {
 		std::vector<value_type> mData;
 	};
 
-	template<typename T>
-	class VertexBufferObjectMap : public VertexBufferObjectBase  {
-	public:
-		VertexBufferObjectMap(const T* data, size_t size, GLenum target = GL_ARRAY_BUFFER, GLenum usage = GL_STATIC_DRAW) :
-			VertexBufferObjectBase(sizeof(T)),
-			mDataPtr(data),
-			mSize(size) 
-		{
-			mUsage = usage;
-			mTarget = target;
-			mUpdated = true;
-		}
-
-		virtual std::size_t size() const override
-		{
-			return mSize;
-		}
-		virtual void clear() override
-		{
-			throw std::runtime_error("Cannot clear VertexBufferObjectMap");
-		}
-	protected:
-		virtual const void* dataPtr() const override
-		{
-			return mDataPtr;
-		}
-
-	private:
-		const T* mDataPtr;
-		size_t mSize;
-
-	};
+	
 
 #pragma region typedefs
 	typedef VertexBufferObject<unsigned int, 1> IndexBuffer;
@@ -261,6 +230,8 @@ namespace gl {
 }
 
 #include "variadic_buffer.hpp"
+
+#include "map_buffer.hpp"
 
 namespace gl {
 
@@ -393,17 +364,37 @@ namespace gl {
 			sharedBuffers.push_back(buffer);
 		}
 
-		void setIndexBufferObject(VertexBufferObject<unsigned int, 1>& buffer) {
-			if (buffer.target() != GL_ELEMENT_ARRAY_BUFFER) throw std::invalid_argument("Buffer has to have the target GL_ELEMENT_ARRAY_BUFFER");
+		template<typename T>
+		void addVertexAttributes(std::shared_ptr<gl::VertexBufferObjectMap<T>> buffer) {
+			if (0 == mId) {
+				glGenVertexArrays(1, &mId);
+			}
+			glBindVertexArray(mId);
+			buffer->bind();
+
+			for (int i = 0; i < (int)buffer->vertexAttributes.size(); ++i) {
+				const auto& info = buffer->vertexAttributes[i];
+				glEnableVertexAttribArray(i);
+				glVertexAttribPointer(i, info.count, info.type, info.normalize, sizeof(T), (GLvoid*)info.offset);
+			}
+
+			buffer->unbind();
+			glBindVertexArray(0);
+
+			sharedBuffers.push_back(buffer);
+		}
+
+		void setIndexBufferObject(std::shared_ptr<gl::VertexBufferObjectBase> buffer) {
+			if (buffer->target() != GL_ELEMENT_ARRAY_BUFFER) throw std::invalid_argument("Buffer has to have the target GL_ELEMENT_ARRAY_BUFFER");
 			// Check if VAO has to be initialized
 			if (0 == mId) {
 				glGenVertexArrays(1, &mId);
 			}
 			glBindVertexArray(mId);
-			buffer.bind();
+			buffer->bind();
 			glBindVertexArray(0);
-			buffer.unbind();
-			indices = &buffer;
+			buffer->unbind();
+			indices = buffer;
 		}
 
 		inline void bind() {
@@ -442,7 +433,7 @@ namespace gl {
 		}
 	private:
 		GLuint mId;
-		VertexBufferObject<unsigned int, 1>* indices;
+		std::shared_ptr<VertexBufferObjectBase> indices;
 		std::vector<VertexBufferObjectBase*> buffers;
 		std::vector<std::shared_ptr<VertexBufferObjectBase>> sharedBuffers;
 		int n;

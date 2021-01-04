@@ -34,7 +34,7 @@ namespace gl {
 
 	private:
 		std::shared_ptr<VertexBufferObject<float, 3>> mPoints;
-		VertexBufferObject<unsigned int, 1> mIndices;
+		std::shared_ptr<VertexBufferObject<unsigned int, 1>> mIndices;
 		VertexArrayObject mVAO;
 	};
 

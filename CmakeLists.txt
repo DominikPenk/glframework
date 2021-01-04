@@ -103,6 +103,7 @@ set(GL_FILES
 	${INCLUDE_DIR}/intermediate.inl.h
 	src/intermediate.cpp
 	${INCLUDE_DIR}/variadic_buffer.hpp
+	${INCLUDE_DIR}/map_buffer.hpp
 	${INCLUDE_DIR}/shadermanager.hpp
 	${INCLUDE_DIR}/shadermanager.inl.hpp
 	src/shadermanager.cpp

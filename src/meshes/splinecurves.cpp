@@ -11,11 +11,11 @@
 void computeCatmulRomData(
 	const std::vector<glm::vec3>& points,
 	std::shared_ptr<gl::VertexBufferObject<float, 3>>& p,
-	gl::VertexBufferObject<unsigned int, 1>& indices) {
+	std::shared_ptr<gl::IndexBuffer> indices) {
 
 	for (int i = 0; i < (int)points.size(); ++i) {
 		const glm::vec3 point = points[i];
-		indices.insert(indices.end(), {
+		indices->insert(indices->end(), {
 			(unsigned int)(i == 0 ? points.size() - 1 : i - 1),
 			(unsigned int)(i),
 			(unsigned int)((i + 1) % points.size()),
@@ -35,8 +35,9 @@ gl::CatmullRomSpline::CatmullRomSpline(const std::vector<glm::vec3>& points) :
 	linewidth(2),
 	mPoints(std::make_shared<decltype(mPoints)::element_type>())
 {
-	mIndices.target() = GL_ELEMENT_ARRAY_BUFFER;
-	mIndices.usage() = GL_DYNAMIC_DRAW;
+	mIndices = std::make_shared<gl::IndexBuffer>();
+	mIndices->target() = GL_ELEMENT_ARRAY_BUFFER;
+	mIndices->usage() = GL_DYNAMIC_DRAW;
 
 	mVAO.setIndexBufferObject(mIndices);
 	mVAO.addVertexAttribute(mPoints, 0);
@@ -72,8 +73,8 @@ void gl::CatmullRomSpline::render(const gl::RendererBase * env)
 		mVAO.bind();
 		glPatchParameteri(GL_PATCH_VERTICES, 4);
 		int n = endpointCondition == EndpointCondition::Periodic
-			? mIndices.size()
-			: mIndices.size() - 4;
+			? mIndices->size()
+			: mIndices->size() - 4;
 		glDrawElements(GL_PATCHES, n, GL_UNSIGNED_INT, 0);
 		mVAO.unbind();
 

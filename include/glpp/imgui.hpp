@@ -37,5 +37,7 @@ inline glm::vec4 imgui2ImGlm(ImVec4 v) {
 }
 
 inline ImVec2 operator*(const glm::mat2& A, const ImVec2 v) {
-	return glm2ImGui(A * glm::vec2(v.x, v.y));
+	return ImVec2(
+		A[0][0] * v.x + A[1][0] * v.y, 
+		A[0][1] * v.x + A[1][1] * v.y);
 }

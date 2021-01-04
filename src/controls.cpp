@@ -238,7 +238,7 @@ gl::FlyingControl::FlyingControl(std::shared_ptr<Camera> cam) :
 
 void gl::FlyingControl::update(std::shared_ptr<Camera> camera, bool force)
 {
-	gl::Control::update(camera);
+	gl::Control::update(camera, force);
 
 	const glm::vec3 Front = camera->forward();
 	const glm::vec3 Right = glm::normalize(glm::cross(Front, camera->up()));
@@ -295,6 +295,7 @@ void gl::FlyingControl::update(std::shared_ptr<Camera> camera, bool force)
 		// Scroll wheel
 		if (io.MouseWheel > 0) {
 			cameraSpeed /= std::pow(0.95f, cameraSpeed);
+			hadUserInteraction = true;
 		}
 		else if (io.MouseWheel < 0) {
 			cameraSpeed *= std::pow(0.95f, cameraSpeed);
