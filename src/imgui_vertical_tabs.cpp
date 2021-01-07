@@ -103,7 +103,6 @@ bool ImGui::BeginVerticalTabItem(const char* label)
 
     if (thisTabID == tabBar->activeTabID) {
         ImGui::SameLine();
-        std::cout << "Begin ... ";
         ImGui::BeginChild(thisTabID);
         tabBar->currentTabID = thisTabID;
         return true;
@@ -130,7 +129,6 @@ void ImGui::EndVerticalTabItem()
         IM_ASSERT_USER_ERROR(tabBar->activeTabID == tabBar->currentTabID, "You should not call EndVerticalTabItem() if the tab is not the active one");
     }
 
-    std::cout << "End\r";
     ImGui::EndChild();
     tabBar->currentTabID = 0;
 }

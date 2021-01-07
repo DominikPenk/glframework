@@ -22,7 +22,7 @@ namespace ImGui {
 	bool DropdownSelect(const char* label, T* current, const std::map<T, std::string>& choices);
 	bool DropdownSelect(const char* label, int* current, const std::vector<std::string>& choices);
 
-	bool InputText(const char* label, std::string& str, size_t size);
+	bool InputText(const char* label, std::string& str, size_t size, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
 
 	bool InlineInputText(const char* label, std::string& str, size_t size);
 

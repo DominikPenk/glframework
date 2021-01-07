@@ -57,11 +57,11 @@ bool ImGui::DropdownSelect(const char* label, int* current, const std::vector<st
 	return changed;
 }
 
-bool ImGui::InputText(const char* label, std::string& str, size_t size)
+bool ImGui::InputText(const char* label, std::string& str, size_t size, ImGuiInputTextFlags flags, ImGuiInputTextCallback callback, void* user_data)
 {
 	std::vector<char> buffer(size + 1, '\0');
 	std::copy_n(str.begin(), std::min(size, str.length()), buffer.begin());
-	bool change = ImGui::InputText(label, buffer.data(), size);
+	bool change = ImGui::InputText(label, buffer.data(), size, flags, callback, user_data);
 	if (change) {
 		str = buffer.data();
 	}
