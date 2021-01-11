@@ -17,6 +17,60 @@ bool ImGui::ImageButton(std::shared_ptr<gl::Texture> tex, const ImVec2& size, co
 	return ImGui::ImageButton(*tex, size, uv0, uv1, frame_padding, bg_col, tint_col);
 }
 
+void ImGui::Image(gl::LargeTexture* tex, const ImVec2& size, const ImVec4& tint_col, const ImVec4& border_col)
+{
+
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return;
+
+	ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
+	if (border_col.w > 0.0f)
+		bb.Max += ImVec2(2, 2);
+	ItemSize(bb);
+	if (!ItemAdd(bb, 0))
+		return;
+
+	if (border_col.w > 0.0f)
+	{
+		window->DrawList->AddRect(bb.Min, bb.Max, GetColorU32(border_col), 0.0f);
+	}
+
+	// Add the image
+	auto lerp = [](float a, float b, float t) {
+		return (a + (b - a) * std::min(1.0f, t));
+	};
+
+	if (border_col.w > 0.0f);
+	bb.Min = bb.Min + ImVec2(1, 1);
+	bb.Max = bb.Max - ImVec2(1, 1);
+
+	for (int j = 0; j < tex->rowTiles; ++j) {
+		for (int i = 0; i < tex->colTiles; ++i) {
+			const ImVec2 start = tex->getRelativePos(i, j);
+			const ImVec2 end = tex->getRelativePos(i + 1, j + 1);
+			const float x0 = lerp(bb.Min.x, bb.Max.x, start.x);
+			const float x1 = lerp(bb.Min.x, bb.Max.x, end.x);
+			const float y0 = lerp(bb.Max.y, bb.Min.y, end.y);
+			const float y1 = lerp(bb.Max.y, bb.Min.y, start.y);
+			const ImVec2 q0(x0, y0); // top left
+			const ImVec2 q1(x1, y0); // top right
+			const ImVec2 q2(x1, y1); // bottom right
+			const ImVec2 q3(x0, y1); // bottom left
+
+			float umax = 1.0f;
+			float vmax = 1.0f;
+
+			window->DrawList->AddImageQuad(
+				tex->getTileID(i, j),
+				q0, q1, q2, q3,
+				ImVec2(0, vmax), ImVec2(umax, vmax), ImVec2(umax, 0), ImVec2(0, 0),
+				GetColorU32(tint_col)
+			);
+		}
+	}
+}
+
 bool ImGui::InputUInt(const char* label, uint32_t* v, int step, int step_fast, ImGuiInputTextFlags flags)
 {
 	const char* format = (flags & ImGuiInputTextFlags_CharsHexadecimal) ? "%08X" : "%u";
@@ -235,6 +289,39 @@ bool ImGui::Rotation(const char* id, float* angle, float pivot[2], float radius,
 	return change;
 }
 
+void ImGui::AddImage(ImDrawList* dl, gl::LargeTexture* tex, const ImVec2 min, const ImVec2& size, const ImVec4& tint_col)
+{
+	auto lerp = [](float a, float b, float t) {
+		return (a + (b - a) * std::min(1.0f, t));
+	};
+	const ImVec2 max = min + size;
+
+	for (int j = 0; j < tex->rowTiles; ++j) {
+		for (int i = 0; i < tex->colTiles; ++i) {
+			const ImVec2 start = tex->getRelativePos(i, j);
+			const ImVec2 end = tex->getRelativePos(i + 1, j + 1);
+			const float x0 = lerp(min.x, max.x, start.x);
+			const float x1 = lerp(min.x, max.x, end.x);
+			const float y0 = lerp(max.y, min.y, end.y);
+			const float y1 = lerp(max.y, min.y, start.y);
+			const ImVec2 q0(x0, y0); // top left
+			const ImVec2 q1(x1, y0); // top right
+			const ImVec2 q2(x1, y1); // bottom right
+			const ImVec2 q3(x0, y1); // bottom left
+
+			float umax = 1.0f;
+			float vmax = 1.0f;
+
+			dl->AddImageQuad(
+				tex->getTileID(i, j),
+				q0, q1, q2, q3,
+				ImVec2(0, vmax), ImVec2(umax, vmax), ImVec2(umax, 0), ImVec2(0, 0),
+				GetColorU32(tint_col)
+			);
+		}
+	}
+}
+
 bool ImGui::BeginCanvas(const char* name, ImVec2 position, ImVec2 size)
 {
 	ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -263,4 +350,16 @@ bool ImGui::BeginCanvasFullscreen(const char* name)
 	bool success = ImGui::Begin(name, NULL, windowFlags);
 	ImGui::PopStyleVar(2);
 	return success;
+}
+
+void ImGui::BeginDisable()
+{
+	ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+}
+
+void ImGui::EndDisable()
+{
+	ImGui::PopItemFlag();
+	ImGui::PopStyleVar();
 }

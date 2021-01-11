@@ -98,6 +98,7 @@ set(GL_FILES
 	${MESH_FILES}
 	${INCLUDE_DIR}/texture.hpp
 	src/texture.cpp
+	src/paged_texture.cpp
 	${INCLUDE_DIR}/framebuffer.hpp
 	src/framebuffer.cpp
 	${INCLUDE_DIR}/draw_batch.hpp

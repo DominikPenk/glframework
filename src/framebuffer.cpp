@@ -10,7 +10,7 @@ namespace internal {
 	std::shared_ptr<gl::Texture> createAndCheckColorTexture(int width, int height, std::shared_ptr<gl::Texture> texture) {
 		if (texture == nullptr) {
 			// Create a new texture
-			texture = std::make_shared<gl::Texture>(height, width, gl::PixelFormat::RGBA, gl::PixelType::UByte, gl::No_Mipmap | gl::Filter_Nearest);
+			texture = std::make_shared<gl::Texture>(height, width, gl::PixelFormat::RGBA, gl::PixelType::UByte, gl::TextureFlags_No_Mipmap | gl::TextureFlags_Filter_Nearest);
 		}
 
 		// Check texture attributes
@@ -35,7 +35,7 @@ namespace internal {
 
 		if (texture == nullptr) {
 			// Create a new texture
-			texture = std::make_shared<gl::Texture>(height, width, pixelFormat, dataType, gl::No_Mipmap | gl::Filter_Nearest);
+			texture = std::make_shared<gl::Texture>(height, width, pixelFormat, dataType, gl::TextureFlags_No_Mipmap | gl::TextureFlags_Filter_Nearest);
 		}
 
 		// Check texture attributes

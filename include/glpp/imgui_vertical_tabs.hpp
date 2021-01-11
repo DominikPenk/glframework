@@ -6,7 +6,7 @@ typedef int ImGuiVerticalTabFlags;
 
 enum ImGuiVerticalTabFlags_ {
 	ImGuiVerticalTabFlags_None  = 0,
-	ImGuiVerticalTabFlags_Right = 1 << 1,	// Tabs on the right side
+	ImGuiVerticalTabFlags_Right = 1 << 0,	// Tabs on the right side
 };
 
 namespace ImGui {

@@ -7,6 +7,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "3rdparty/stb_image.h"
 
+#ifdef _DEBUG
+#include <iostream>
+#endif
+
+
 namespace impl {
 	GLenum textureType(int dimensions) {
 		switch (dimensions) {
@@ -51,41 +56,126 @@ namespace impl {
 	}
 }
 
-
-GLenum gl::Texture::glTextureType() const
-{
-	return static_cast<GLenum>(mTextureType);
-}
-
-GLenum gl::Texture::glType() const
-{
-	return static_cast<GLenum>(mDataType);
-}
-
-GLenum gl::Texture::glSizedFormat() const
-{
-	return getGlSizedFormat(mPixelFormat, mDataType);
-}
-
-GLenum gl::Texture::glFormat() const
-{
-	return static_cast<GLenum>(mPixelFormat);
-}
-
-gl::Texture::Texture(TextureType type, PixelFormat pixelFormat, gl::PixelType dataType, int flags) :
-	mTextureType(type),
-	mPixelFormat(pixelFormat),
-	mDataType(dataType),
-	mId(0),
-	id(mId),
+#pragma region TextureBase
+gl::TextureBase::TextureBase(TextureType type, PixelFormat pixelFormat, PixelType dataType, TextureFlags _flags) :
 	rows(mRows),
 	cols(mCols),
 	depth(mDepth),
 	pixelFormat(mPixelFormat),
 	pixelType(mDataType),
-	type(mTextureType)
+	type(mTextureType),
+
+	mTextureType(type),
+	mPixelFormat(pixelFormat),
+	mDataType(dataType),
+	mCols(1),
+	mRows(1),
+	mDepth(1),
+	mMinFilterType(FilterType::Linear),
+	mMagFilterType(FilterType::Linear),
+	mWrapType()
 {
-	setValuesFromFlags((gl::TextureFlags)flags);
+	int filterType = _flags & TextureFlags_Filter_Nearest_Linear;
+	int wrapType = _flags & (0x7 << 3);
+
+	switch (wrapType) {
+	case TextureFlags_Wrap_Clamp:
+		mWrapType[0] = mWrapType[1] = mWrapType[2] = gl::WrapType::Clamp;
+		break;
+	case TextureFlags_Wrap_Repeat:
+		mWrapType[0] = mWrapType[1] = mWrapType[2] = gl::WrapType::Repeat;
+		break;
+	case TextureFlags_Wrap_Border:
+		mWrapType[0] = mWrapType[1] = mWrapType[2] = gl::WrapType::Border;
+		break;
+	case TextureFlags_Wrap_Mirrored_Clamp:
+		mWrapType[0] = mWrapType[1] = mWrapType[2] = gl::WrapType::MirroredClamp;
+		break;
+	case TextureFlags_Wrap_Mirrored_Repeat:
+		mWrapType[0] = mWrapType[1] = mWrapType[2] = gl::WrapType::MirroredRepeat;
+		break;
+	}
+
+	switch (filterType) {
+	case TextureFlags_Filter_Linear:
+		mMagFilterType = mMinFilterType = gl::FilterType::Linear;
+		break;
+	case TextureFlags_Filter_Nearest:
+		mMagFilterType = mMinFilterType = gl::FilterType::Nearest;
+		break;
+	case TextureFlags_Filter_Nearest_Linear:
+		mMagFilterType = mMinFilterType = gl::FilterType::NearestMipmapLinear;
+		break;
+	case TextureFlags_Filter_Linear_Nearest:
+		mMagFilterType = mMinFilterType = gl::FilterType::LinearMipmapNearest;
+		break;
+	}
+}
+
+GLenum gl::TextureBase::glTextureType() const
+{
+	return static_cast<GLenum>(mTextureType);
+}
+
+GLenum gl::TextureBase::glType() const
+{
+	return static_cast<GLenum>(mDataType);
+}
+
+GLenum gl::TextureBase::glSizedFormat() const
+{
+	return getGlSizedFormat(mPixelFormat, mDataType);
+}
+
+GLenum gl::TextureBase::glFormat() const
+{
+	return static_cast<GLenum>(mPixelFormat);
+}
+
+int gl::TextureBase::channels() const
+{
+	return getChannelsForFormat(mPixelFormat);
+}
+
+int gl::TextureBase::dimensions() const
+{
+	switch (mTextureType) {
+	case TextureType::D1:
+		return 1;
+	case TextureType::D2:
+		return 2;
+	case TextureType::D3:
+		return 3;
+	default:
+		throw std::runtime_error("Invalid texture type");
+	}
+}
+
+gl::WrapType gl::TextureBase::wrap(int dim) const
+{
+	assert(dim >= 0 && dim <= 3);
+	return mWrapType[dim];
+}
+
+gl::FilterType gl::TextureBase::magFilter() const
+{
+	return mMagFilterType;
+}
+
+gl::FilterType gl::TextureBase::minFilter() const
+{
+	return mMinFilterType;
+}
+#pragma endregion
+
+#pragma region Texture
+
+gl::Texture::Texture(TextureType type, PixelFormat pixelFormat, gl::PixelType dataType, int flags) :
+	TextureBase(type, pixelFormat, dataType, flags),
+	mId(0),
+	id(mId)	
+{
+	mCreateMipmap = (static_cast<int>(flags) & TextureFlags_No_Mipmap) == 0x0;
 }
 
 gl::Texture::Texture(int cols, PixelFormat pixelFormat, gl::PixelType dataType, int flags) :
@@ -93,7 +183,7 @@ gl::Texture::Texture(int cols, PixelFormat pixelFormat, gl::PixelType dataType, 
 {
 	mCols = cols;
 	mRows = mDepth = 1;
-	if (flags & Lazy_Init == Force_Init) {
+	if (!(flags & TextureFlags_Lazy_Init)) {
 		init();
 	}
 }
@@ -105,18 +195,18 @@ gl::Texture::Texture(int cols, int rows, PixelFormat pixelFormat, gl::PixelType 
 	mRows = rows;
 	mDepth = 1;
 
-	if (flags & Lazy_Init == Force_Init) {
+	if (!(flags & TextureFlags_Lazy_Init)) {
 		init();
 	}
 }
 
-gl::Texture::Texture(int cols, int rows, int depth, PixelFormat pixelFormat, gl::PixelType dataType, int flags) :
+gl::Texture::Texture(int cols, int rows, int depth, PixelFormat pixelFormat, gl::PixelType dataType, TextureFlags flags) :
 	Texture(TextureType::D3, pixelFormat, dataType, flags)
 {
 	mCols = cols;
 	mRows = rows;
 	mDepth = depth;
-	if (flags & Lazy_Init == Force_Init) {
+	if (!(flags & TextureFlags_Lazy_Init)) {
 		init();
 	}
 }
@@ -125,18 +215,13 @@ gl::Texture::Texture(std::string path, bool flipY, TextureFlags flags) :
 	Texture(TextureType::D2, PixelFormat::RGB, PixelType::UByte, flags)
 {
 	int channels;
+	stbi_set_flip_vertically_on_load(flipY);
 	unsigned char * data = stbi_load(path.c_str(), &mCols, &mRows, &channels, 0);
 	if(data == NULL) {
 		throw std::runtime_error("Could not load texture from \"" + path + "\"");
 	}
-	if (flipY) {
-		for (int j = 0; j < mRows / 2; ++j) {
-			for (int i = 0; i < mCols; ++i) {
-				for (int c = 0; c < channels; ++c) {
-					std::swap(data[channels * (j * mCols + i) + c], data[channels * ((mRows - 1 - j) * mCols + i) + c]);
-				}
-			}
-		}
+	if (std::max(mCols, mRows) > 2048) {
+		throw std::runtime_error("This is texture is to large!");
 	}
 	if (channels == 1) {
 		mPixelFormat = PixelFormat::Red;
@@ -160,46 +245,6 @@ gl::Texture::~Texture()
 	}
 }
 
-void gl::Texture::setValuesFromFlags(TextureFlags _flags)
-{
-	mCreateMipmap = (static_cast<int>(_flags) & No_Mipmap) == 0x0;
-	int filterType = _flags & Filter_Nearest_Linear;
-	int wrapType = _flags & (0x7 << 3);
-
-	switch (wrapType) {
-	case Wrap_Clamp:
-		mWrapType[0] = mWrapType[1] = mWrapType[2] = gl::WrapType::Clamp;
-		break;
-	case Wrap_Repeat:
-		mWrapType[0] = mWrapType[1] = mWrapType[2] = gl::WrapType::Repeat;
-		break;
-	case Wrap_Border:
-		mWrapType[0] = mWrapType[1] = mWrapType[2] = gl::WrapType::Border;
-		break;
-	case Wrap_Mirrored_Clamp:
-		mWrapType[0] = mWrapType[1] = mWrapType[2] = gl::WrapType::MirroredClamp;
-		break;
-	case Wrap_Mirrored_Repeat:
-		mWrapType[0] = mWrapType[1] = mWrapType[2] = gl::WrapType::MirroredRepeat;
-		break;
-	}
-
-	switch (filterType) {
-	case Filter_Linear:
-		mMagFilterType = mMinFilterType = gl::FilterType::Linear;
-		break;
-	case Filter_Nearest:
-		mMagFilterType = mMinFilterType = gl::FilterType::Nearest;
-		break;
-	case Filter_Nearest_Linear:
-		mMagFilterType = mMinFilterType = gl::FilterType::NearestMipmapLinear;
-		break;
-	case Filter_Linear_Nearest:
-		mMagFilterType = mMinFilterType = gl::FilterType::LinearMipmapNearest;
-		break;
-	}
-}
-
 void gl::Texture::createMipmap(bool shouldCreate)
 {
 	if (shouldCreate) {
@@ -213,13 +258,18 @@ void gl::Texture::setData(void* data, PixelFormat pixelFormat)
 {
 	bind();
 	GLenum format = pixelFormat == gl::PixelFormat::Default ? glFormat() : getGLFormat(pixelFormat);
+	GLint oldAlign;
+	glGetIntegerv(GL_UNPACK_ALIGNMENT, &oldAlign);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	switch (mTextureType) {
 	case TextureType::D1:
 		glTexSubImage1D(GL_TEXTURE_1D, 0, 0, mCols, format, static_cast<GLenum>(mDataType), data);
 		break;
 	case TextureType::D2:
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, mCols);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mCols, mRows, format, static_cast<GLenum>(mDataType), data);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		break;
 	case TextureType::D3:
 		glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, mCols, mRows, mDepth, format, static_cast<GLenum>(mDataType), data);
@@ -228,6 +278,7 @@ void gl::Texture::setData(void* data, PixelFormat pixelFormat)
 		throw std::runtime_error("Invalid number of dimensions");
 	}
 	createMipmap(mCreateMipmap);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, oldAlign);
 	glBindTexture(static_cast<GLenum>(mTextureType), 0);
 }
 
@@ -304,44 +355,9 @@ void gl::Texture::unbind()
 	glBindTexture(static_cast<GLenum>(mTextureType), 0);
 }
 
-int gl::Texture::dimensions() const
-{
-	switch (mTextureType) {
-	case TextureType::D1:
-		return 1;
-	case TextureType::D2: 
-		return 2;
-	case TextureType::D3:
-		return 3;
-	default:
-		throw std::runtime_error("Invalid texture type");
-	}
-}
-
-gl::WrapType gl::Texture::wrap(int dim) const
-{
-	assert(dim >= 0 && dim <= 3);
-	return mWrapType[dim];
-}
-
-gl::FilterType gl::Texture::magFilter() const
-{
-	return mMagFilterType;
-}
-
-gl::FilterType gl::Texture::minFilter() const
-{
-	return mMinFilterType;
-}
-
 bool gl::Texture::hasMipmap() const
 {
 	return mCreateMipmap;
-}
-
-int gl::Texture::channels() const
-{
-	return getChannelsForFormat(mPixelFormat);
 }
 
 void gl::Texture::init()
@@ -433,3 +449,6 @@ int gl::getChannelsForFormat(PixelFormat format)
 		std::invalid_argument("Invalid format");
 	}
 }
+
+#pragma endregion
+

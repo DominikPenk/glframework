@@ -2,6 +2,8 @@
 
 #if defined(__WIN32__) || defined(_WIN32) || defined(WIN32)
 #include <windows.h>
+#undef min
+#undef max
 #endif
 
 #include <chrono>
@@ -16,10 +18,54 @@
 namespace fs = std::filesystem;
 using namespace std::chrono_literals;
 
-bool ImGui::ImFilesystemDialoguePopup::_BookmarksLoaded = false;
+bool ImGui::ImFilesystemDialoguePopup::_FirstCall = true;
 std::set<std::string> ImGui::ImFilesystemDialoguePopup::Bookmarks = std::set<std::string>();
 std::vector<std::string> ImGui::ImFilesystemDialoguePopup::_Drives = std::vector<std::string>();
 ImPool<ImGui::ImFilesystemDialoguePopup> ImGui::ImFilesystemDialoguePopup::FileDialogues = ImPool<ImGui::ImFilesystemDialoguePopup>();
+std::unordered_map<std::string, std::shared_ptr<ImGui::FilePreview>> ImGui::ImFilesystemDialoguePopup::PreviewFunctions;
+std::unordered_map<std::string, std::string> ImGui::ImFilesystemDialoguePopup::FileIcons = {
+	{ ".png", ICON_FA_FILE_IMAGE },
+	{ ".jpg", ICON_FA_FILE_IMAGE },
+	{ ".jpeg", ICON_FA_FILE_IMAGE },
+	{ ".bpm", ICON_FA_FILE_IMAGE },
+	{ ".tiff", ICON_FA_FILE_IMAGE },
+	{ ".tif", ICON_FA_FILE_IMAGE },
+	{ ".exr", ICON_FA_FILE_IMAGE },
+	{ ".ppm", ICON_FA_FILE_IMAGE },
+	{ ".raw", ICON_FA_FILE_IMAGE },
+	{ ".exe", ICON_FA_COG },
+	{ ".ply", ICON_FA_DRAW_POLYGON },
+	{ ".obj", ICON_FA_DRAW_POLYGON },
+	{ ".txt", ICON_FA_FILE_ALT },
+	{ ".pdf", ICON_FA_FILE_PDF },
+	{ ".ppt", ICON_FA_FILE_POWERPOINT },
+	{ ".pptx", ICON_FA_FILE_POWERPOINT },
+	{ ".cxx", ICON_FA_FILE_CODE },
+	{ ".c", ICON_FA_FILE_CODE },
+	{ ".h", ICON_FA_FILE_CODE },
+	{ ".hpp", ICON_FA_FILE_CODE },
+	{ ".html", ICON_FA_FILE_CODE },
+	{ ".py", ICON_FA_FILE_CODE },
+	{ ".js", ICON_FA_FILE_CODE },
+	{ ".cpp", ICON_FA_FILE_CODE },
+	{ ".mp4", ICON_FA_FILE_VIDEO },
+	{ ".avi", ICON_FA_FILE_VIDEO },
+	{ ".webm", ICON_FA_FILE_VIDEO },
+	{ ".mkv", ICON_FA_FILE_VIDEO },
+	{ ".flv", ICON_FA_FILE_VIDEO },
+	{ ".ogg", ICON_FA_FILE_VIDEO },
+	{ ".ogv", ICON_FA_FILE_VIDEO },
+	{ ".gif", ICON_FA_FILE_VIDEO },
+	{ ".mov", ICON_FA_FILE_VIDEO },
+	{ ".qt", ICON_FA_FILE_VIDEO },
+	{ ".mpg", ICON_FA_FILE_VIDEO },
+	{ ".zip", ICON_FA_FILE_ARCHIVE },
+	{ ".7z", ICON_FA_FILE_ARCHIVE },
+	{ ".mp3", ICON_FA_FILE_AUDIO },
+	{ ".aac", ICON_FA_FILE_AUDIO },
+	{ ".csv", ICON_FA_FILE_CSV },
+
+};
 
 #pragma region Utility functions
 
@@ -155,6 +201,8 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 	const bool hideFiles     = flags & ImFileSystemFlags_HideFiles;
 	const bool selectFolders = flags & ImFileSystemFlags_FolderSelect;
 	const bool selectFiles   = flags & ImFileSystemFlags_FileSelect;
+	const bool noDoubleClick = flags & ImFileSystemFlags_NoAcceptOnDoubleClick;
+	const bool withPreview   = !(bool)(flags & ImFileSystemFlags_NoPreviews);
 
 	ImGuiID id = ImGui::GetID(str_id);
 	ImFilesystemDialoguePopup* popup = ImFilesystemDialoguePopup::FileDialogues.GetOrAddByKey(id);
@@ -222,7 +270,7 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 
 			// -- End Left Column
 
-			// --- Right Column
+			// --- Right Column Column (Filesystem viewer)
 			ImGui::TableNextColumn();
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f));
 			if (ImGui::Button(ICON_FA_ARROW_LEFT)) {
@@ -251,116 +299,150 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 				popup->setCurrentFolder(popup->_currentFolderUserInput);
 			}
 
-			ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Sortable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg;
-			ImVec2 tableSize(0, ImGui::GetContentRegionAvail().y - okSize.y - 2.0f * style.ItemSpacing.y);
-			if (fs::exists(currentFolder) && ImGui::BeginTable("##Selector", 3, flags, tableSize)) {
-				ImGui::TableSetupScrollFreeze(0, 1); // Make top row always visible
-				ImGui::TableSetupColumn("Name",          ImGuiTableColumnFlags_DefaultSort);
-				ImGui::TableSetupColumn("Date Modified", ImGuiTableColumnFlags_NoSort);         // FIXME: Enable sorting for these two columns
-				ImGui::TableSetupColumn("Size",          ImGuiTableColumnFlags_NoSort);         // FIXME: Enable sorting for these two columns
-				ImGui::TableHeadersRow();
-
-				// Display contents of current folder
-				std::vector<fs::path> folders;
-				std::vector<fs::path> files;
-
-
-				for (auto& child : fs::directory_iterator(currentFolder, fs::directory_options::skip_permission_denied)) {
-					if (child.is_directory()) {
-						folders.push_back(child.path());
-					}
-					else if (child.is_regular_file()) {
-						files.push_back(child.path());
-					}
-				}
-				
-				// FIXME implement sorting for all columns
-				ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs();
-				if (sortSpecs && sortSpecs->SpecsDirty) {
-					if (sortSpecs->Specs->SortDirection == ImGuiSortDirection_Ascending) {
-						std::sort(folders.begin(), folders.end(), std::less());
-					}
-					else {
-						std::sort(folders.begin(), folders.end(), std::greater());
-					}
-				}
-
-				// Draw folders first
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-				ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.f, 0.5f));
-				
-				// Show link to parent folder
-				if (currentFolder.parent_path() != currentFolder) {
-					ImGui::TableNextColumn();									// Name
-					const std::string label = std::string(ICON_FA_FOLDER_OPEN) + " ..";
-					if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
-						popup->setCurrentFolder(currentFolder.parent_path().string());
-						if (selectFolders) { popup->currentSelected = currentFolder.string(); }
-					}
-					ImGui::TableNextColumn();									// Date Modified
-					ImGui::TableNextColumn();									// Size
-				}
-
-				// Show new folder
-				if (popup->_creatingNewFolder) {
+			if (fs::exists(currentFolder)) {
+				if (withPreview) {
+					ImGuiTabBarFlags previewFlags = ImGuiTableFlags_Resizable;
+					ImGui::BeginTable("##SelectorLayout", 2, previewFlags);
+					ImGui::TableNextRow();
 					ImGui::TableNextColumn();
-					if (shouldSetNewFolderFocus) { SetKeyboardFocusHere(); }
-					InputText("##Foldername", popup->_newFolder, 256);			// Name
-					if (IsKeyPressed(GLFW_KEY_ESCAPE)) {
-						popup->_creatingNewFolder = false;
-					}
-					if (IsItemDeactivatedAfterEdit()) {
-						try {
-							fs::create_directory(currentFolder / popup->_newFolder);
-						}
-						catch (...) {
-							std::cerr << "Could not create folder \"" + (fs::path(currentFolder) / popup->_newFolder).string() + "\"\n";
-						}
-						popup->_creatingNewFolder = false;
-					}
-					ImGui::TableNextColumn();									// Date Modified
-					ImGui::TableNextColumn();									// Size
 				}
-				
-				// Show all folders
-				for (const fs::path& folder : folders) {
-					const std::string path = folder.string();
-					const std::string name = folder.filename().string();
-					const std::string label = std::string(ICON_FA_FOLDER_OPEN) + " " + name;
-					if (!showHidden && hiddenFileInicators.find(name[0]) != std::string::npos) { continue; }	// Skip hidden files/folders
-					ImGui::TableNextColumn();									// Name
-					if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
-						popup->setCurrentFolder(path);
-						if (selectFolders) { popup->currentSelected = currentFolder.string(); }
-					}
-					ImGui::TableNextColumn();									// Date Modified
-					ImGui::TableNextColumn();									// Size
-				}
+				ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Sortable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg;
+				ImVec2 tableSize(0, ImGui::GetContentRegionAvail().y - okSize.y - 2.0f * style.ItemSpacing.y);
+				if (ImGui::BeginTable("##Selector", 3, flags, tableSize)) {
+					ImGui::TableSetupScrollFreeze(0, 1); // Make top row always visible
+					ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_DefaultSort);
+					ImGui::TableSetupColumn("Date Modified", ImGuiTableColumnFlags_NoSort);         // FIXME: Enable sorting for these two columns
+					ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_NoSort);         // FIXME: Enable sorting for these two columns
+					ImGui::TableHeadersRow();
 
-				// Show all files
-				if (!hideFiles) {
-					for (const fs::path& file : files) {
-						ImGui::TableNextColumn();								// Name
-						std::string path = file.string();
-						std::string name = file.filename().string();
-						const std::string label = std::string(ICON_FA_FILE) + " " + name;
+					// Display contents of current folder
+					std::vector<fs::path> folders;
+					std::vector<fs::path> files;
+
+
+					for (auto& child : fs::directory_iterator(currentFolder, fs::directory_options::skip_permission_denied)) {
+						if (child.is_directory()) {
+							folders.push_back(child.path());
+						}
+						else if (child.is_regular_file()) {
+							files.push_back(child.path());
+						}
+					}
+
+					// FIXME implement sorting for all columns
+					ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs();
+					if (sortSpecs && sortSpecs->SpecsDirty) {
+						if (sortSpecs->Specs->SortDirection == ImGuiSortDirection_Ascending) {
+							std::sort(folders.begin(), folders.end(), std::less());
+						}
+						else {
+							std::sort(folders.begin(), folders.end(), std::greater());
+						}
+					}
+
+					// Draw folders first
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+					ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.f, 0.5f));
+
+					// Show link to parent folder
+					if (currentFolder.parent_path() != currentFolder) {
+						ImGui::TableNextColumn();									// Name
+						const std::string label = std::string(ICON_FA_FOLDER_OPEN) + " ..";
 						if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
-							if (selectFiles) { popup->currentSelected = file.string(); }
+							if (selectFolders) { popup->currentSelected = currentFolder.string(); }
 						}
-						ImGui::TableNextColumn();								// Date Modified
-						ImGui::Text(getFileLastWriteString(file).c_str());
-						ImGui::TableNextColumn();								// Size
-						try {
-							const std::string size = bytesToString(fs::file_size(file));
-							ImGui::Text("%s", size.c_str());
+						if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+							popup->setCurrentFolder(currentFolder.parent_path().string());
 						}
-						catch (...) {}
+						ImGui::TableNextColumn();									// Date Modified
+						ImGui::TableNextColumn();									// Size
 					}
-				}
-				ImGui::PopStyleVar();
-				ImGui::PopStyleColor();
 
-				ImGui::EndTable();
+					// Show new folder
+					if (popup->_creatingNewFolder) {
+						ImGui::TableNextColumn();
+						if (shouldSetNewFolderFocus) { SetKeyboardFocusHere(); }
+						InputText("##Foldername", popup->_newFolder, 256);			// Name
+						if (IsKeyPressed(GLFW_KEY_ESCAPE)) {
+							popup->_creatingNewFolder = false;
+						}
+						if (IsItemDeactivatedAfterEdit()) {
+							try {
+								fs::create_directory(currentFolder / popup->_newFolder);
+							}
+							catch (...) {
+								std::cerr << "Could not create folder \"" + (fs::path(currentFolder) / popup->_newFolder).string() + "\"\n";
+							}
+							popup->_creatingNewFolder = false;
+						}
+						ImGui::TableNextColumn();									// Date Modified
+						ImGui::TableNextColumn();									// Size
+					}
+
+					// Show all folders
+					for (const fs::path& folder : folders) {
+						const std::string path = folder.string();
+						const std::string name = folder.filename().string();
+						const std::string label = std::string(ICON_FA_FOLDER_OPEN) + " " + name;
+						if (!showHidden && hiddenFileInicators.find(name[0]) != std::string::npos) { continue; }	// Skip hidden files/folders
+						ImGui::TableNextColumn();									// Name
+						if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth(), 0)) && selectFolders) {
+							if (selectFolders) { popup->currentSelected = currentFolder.string(); }
+						}
+						if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+							popup->setCurrentFolder(path);
+						}
+						ImGui::TableNextColumn();									// Date Modified
+						ImGui::TableNextColumn();									// Size
+					}
+
+					// Show all files
+					if (!hideFiles) {
+						for (const fs::path& file : files) {
+							ImGui::TableNextColumn();								// Name
+							std::string path = file.string();
+							std::string name = file.filename().string();
+							std::string icon = std::string(ICON_FA_FILE);
+							std::string extension = file.extension().string();
+							std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c) { return std::tolower(c); });
+							if (popup->FileIcons.find(extension) != popup->FileIcons.end()) {
+								icon = popup->FileIcons[extension];
+							}
+							const std::string label = icon + " " + name;
+							if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
+								if (selectFiles) { popup->currentSelected = file.string(); }
+								// Check if a preview is available
+								popup->setPreviewFunction(file.string());
+							}
+							if (!noDoubleClick && selectFiles && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+								ImGui::CloseCurrentPopup();
+								popup->isOpen = false;
+								popup->_history.clear();
+								selected = file.string();
+								elementSelected = true;
+							}
+							ImGui::TableNextColumn();								// Date Modified
+							ImGui::Text(getFileLastWriteString(file).c_str());
+							ImGui::TableNextColumn();								// Size
+							try {
+								const std::string size = bytesToString(fs::file_size(file));
+								ImGui::Text("%s", size.c_str());
+							}
+							catch (...) {}
+						}
+					}
+					ImGui::PopStyleVar();
+					ImGui::PopStyleColor();
+
+					ImGui::EndTable();
+				}
+				if (withPreview) {
+					ImGui:TableNextColumn();
+					if (popup->currentPreview) {
+						popup->currentPreview->draw();
+					}
+					ImGui::EndTable();
+				}
 			}
 			else if (!fs::exists(currentFolder)) {
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
@@ -394,7 +476,7 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 				popup->_history.clear();
 				elementSelected = false;
 			}
-			// --- End Right Column
+			// --- End Right/Center Column
 
 			ImGui::EndTable();
 		}
@@ -406,31 +488,29 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 
 bool ImGui::FilePathInput(const char* label, std::string& file, size_t maxSize, const char* msg)
 {
-	ImGui::PushID(label);
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-	bool change = ImGui::InputText("##filepath", file, maxSize);
-	ImGui::SameLine();
-	if (ImGui::Button("Open")) {
-		ImGui::OpenPopup(msg);
-	}
-	ImGui::PopStyleVar();
-	ImGui::SameLine();
-	ImGui::Text(label);
 
-	if (FilesystemDialogPopupModal(msg, file, ImFileSystemFlags_FileSelect)) {
-		change = true;
-	}
-	
-	ImGui::PopID();
-
-	return change;
+	return FileSystemPathInputEx(label, file, maxSize, msg, ImFileSystemFlags_FileSelect);
 }
 
 bool ImGui::FolderPathInput(const char* label, std::string& file, size_t maxSize, const char* msg)
 {
+	return FileSystemPathInputEx(label, file, maxSize, msg, ImFileSystemFlags_HideFiles | ImFileSystemFlags_FolderSelect);
+}
+
+bool ImGui::FileSystemPathInputEx(const char* label, std::string& path, size_t maxSize, const char* msg, ImFileSystemFlags flags)
+{
+	ImGuiContext& g = *GImGui;
+	ImGuiWindow* window = g.CurrentWindow;
+	if (window->SkipItems)
+		return false;
+
 	ImGui::PushID(label);
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-	bool change = ImGui::InputText("##filepath", file, maxSize);
+	const ImVec2 buttonSize = ImGui::CalcTextSize("Open", NULL) + g.Style.FramePadding * 2.0f;
+	const float width = window->DC.ItemWidth - buttonSize.x - g.Style.ItemInnerSpacing.x;
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, g.Style.ItemInnerSpacing);
+	ImGui::PushItemWidth(width);
+	bool change = ImGui::InputText("##path", (char*)path.c_str(), maxSize, ImGuiInputTextFlags_ReadOnly);
+	ImGui::PopItemWidth();
 	ImGui::SameLine();
 	if (ImGui::Button("Open")) {
 		ImGui::OpenPopup(msg);
@@ -439,11 +519,12 @@ bool ImGui::FolderPathInput(const char* label, std::string& file, size_t maxSize
 	ImGui::SameLine();
 	ImGui::Text(label);
 
-	if (FilesystemDialogPopupModal(msg, file, ImFileSystemFlags_FolderSelect)) {
+	if (FilesystemDialogPopupModal(msg, path, flags)) {
 		change = true;
 	}
 
 	ImGui::PopID();
+
 	return change;
 }
 
@@ -451,13 +532,18 @@ ImGui::ImFilesystemDialoguePopup::ImFilesystemDialoguePopup() :
 	isOpen(false),
 	currentFolder(""),
 	currentSelected(""),
+	currentPreview(nullptr),
 	_creatingNewFolder(false),
 	_newFolder(""),
 	_historyPos(0)
 {
-	if (!_BookmarksLoaded) { _LoadBookmarks(); }
-	if (_Drives.size() == 0) {
+	// Initialize global stuff
+	if (_FirstCall) { 
+		_LoadBookmarks();
 		_Drives = getFilesystemRoots();
+		std::shared_ptr<ImagePreview> imagePreview = std::make_shared<ImagePreview>();
+		PreviewFunctions.insert({ ".png", imagePreview });
+		PreviewFunctions.insert({ ".jpg", imagePreview });
 	}
 }
 
@@ -470,6 +556,18 @@ void ImGui::ImFilesystemDialoguePopup::setCurrentFolder(std::string folder)
 	}
 	currentFolder = folder;
 	_currentFolderUserInput = folder;
+}
+
+void ImGui::ImFilesystemDialoguePopup::setPreviewFunction(std::string file)
+{
+	std::string ext = fs::path(file).extension().string();
+	if (PreviewFunctions.find(ext) != PreviewFunctions.end()) {
+		currentPreview = PreviewFunctions[ext];
+		currentPreview->selected(file);
+	}
+	else {
+		currentPreview = nullptr;
+	}
 }
 
 void ImGui::ImFilesystemDialoguePopup::historyBack()
@@ -522,5 +620,28 @@ void ImGui::ImFilesystemDialoguePopup::RemoveBookmark(std::string path)
 	IM_ASSERT(f.is_open());
 	for (std::string bm : Bookmarks) {
 		f << bm << std::endl;
+	}
+}
+
+void ImGui::ImagePreview::selected(std::string path)
+{
+	try {
+		mPreviewTexture = std::make_unique<gl::LargeTexture>(path, gl::TextureFlags_No_Mipmap);
+	} catch(std::exception& ex) {
+		mPreviewTexture = nullptr;
+	}
+	mPath = path;
+}
+
+void ImGui::ImagePreview::draw()
+{
+	ImGui::TextUnformatted(mPath.c_str());
+	if (mPreviewTexture != nullptr) {
+		ImVec2 space = ImGui::GetContentRegionAvail();
+		float s = std::min(1.0f, space.x / mPreviewTexture->cols);
+		ImGui::Image(mPreviewTexture.get(), ImVec2(mPreviewTexture->cols, mPreviewTexture->rows) * s);
+	}
+	else {
+		ImGui::TextUnformatted("Could not load image");
 	}
 }
