@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glpp/meshes/mesh.hpp"
+#include <glm/glm.hpp>
 
 namespace gl {
 	class RendererBase;
@@ -22,6 +23,9 @@ namespace gl {
 
 		size_t numVertices() const { return mVertexData->size(); }
 		size_t numFaces() const { return mBatch.indexBuffer->size() / 3; }
+
+		glm::vec3 vertex(size_t i) const;
+		glm::vec4& color();
 
 		virtual bool handleIO(const Renderer* env, ImGuiIO& io) override;
 

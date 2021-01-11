@@ -4,6 +4,7 @@
 
 #include <glm/gtx/vector_angle.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 

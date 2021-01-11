@@ -1,5 +1,6 @@
 #include "glpp/texture.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <cassert>

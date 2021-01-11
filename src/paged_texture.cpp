@@ -3,6 +3,7 @@
 #include "3rdparty/stb_image.h"
 
 #include <iostream>
+#include <algorithm>
 
 gl::LargeTexture::LargeTexture(int cols, int rows, PixelFormat pixelFormat, gl::PixelType dataType, TextureFlags flags) :
 	TextureBase(TextureType::D2, pixelFormat, dataType, flags),

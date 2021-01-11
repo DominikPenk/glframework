@@ -145,3 +145,9 @@ void gl::TriangleMesh::computeNormals()
 		mVertexData->get<2>(i) = glm::normalize(vertexNormals[i]);
 	}
 }
+
+glm::vec3 gl::TriangleMesh::vertex(size_t i) const {
+	return mVertexData->at<0>(i);
+}
+
+glm::vec4& gl::TriangleMesh::color() { return mColor; }

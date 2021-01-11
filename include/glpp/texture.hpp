@@ -16,7 +16,7 @@ namespace gl {
 	};
 
 	enum class PixelFormat {
-		Red = GL_LUMINANCE,
+		Red = GL_RED,
 		RG = GL_RG,
 		RGB = GL_RGB,
 		BGR = GL_BGR,
@@ -65,7 +65,9 @@ namespace gl {
 		TextureFlags_Wrap_Mirrored_Repeat   = (0x4 << 3), // b100000
 
 		TextureFlags_Force_Init             = (0x0 << 6),
-		TextureFlags_Lazy_Init              = (0x1 << 6)
+		TextureFlags_Lazy_Init              = (0x1 << 6),
+
+		TextureFlags_FrameBuffer_Texture    = TextureFlags_No_Mipmap | TextureFlags_Filter_Nearest  // This is a shorthand to create textures ready to use in a framebuffer
 	};
 
 	constexpr GLenum getGLFormat(PixelFormat format) {
