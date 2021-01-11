@@ -213,8 +213,14 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 			popup->isOpen = true;
 			popup->currentSelected = selected;
 		}
-		if (popup->currentFolder == "") {
+		if (popup->currentFolder == "" && selected == "") {
 			popup->setCurrentFolder(ImFilesystemDialoguePopup::_Drives.front());
+		}
+		else if (popup->currentFolder == "" && fs::is_directory(selected)) {
+			popup->setCurrentFolder(selected);
+		}
+		else if (popup->currentFolder == "" && fs::is_regular_file(selected)) {
+			popup->setCurrentFolder(fs::path(selected).parent_path().string());
 		}
 		const fs::path currentFolder(popup->currentFolder);
 		ImGuiContext& g = *GImGui;
@@ -517,7 +523,7 @@ bool ImGui::FileSystemPathInputEx(const char* label, std::string& path, size_t m
 	}
 	ImGui::PopStyleVar();
 	ImGui::SameLine();
-	ImGui::Text(label);
+	ImGui::TextUnformatted(label, FindRenderedTextEnd(label));
 
 	if (FilesystemDialogPopupModal(msg, path, flags)) {
 		change = true;
