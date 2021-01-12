@@ -204,6 +204,8 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 	const bool noDoubleClick = flags & ImFileSystemFlags_NoAcceptOnDoubleClick;
 	const bool withPreview   = !(bool)(flags & ImFileSystemFlags_NoPreviews);
 
+	IM_ASSERT_USER_ERROR(selectFolders != selectFiles, "You can only choose one of ImFileSystemFlags_FolderSelect and ImFileSystemFlags_FileSelect");
+
 	ImGuiID id = ImGui::GetID(str_id);
 	ImFilesystemDialoguePopup* popup = ImFilesystemDialoguePopup::FileDialogues.GetOrAddByKey(id);
 
@@ -211,16 +213,13 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 	if (ImGui::BeginPopupModal(str_id)) {
 		if (!popup->isOpen) {
 			popup->isOpen = true;
-			popup->currentSelected = selected;
-		}
-		if (popup->currentFolder == "" && selected == "") {
-			popup->setCurrentFolder(ImFilesystemDialoguePopup::_Drives.front());
-		}
-		else if (popup->currentFolder == "" && fs::is_directory(selected)) {
-			popup->setCurrentFolder(selected);
-		}
-		else if (popup->currentFolder == "" && fs::is_regular_file(selected)) {
-			popup->setCurrentFolder(fs::path(selected).parent_path().string());
+			popup->setCurrentSelected(selected);
+			if (selected != "") {
+				popup->setCurrentFolder(fs::path(selected).parent_path().string(), false);
+			}
+			else {
+				popup->setCurrentFolder(ImFilesystemDialoguePopup::_Drives.front(), false);
+			}
 		}
 		const fs::path currentFolder(popup->currentFolder);
 		ImGuiContext& g = *GImGui;
@@ -244,7 +243,7 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 				std::string label = std::string(ICON_FA_HDD) + " " + drive;
 				if (selected) { ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive)); }
 				if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
-					popup->setCurrentFolder(drive); 
+					popup->setCurrentFolder(drive, selectFolders); 
 				}
 				if (selected) { ImGui::PopStyleColor(); }
 			}
@@ -262,7 +261,7 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 				std::string name = fs::path(bm).filename().string();
 				if (name == "") { name = bm; }	// We need this because Root directories do not have a filename
 				if (ImGui::Button(name.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth() - buttonSize.x - style.ItemSpacing.x, 0))) {
-					popup->setCurrentFolder(bm);
+					popup->setCurrentFolder(bm, selectFolders);
 				}
 				if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.65f) { ImGui::SetTooltip(bm.c_str()); }	// Delayed full path tooltip
 				ImGui::SameLine(ImGui::GetContentRegionAvailWidth() - buttonSize.x);
@@ -288,7 +287,7 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 			}
 			ImGui::SameLine();
 			if (ImGui::Button(ICON_FA_ARROW_UP) && currentFolder.has_parent_path()) {
-				popup->setCurrentFolder(currentFolder.parent_path().string());
+				popup->setCurrentFolder(currentFolder.parent_path().string(), selectFolders);
 			}
 			ImGui::SameLine();
 			ImGui::Button(ICON_FA_SYNC);	// Currently useless (Maybe needed if I decide to cache folder data)
@@ -302,7 +301,7 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 			ImGui::SameLine();
 			ImGui::PushItemWidth(-1);
 			if (ImGui::InputText("##CurrentFolder", popup->_currentFolderUserInput, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-				popup->setCurrentFolder(popup->_currentFolderUserInput);
+				popup->setCurrentFolder(popup->_currentFolderUserInput, selectFolders);
 			}
 
 			if (fs::exists(currentFolder)) {
@@ -351,14 +350,14 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 					ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.f, 0.5f));
 
 					// Show link to parent folder
+					std::string newSelected = "";
+
 					if (currentFolder.parent_path() != currentFolder) {
 						ImGui::TableNextColumn();									// Name
 						const std::string label = std::string(ICON_FA_FOLDER_OPEN) + " ..";
-						if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
-							if (selectFolders) { popup->currentSelected = currentFolder.string(); }
-						}
+						ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
 						if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-							popup->setCurrentFolder(currentFolder.parent_path().string());
+							popup->setCurrentFolder(currentFolder.parent_path().string(), selectFolders);
 						}
 						ImGui::TableNextColumn();									// Date Modified
 						ImGui::TableNextColumn();									// Size
@@ -375,6 +374,8 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 						if (IsItemDeactivatedAfterEdit()) {
 							try {
 								fs::create_directory(currentFolder / popup->_newFolder);
+								// Select it
+								if (selectFolders) { popup->setCurrentSelected((currentFolder / popup->_newFolder).string()); }
 							}
 							catch (...) {
 								std::cerr << "Could not create folder \"" + (fs::path(currentFolder) / popup->_newFolder).string() + "\"\n";
@@ -386,17 +387,19 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 					}
 
 					// Show all folders
+					
 					for (const fs::path& folder : folders) {
 						const std::string path = folder.string();
 						const std::string name = folder.filename().string();
 						const std::string label = std::string(ICON_FA_FOLDER_OPEN) + " " + name;
 						if (!showHidden && hiddenFileInicators.find(name[0]) != std::string::npos) { continue; }	// Skip hidden files/folders
 						ImGui::TableNextColumn();									// Name
+						if (popup->currentSelected == name) { ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(ImGuiCol_ButtonActive)); }
 						if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth(), 0)) && selectFolders) {
-							if (selectFolders) { popup->currentSelected = currentFolder.string(); }
+							if (selectFolders) { newSelected = path; }
 						}
 						if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-							popup->setCurrentFolder(path);
+							popup->setCurrentFolder(path, selectFolders);
 						}
 						ImGui::TableNextColumn();									// Date Modified
 						ImGui::TableNextColumn();									// Size
@@ -405,7 +408,6 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 					// Show all files
 					if (!hideFiles) {
 						for (const fs::path& file : files) {
-							ImGui::TableNextColumn();								// Name
 							std::string path = file.string();
 							std::string name = file.filename().string();
 							std::string icon = std::string(ICON_FA_FILE);
@@ -415,8 +417,11 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 								icon = popup->FileIcons[extension];
 							}
 							const std::string label = icon + " " + name;
+
+							ImGui::TableNextColumn();								// Name
+							if (popup->currentSelected == name) { ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(ImGuiCol_ButtonActive)); }
 							if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
-								if (selectFiles) { popup->currentSelected = file.string(); }
+								if (selectFiles) { newSelected = path; }
 								// Check if a preview is available
 								popup->setPreviewFunction(file.string());
 							}
@@ -441,6 +446,9 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 					ImGui::PopStyleColor();
 
 					ImGui::EndTable();
+					if (newSelected != "") {
+						popup->setCurrentSelected(newSelected);
+					}
 				}
 				if (withPreview) {
 					ImGui:TableNextColumn();
@@ -458,23 +466,31 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 				Text("Folder \"%s\" does not exist", currentFolder.string().c_str());
 			}
 			// Draw current result
-			ImGui::TextUnformatted(popup->currentSelected.c_str());
-			ImGui::SameLine(ImGui::GetContentRegionAvailWidth() - okSize.x - cancelSize.x - 2.0f * style.ItemInnerSpacing.x);
-			if (popup->currentSelected == "") {	// Disable OK button if nothing is selected
-				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			bool validSelected = false;
+			float width = ImGui::GetContentRegionAvailWidth() - okSize.x - cancelSize.x - 2.0f * style.ItemInnerSpacing.x;
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, style.ItemInnerSpacing);
+			if (selectFolders) {
+				std::string selectedFolder = (fs::path(popup->currentFolder) / popup->currentSelected.c_str()).string();
+				ImGui::TextUnformatted(selectedFolder.c_str());
+				validSelected = selectedFolder != "";
+				ImGui::SetCursorPosX(width);
 			}
+			else {
+				ImGui::PushItemWidth(width);
+				ImGui::InputText("##filename", popup->currentSelected, 256);
+				ImGui::PopItemWidth();
+				validSelected = popup->currentSelected != "";
+			}
+			ImGui::SameLine();
+			if (!validSelected) { ImGui::BeginDisable(); } // Disable OK button if nothing is selected
 			if (ImGui::Button("OK")) {
 				ImGui::CloseCurrentPopup();
 				popup->isOpen = false;
 				popup->_history.clear();
-				selected = popup->currentSelected;
+				selected = (fs::path(popup->currentFolder) / popup->currentSelected).string();
 				elementSelected = true;
 			}
-			if (popup->currentSelected == "") {
-				ImGui::PopItemFlag();
-				ImGui::PopStyleVar();
-			}
+			if (!validSelected) { ImGui::EndDisable(); }
 			ImGui::SameLine();
 			if (ImGui::Button("Cancel")) {
 				ImGui::CloseCurrentPopup();
@@ -482,6 +498,7 @@ bool ImGui::FilesystemDialogPopupModal(const char* str_id, std::string& selected
 				popup->_history.clear();
 				elementSelected = false;
 			}
+			ImGui::PopStyleVar();
 			// --- End Right/Center Column
 
 			ImGui::EndTable();
@@ -553,7 +570,7 @@ ImGui::ImFilesystemDialoguePopup::ImFilesystemDialoguePopup() :
 	}
 }
 
-void ImGui::ImFilesystemDialoguePopup::setCurrentFolder(std::string folder)
+void ImGui::ImFilesystemDialoguePopup::setCurrentFolder(std::string folder, bool clearSelected)
 {
 	if (fs::exists(currentFolder) && fs::is_directory(currentFolder)) {
 		_history.resize(_historyPos + 1);
@@ -562,6 +579,13 @@ void ImGui::ImFilesystemDialoguePopup::setCurrentFolder(std::string folder)
 	}
 	currentFolder = folder;
 	_currentFolderUserInput = folder;
+	if (clearSelected) { currentSelected = ""; }
+}
+
+void ImGui::ImFilesystemDialoguePopup::setCurrentSelected(std::string entry)
+{
+	//setCurrentFolder(fs::path(entry).parent_path().string());
+	currentSelected = fs::path(entry).filename().string();
 }
 
 void ImGui::ImFilesystemDialoguePopup::setPreviewFunction(std::string file)

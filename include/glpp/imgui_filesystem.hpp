@@ -56,7 +56,8 @@ namespace ImGui {
 		bool _creatingNewFolder;
 		std::shared_ptr<FilePreview> currentPreview;
 
-		void setCurrentFolder(std::string folder);
+		void setCurrentFolder(std::string folder, bool clearSelected);
+		void setCurrentSelected(std::string entry);
 		void setPreviewFunction(std::string file);
 		void historyBack();
 		void historyForward();
