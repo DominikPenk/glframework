@@ -25,7 +25,12 @@ namespace gl {
 		size_t numFaces() const { return mBatch.indexBuffer->size() / 3; }
 
 		glm::vec3 vertex(size_t i) const;
+		glm::vec3& vertex(size_t i);
 		glm::vec4& color();
+
+		std::tuple<unsigned int, unsigned int, unsigned int> face(size_t i) const;
+
+		void transform(glm::mat4 T);
 
 		virtual bool handleIO(const Renderer* env, ImGuiIO& io) override;
 

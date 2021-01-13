@@ -150,4 +150,27 @@ glm::vec3 gl::TriangleMesh::vertex(size_t i) const {
 	return mVertexData->at<0>(i);
 }
 
+glm::vec3& gl::TriangleMesh::vertex(size_t i)
+{
+	return mVertexData->at<0>(i);
+}
+
 glm::vec4& gl::TriangleMesh::color() { return mColor; }
+
+std::tuple<unsigned int, unsigned int, unsigned int> gl::TriangleMesh::face(size_t i) const
+{
+	return {
+		mBatch.indexBuffer->at(i * 3),
+		mBatch.indexBuffer->at(i * 3 + 1),
+		mBatch.indexBuffer->at(i * 3 + 2)
+	};
+}
+
+void gl::TriangleMesh::transform(glm::mat4 T)
+{
+	glm::mat4 Tn = glm::transpose(glm::inverse(T));
+	for (auto& [p, uv, n] : *mVertexData) {
+		p = glm::vec3(T * glm::vec4(p, 1.0f));
+		n = glm::vec3(Tn * glm::vec4(p, 0.0f));
+	}
+}
