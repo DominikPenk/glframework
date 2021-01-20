@@ -47,6 +47,8 @@ set(IMGUI_SRC
 	${INCLUDE_DIR}/imgui_ext.hpp
 	${INCLUDE_DIR}/imgui_ext.inl.hpp
 	src/imgui_ext.cpp
+	${INCLUDE_DIR}/imgui_statistics.hpp
+	src/imgui_statistics.cpp
 	${INCLUDE_DIR}/imgui_vertical_tabs.hpp
 	src/imgui_vertical_tabs.cpp
 	${INCLUDE_DIR}/imgui_filesystem.hpp
