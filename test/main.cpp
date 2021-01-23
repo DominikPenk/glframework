@@ -5,6 +5,7 @@
 #include <glpp/controls.hpp>
 #include <glpp/meshes.hpp>
 #include <glpp/imgui.hpp>
+#include <glpp/uiwindow.hpp>
 
 #include <glpp/imgui3d/imgui_3d.h>
 #include <glpp/imgui3d/imgui_3d_editor_widgets.h>
@@ -23,9 +24,8 @@ int main(int argc, const char* argv[]) {
 	gl::FlyingControl control(cam);
 
 	gl::Renderer renderer(800, 600, cam, "Test Window", true);
+	ImGui::PhotoshopStyle();
 
-	auto coo = renderer.addMesh<gl::CoordinateFrame>("Coordinate Frame");
-	
 	renderer.showDebug = true;
 	renderer.showMeshWatch = true;
 
@@ -67,6 +67,7 @@ int main(int argc, const char* argv[]) {
 	while (!renderer.shouldClose()) {
 		renderer.startFrame();
 		control.update(cam);
+		ImGui::ShowStyleEditor();
 		//ImGui3D::DirectionalLight(&d[0], &p1[0]);
 		ImGui3D::Spotlight(d, p1, angles[0]);
 		ImGui3D::CubeMap(p0);

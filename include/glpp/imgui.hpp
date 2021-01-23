@@ -14,6 +14,7 @@
 #include "glpp/imgui_ext.hpp"
 #include "glpp/imgui_vertical_tabs.hpp"
 #include "glpp/imgui_filesystem.hpp"
+#include "glpp/imgui_style.hpp"
 
 #include <glm/glm.hpp>
 

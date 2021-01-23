@@ -42,6 +42,9 @@ set(IMGUI_SRC
 	${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
 	${IMGUI_DIR}/backends/imgui_impl_glfw.h
 	${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+	# Custom styles
+	${INCLUDE_DIR}/imgui_style.hpp
+	src/imgui_style.cpp
 	# Custom extensions
 	${INCLUDE_DIR}/imgui.hpp
 	${INCLUDE_DIR}/imgui_ext.hpp
