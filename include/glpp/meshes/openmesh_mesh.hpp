@@ -15,7 +15,7 @@ namespace gl {
 		OpenMeshMesh(std::string path);
 
 		// Inherited via Mesh
-		virtual void render(const RendererBase* env) override;
+		virtual void render(const std::shared_ptr<gl::Camera> camera) override;
 
 		virtual void drawOutliner() override;
 

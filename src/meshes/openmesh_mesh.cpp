@@ -49,11 +49,11 @@ gl::OpenMeshMesh::OpenMeshMesh(std::string path) :
 	}
 }
 
-void gl::OpenMeshMesh::render(const gl::RendererBase * env)
+void gl::OpenMeshMesh::render(const std::shared_ptr<gl::Camera> camera)
 {
 	update();
-	glm::mat4 P = env->camera()->GetProjectionMatrix();
-	glm::mat4 V = env->camera()->viewMatrix;
+	glm::mat4 P = camera->GetProjectionMatrix();
+	glm::mat4 V = camera->viewMatrix;
 	glm::mat4 MVP = P * V * ModelMatrix;
 	glDisable(GL_BLEND);
 	

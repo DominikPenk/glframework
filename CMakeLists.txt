@@ -3,6 +3,7 @@ project(GL-Framework LANGUAGES CXX)
 
 set(WITH_ASSIMP ON CACHE BOOL "Build with assimp")
 set(WITH_OPENMESH ON CACHE BOOL "Build with OpenMesh")
+set(WITH_EGL ON CACHE BOOL "Build offscreenrendering with EGL")
 option(BUILD_FRAMEWORK_TEST "Build framework tests" OFF)
 
 # Find Opengl libs
@@ -27,6 +28,13 @@ if(${WITH_ASSIMP})
 		set(WITH_ASSIMP OFF CACHE BOOL "Build with assimp" FORCE)
 	endif()
 endif()
+
+if(${WITH_EGL})
+	if(NOT ${OpenGL_EGL_FOUND})
+		message(STATUS "Did not find EGL, turning it off")
+		set(WITH_EGL OFF CACHE BOOL "Build offscreenrendering with EGL" FORCE)
+	endif()
+else()
 
 set(INCLUDE_DIR include/glpp)
 
@@ -67,6 +75,16 @@ set(MESH_FILES
 	${INCLUDE_DIR}/meshes/pointcloud.hpp
 	src/meshes/pointcloud.cpp)
 
+set(RENDERER_FILES
+	${INCLUDE_DIR}/context.hpp
+	${INCLUDE_DIR}/renderer.hpp
+	src/context.cpp
+	${INCLUDE_DIR}/renderers/editor.hpp
+	src/renderers/editor.cpp
+	${INCLUDE_DIR}/renderers/editorwindow.hpp
+	src/renderers/editorwindow.cpp
+)
+
 set(IMGUI_3D_FILES
 	${INCLUDE_DIR}/imgui3d/imgui_3d.h
 	${INCLUDE_DIR}/imgui3d/imgui_3d_utils.h
@@ -82,22 +100,9 @@ set(IMGUI_3D_FILES
 
 set(IMGUI_FILES ${IMGUI_SRC})
 
-SET(RENDER_2D_FILES
-	# ${INCLUDE_DIR}/2d/canvas.hpp
-	# src/2d/canvas.cpp
-	# ${INCLUDE_DIR}/2d/eventsystem.hpp
-	# src/2d/eventsystem.cpp
-	# ${INCLUDE_DIR}/2d/sprite.hpp
-	# src/2d/sprite.cpp
-	
-	# ${INCLUDE_DIR}/2d/handles.hpp
-	# src/2d/handles.cpp
-	# ${INCLUDE_DIR}/2d/selector.hpp
-	# src/2d/selector.cpp
-	)
-
 set(GL_FILES
 	${MESH_FILES}
+	${RENDERER_FILES}
 	${INCLUDE_DIR}/texture.hpp
 	src/texture.cpp
 	src/paged_texture.cpp
@@ -116,16 +121,14 @@ set(GL_FILES
 	src/shadermanager.cpp
 	${INCLUDE_DIR}/controls.hpp
 	src/controls.cpp
-	${INCLUDE_DIR}/renderer.hpp
-	src/renderer.cpp
-	${INCLUDE_DIR}/offscreen_renderer.hpp
-	src/offscreen_renderer.cpp
+	# ${INCLUDE_DIR}/offscreen_renderer.hpp
+	# src/offscreen_renderer.cpp
 	${INCLUDE_DIR}/camera.hpp
 	${INCLUDE_DIR}/buffers.hpp
 	src/buffers.cpp
 	${INCLUDE_DIR}/gl_internal.hpp
-	${INCLUDE_DIR}/uiwindow.hpp
-	src/uiwindow.cpp
+	# ${INCLUDE_DIR}/uiwindow.hpp
+	# src/uiwindow.cpp
 	${INCLUDE_DIR}/IconsFontAwesome5.h)
 
 	

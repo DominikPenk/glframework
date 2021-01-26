@@ -20,11 +20,11 @@ namespace gl {
 
 		CatmullRomSpline(const std::vector<glm::vec3>& points);
 
-		virtual void render(const RendererBase* env) override;
+		virtual void render(const std::shared_ptr<gl::Camera> camera) override;
 
 		virtual void drawOutliner() override; 
 
-		virtual bool handleIO(const Renderer* env, ImGuiIO& io) override;
+		virtual bool handleIO(const std::shared_ptr<gl::Camera> camera, ImGuiIO& io) override;
 
 		glm::vec4 color;
 		glm::vec3 q0, qk;

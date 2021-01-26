@@ -130,16 +130,16 @@ std::size_t gl::PointCloud::size() const
 	return mBatch.indexBuffer->size();
 }
 
-void gl::PointCloud::render(const gl::RendererBase * env)
+void gl::PointCloud::render(const std::shared_ptr<gl::Camera> camera)
 {
-	glm::mat4 P = env->camera()->GetProjectionMatrix();
-	glm::mat4 V = env->camera()->viewMatrix;
+	glm::mat4 P = camera->GetProjectionMatrix();
+	glm::mat4 V = camera->viewMatrix;
 	glm::mat4 MV = V * ModelMatrix;
 	mBatch.execute(
 		mShader,
 		"MV", MV,
 		"P", P,
-		"pointsize", static_cast<float>(pointSize) / env->camera()->ScreenWidth);
+		"pointsize", static_cast<float>(pointSize) / camera->ScreenWidth);
 }
 
 void gl::PointCloud::drawOutliner()

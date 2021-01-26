@@ -1,5 +1,6 @@
 add_executable(gl-test main.cpp)
 target_link_libraries(gl-test PUBLIC glframework)
+target_compile_definitions(gl-test PRIVATE -DTEST_DIR="${PROJECT_SOURCE_DIR}/test/")
 if(${WITH_ASSIMP})
 	add_executable(gl-test-framebuffer framebuffer_test.cpp)
 	target_link_libraries(gl-test-framebuffer PUBLIC glframework)

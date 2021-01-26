@@ -47,11 +47,11 @@ gl::CatmullRomSpline::CatmullRomSpline(const std::vector<glm::vec3>& points) :
 	computeCatmulRomData(points, mPoints, mIndices);
 }
 
-void gl::CatmullRomSpline::render(const gl::RendererBase * env)
+void gl::CatmullRomSpline::render(const std::shared_ptr<gl::Camera> camera)
 {
 
-	glm::mat4 P = env->camera()->GetProjectionMatrix();
-	glm::mat4 V = env->camera()->viewMatrix;
+	glm::mat4 P = camera->GetProjectionMatrix();
+	glm::mat4 V = camera->viewMatrix;
 	glm::mat4  VP = P * V;
 
 	{
@@ -68,7 +68,7 @@ void gl::CatmullRomSpline::render(const gl::RendererBase * env)
 		mShader.setUniform("endpointCondition", static_cast<int>(endpointCondition));
 		mShader.setUniform("q0", q0);
 		mShader.setUniform("qk", qk);
-		mShader.setUniform("width", (float)linewidth / (env->camera()->ScreenWidth));
+		mShader.setUniform("width", (float)linewidth / (camera->ScreenWidth));
 
 		mVAO.bind();
 		glPatchParameteri(GL_PATCH_VERTICES, 4);
@@ -113,7 +113,7 @@ void gl::CatmullRomSpline::drawOutliner()
 	}
 }
 
-bool gl::CatmullRomSpline::handleIO(const Renderer* env, ImGuiIO& io)
+bool gl::CatmullRomSpline::handleIO(const std::shared_ptr<gl::Camera> camera, ImGuiIO& io)
 {
 	bool wasChanged = false;
 	for (unsigned int i = 0; i < mPoints->size(); ++i) {

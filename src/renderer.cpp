@@ -165,7 +165,7 @@ Renderer::Renderer(int width, int height, std::shared_ptr<Camera> cam, const std
 	gammaCorrection(true),
 	mToneMapping(ToneMapping::Reinhard),
 	gamma(1.2f),
-	mPostProShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "displayShader.glsl"),
+	(std::string(GL_FRAMEWORK_SHADER_DIR) + "displayShader.glsl"),mPostProShader
 	mDisplayShader(std::string(GL_FRAMEWORK_SHADER_DIR) + "copyShader.glsl")
 {
 	// Update camera dimensions if maximized
@@ -250,7 +250,7 @@ void gl::Renderer::endFrame()
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.w);
 	mPrePostroBuffer->clear({ clearColor });
 	
-	// These should be rendered with depth test
+	// These should be rendered with depth testm
 	glEnable(GL_DEPTH_TEST);
 	for (auto mesh : mMeshes) {
 		if (mesh->visible) {

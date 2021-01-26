@@ -11,7 +11,7 @@ namespace gl {
 		CoordinateFrame(float length = 10.0f);
 
 		// Inherited via Mesh
-		virtual void render(const RendererBase* env) override;
+		virtual void render(const std::shared_ptr<gl::Camera> env) override;
 
 		float axisLength;
 

@@ -81,10 +81,10 @@ gl::TriangleMesh::TriangleMesh(const std::string& path) :
 #endif
 }
 
-void gl::TriangleMesh::render(const gl::RendererBase* env)
+void gl::TriangleMesh::render(const std::shared_ptr<gl::Camera> camera)
 {
-	glm::mat4 P = env->camera()->GetProjectionMatrix();
-	glm::mat4 V = env->camera()->viewMatrix;
+	glm::mat4 P = camera->GetProjectionMatrix();
+	glm::mat4 V = camera->viewMatrix;
 	glm::mat4 MVP = P * V * ModelMatrix;
 
 	Mesh::render(
@@ -114,7 +114,7 @@ void gl::TriangleMesh::addTriangles(std::vector<glm::vec3>& vertices)
 	}
 }
 
-bool gl::TriangleMesh::handleIO(const Renderer* env, ImGuiIO& io)
+bool gl::TriangleMesh::handleIO(const std::shared_ptr<gl::Camera> camera, ImGuiIO& io)
 {
 	bool updated = false;
 	//for (auto& vertex : *mVertices) {

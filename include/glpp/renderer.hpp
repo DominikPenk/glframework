@@ -1,97 +1,29 @@
 #pragma once
 
-#include "glpp/camera.hpp"
-#include "glpp/meshes/mesh.hpp"
-#include "glpp/framebuffer.hpp"
-
-#include <functional>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <mutex>
-
-namespace ImGui3D {
-	struct ImGui3DContext;
-}
-
 namespace gl {
-	class UIWindow;
-	class GenericUIWindow;
 
-	struct PointLight {
-		PointLight() {
-			position = glm::fvec3(0, 0, 0);
-			color = glm::fvec3(1, 1, 1);
-		}
-		glm::fvec3 position;
-		glm::fvec3 color;
+
+	enum class ToneMapping {
+		Linear                     = 0,
+		Reinhard                   = 1,
+		HaarmPeterDuiker           = 2,
+		JimHejlRicharBurgessDawson = 3,
+		Uncharted2                 = 4
 	};
 
-	class RendererBase {
-	public:
-		RendererBase(int initialWidth, int initialHeight, std::string title, bool maximized, bool enableImGui = true, const RendererBase* shared = NULL);
-		~RendererBase();
-
-		/// <summary>This function initializes a new frame and polls for user input.</summary>
-		/// <remarks>Call this function as soon as possible in your render loop. 
-		/// In most cases you should call this first.</remarks>
-		/// <returns>True if the window will be drawn or false otherwise (e.g. if window is iconyfied)</returns>
-		virtual bool startFrame() = 0;
-
-		/// <summary>This function finalizes the frame by drawing UI and geometry.</summary>
-		/// <remarks>Call this function as late as possbile in your render loop. In most cases this is the last function called.</remarks>
-		virtual void endFrame() = 0;
-
-		// Setters
-		void setTitle(const std::string& title);
-
-		// -> End setters
-
-		// Getters
-		// TODO: Refactor this
-		virtual std::shared_ptr<Camera> camera() { throw std::runtime_error("This renderer has no camera"); }
-		virtual const std::shared_ptr<Camera> camera() const { throw std::runtime_error("This renderer has no camera"); }
-		inline const GLFWwindow* window() const { return mWindow; }
-		inline bool shouldClose() const { return glfwWindowShouldClose(mWindow); }
-		inline bool isMinified() const { return glfwGetWindowAttrib(mWindow, GLFW_ICONIFIED); }
-		inline bool isMaximized() const { return glfwGetWindowAttrib(mWindow, GLFW_MAXIMIZED); }
-		std::pair<uint32_t, uint32_t> windowSize() const;
-		int windowWidth() const;
-		int windowHeight() const;
-
-		// -> End getters
-
-	protected:
-		GLFWwindow* mWindow;
-		int mVersion[2];
+	enum class RenderHook {
+		Pre2DGui,
+		PostMeshDrawing
 	};
 
+#if false
 	class Renderer : public RendererBase {
 	public:
-		enum class RenderHook {
-			Pre2DGui,
-			PostMeshDrawing
-		};
 
-		enum class ToneMapping {
-			Linear                     = 0,
-			Reinhard                   = 1,
-			HaarmPeterDuiker           = 2,
-			JimHejlRicharBurgessDawson = 3,
-			Uncharted2                 = 4
-		};
 
 		Renderer(int width, int height, std::shared_ptr<Camera> cam, const std::string& title = "Title", bool maximized = false);
 
-		/// <summary>This function initializes a new frame and polls for user input.</summary>
-		/// <remarks>Call this function as soon as possible in your render loop. 
-		/// In most cases you should call this first.</remarks>
-		/// <returns>True if the window will be drawn or false otherwise (e.g. if window is iconyfied)</returns>
-		virtual bool startFrame() override;
-
-		/// <summary>This function finalizes the frame by drawing UI and geometry.</summary>
-		/// <remarks>Call this function as late as possbile in your render loop. In most cases this is the last function called.</remarks>
-		virtual void endFrame() override;
+		
 
 		/// <summary>Construct a new window and add it to the ui.</summary>
 		/// <param name="args">Parameters for the constructor of the new window.</param>
@@ -192,7 +124,6 @@ namespace gl {
 		std::vector<std::shared_ptr<Mesh>> mMeshes;
 
 		std::vector<std::shared_ptr<UIWindow>> mUIWindows;
-		PointLight mLight;
 		ToneMapping mToneMapping;
 		gl::Shader mPostProShader;
 		gl::Shader mDisplayShader;
@@ -212,5 +143,5 @@ namespace gl {
 		std::unordered_map<std::shared_ptr<Mesh>, std::mutex> mObjectLocks;
 		std::unordered_map<std::shared_ptr<UIWindow>, std::mutex> mWindowLocks;
 	};
-
+#endif
 }

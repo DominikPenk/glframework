@@ -13,7 +13,7 @@ namespace gl {
 
 		TriangleMesh(const std::string& path);
 
-		void render(const RendererBase* env);
+		void render(const std::shared_ptr<gl::Camera> camera);
 
 		virtual void drawOutliner() override;
 
@@ -32,7 +32,7 @@ namespace gl {
 
 		void transform(glm::mat4 T);
 
-		virtual bool handleIO(const Renderer* env, ImGuiIO& io) override;
+		virtual bool handleIO(const std::shared_ptr<gl::Camera> camera, ImGuiIO& io) override;
 
 		void computeNormals();
 

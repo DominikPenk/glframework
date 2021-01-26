@@ -16,14 +16,14 @@ gl::CoordinateFrame::CoordinateFrame(float length) :
 	mShowInOutliner = false;
 }
 
-void gl::CoordinateFrame::render(const gl::RendererBase* env)
+void gl::CoordinateFrame::render(const std::shared_ptr<gl::Camera> camera)
 {
 	mPoints.update();
 
 	auto _ = mShader.use();
 
-	glm::mat4 P = env->camera()->GetProjectionMatrix();
-	glm::mat4 V = env->camera()->viewMatrix;
+	glm::mat4 P = camera->GetProjectionMatrix();
+	glm::mat4 V = camera->viewMatrix;
 	glm::mat4 MVP = P * V * ModelMatrix;
 	mShader.setUniform("MVP", MVP);
 	mShader.setUniform("length", axisLength);
