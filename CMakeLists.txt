@@ -107,9 +107,14 @@ set(IMGUI_3D_FILES
 
 set(IMGUI_FILES ${IMGUI_SRC})
 
+set(LOGGING_FILES 
+	${INCLUDE_DIR}/logging.hpp
+	src/logging.cpp)
+
 set(GL_FILES
 	${MESH_FILES}
 	${RENDERER_FILES}
+	${LOGGING_FILES}
 	${INCLUDE_DIR}/texture.hpp
 	src/texture.cpp
 	src/paged_texture.cpp
@@ -143,6 +148,7 @@ source_group("Meshes" FILES ${MESH_FILES})
 source_group("Dear Imgui" FILES ${IMGUI_FILES})
 source_group("Dear Imgui 3D" FILES ${IMGUI_3D_FILES})
 source_group("Renderes" FILES ${RENDERER_FILES})
+source_group("Logging" FILES ${LOGGING_FILES})
 
 add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${IMGUI_3D_FILES} ${RENDER_2D_FILES})
 target_link_libraries(glframework PUBLIC ${OPENGL_gl_LIBRARY} glfw glad::glad glm)
