@@ -203,6 +203,7 @@ namespace ImGui3D {
 		glm::mat4                          ViewProjectionMatrix;
 		glm::mat4                          ViewPerspectiveMatrixInverse;
 		glm::vec4                          CameraPosition;
+		ImVec2                             ScreenPosition;
 		ImVec2                             ScreenSize;
 		float                              Aspect;
 
@@ -216,6 +217,8 @@ namespace ImGui3D {
 		std::shared_ptr<DrawCommand> currentDrawList() {
 			return drawCommands.back();
 		}
+
+		inline ImRect getScreenRect() { return ImRect(ScreenPosition, ScreenPosition + ScreenSize); }
 
 		ImGui3DContext();
 	};

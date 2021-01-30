@@ -19,14 +19,24 @@ namespace gl {
 	class Mesh;
 	class Shader;
 
+	typedef unsigned int EditorFlags;
+
+	enum EditorFlags_ {
+		EditorFlags_None              = 0x0,
+		EditorFlags_NoDefaultOutliner = 0x1 << 1,
+		EditorFlags_NoDefaultDebug    = 0x1 << 2,
+		EditorFlags_NoDefaultLogging  = 0x1 << 3,
+		EditorFlags_NoDefaultViewport = 0x1 << 3
+	};
+
 	class Editor {
 	public:
 
 		
 
 		Editor();
-		Editor(int width, int height, const std::string& title = "Title");
-		Editor(const std::string& title);
+		Editor(int width, int height, const std::string& title = "Title", EditorFlags flags = 0);
+		Editor(const std::string& title, EditorFlags flags = 0);
 
 		/// <summary>This function initializes a new frame and polls for user input.</summary>
 		/// <remarks>Call this function as soon as possible in your render loop. 
@@ -120,7 +130,7 @@ namespace gl {
 		/// <summary>
 		/// This function initializes ImGui and ImGui3D
 		/// </summary>
-		void initialize();
+		void initialize(EditorFlags flags);
 
 	private:
 		bool                    mForceUiResetOnNextDraw;

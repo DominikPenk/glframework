@@ -3,6 +3,9 @@
 std::pair<glm::vec4, glm::vec4> ImGui3D::worldCameraRay(ImVec2 mouse)
 {
 	const ImGui3DContext& g = *GImGui3D;
+
+	mouse = mouse - g.ScreenPosition;
+
 	float ndcX = 2.0f * mouse.x / g.ScreenSize.x - 1.0f;
 	float ndcY = -(2.0f * mouse.y / g.ScreenSize.y - 1.0f);
 	glm::vec4 clip(ndcX, ndcY, -1.0f, 1.0f);

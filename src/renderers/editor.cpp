@@ -28,18 +28,18 @@ gl::Editor::Editor() :
 	
 }
 
-gl::Editor::Editor(int width, int height, const std::string& title) :
+gl::Editor::Editor(int width, int height, const std::string& title, EditorFlags flags) :
 	Editor()
 {
 	mContext = std::make_shared<GLFWContext>(width, height, title);
-	initialize();
+	initialize(flags);
 }
 
-gl::Editor::Editor(const std::string& title) :
+gl::Editor::Editor(const std::string& title, EditorFlags flags) :
 	Editor()
 {
 	mContext = std::make_shared<GLFWContext>(1024, 720, title, true);
-	initialize();
+	initialize(flags);
 }
 
 bool gl::Editor::startFrame()
@@ -205,7 +205,7 @@ ImGuiID gl::Editor::buildDefaultLayout(bool force)
 	return dockSpaceID;
 }
 
-void gl::Editor::initialize()
+void gl::Editor::initialize(EditorFlags flags)
 {
 	// Initialize Dear ImGui
 	IMGUI_CHECKVERSION();
@@ -226,8 +226,16 @@ void gl::Editor::initialize()
 	io.Fonts->AddFontFromFileTTF(fontFile.c_str(), 13.0f, &icons_config, icons_ranges);
 
 	// Add the default windows "Debug" and "Outliner"
-	mEditorWindows.push_back(std::make_shared<OutlinerEditorWindow>());
-	mEditorWindows.push_back(std::make_shared<DebugEditorWindow>());
-	mEditorWindows.push_back(std::make_shared<ViewportEditorWindow>());
-	mEditorWindows.push_back(std::make_shared<LoggingEditorWindow>());
+	if ((flags & EditorFlags_NoDefaultOutliner) == 0x0) {
+		mEditorWindows.push_back(std::make_shared<OutlinerEditorWindow>());
+	}
+	if ((flags & EditorFlags_NoDefaultDebug) == 0x0) {
+		mEditorWindows.push_back(std::make_shared<DebugEditorWindow>());
+	}
+	if ((flags & EditorFlags_NoDefaultViewport) == 0x0) {
+		mEditorWindows.push_back(std::make_shared<ViewportEditorWindow>());
+	}
+	if ((flags & EditorFlags_NoDefaultLogging) == 0x0) {
+		mEditorWindows.push_back(std::make_shared<LoggingEditorWindow>());
+	}
 }

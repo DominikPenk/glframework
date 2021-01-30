@@ -222,9 +222,6 @@ void gl::ViewportEditorWindow::initialize(Editor* editor) {
 void gl::ViewportEditorWindow::onResize(ImVec2 position, ImVec2 size, Editor* editor) {
 	camera->ScreenWidth  = (int)size.x;
 	camera->ScreenHeight = (int)size.y;
-	mImGui3DContext->ScreenSize.x = size.x;
-	mImGui3DContext->ScreenSize.y = size.y;
-	mImGui3DContext->Aspect = size.x / size.y;
 	mFrameBuffer->resize((int)size.x, (int)size.y);
 	mGeometryFrameBuffer->resize((int)size.x, (int)size.y);
 }

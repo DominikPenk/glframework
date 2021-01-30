@@ -38,7 +38,21 @@ namespace ImGui3D {
 		g.ViewProjectionMatrix = g.ProjectionMatrix * g.ViewMatrix;
 		g.ViewPerspectiveMatrixInverse = glm::inverse(g.ViewProjectionMatrix);
 		g.CameraPosition = glm::inverse(g.ViewMatrix) * glm::vec4(0, 0, 0, 1);
+		if (windowID == 0) {
+			GLFWwindow* window = glfwGetCurrentContext();
+			int w, h, x, y;
+			glfwGetWindowSize(window, &w, &h);
+			glfwGetWindowPos(window, &x, &y);
+			g.ScreenPosition = ImVec2(x, y);
+			g.ScreenSize = ImVec2(w, h);
+		}
+		else {
+			ImRect rect = ImGui::FindWindowByID(windowID)->WorkRect;
+			g.ScreenPosition = rect.Min;
+			g.ScreenSize = rect.GetSize();
+		}
 
+		g.Aspect = g.ScreenSize.x / g.ScreenSize.y;
 		g.drawCommands.resize(1);
 		g.drawCommands.back()->Clear();
 
@@ -51,9 +65,7 @@ namespace ImGui3D {
 		}
 
 		// Look for ids under the mouse cursor if neccessary
-		ImRect windowRect = windowID == 0
-			? ImRect(ImVec2(0, 0), g.ScreenSize)
-			: ImGui::FindWindowByID(windowID)->ContentRegionRect;
+		ImRect windowRect = ImRect(g.ScreenPosition, g.ScreenPosition + g.ScreenSize);
 		bool imguiUsesIO = windowID == 0
 			? io.WantCaptureMouse || io.WantCaptureKeyboard
 			: false;	// FIXME: This should not always be true!
