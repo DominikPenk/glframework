@@ -34,7 +34,7 @@ if(${WITH_EGL})
 		message(STATUS "Did not find EGL, turning it off")
 		set(WITH_EGL OFF CACHE BOOL "Build offscreenrendering with EGL" FORCE)
 	endif()
-else()
+endif()
 
 set(INCLUDE_DIR include/glpp)
 
@@ -79,10 +79,14 @@ set(RENDERER_FILES
 	${INCLUDE_DIR}/context.hpp
 	${INCLUDE_DIR}/renderer.hpp
 	src/context.cpp
+	# Editor renderer
 	${INCLUDE_DIR}/renderers/editor.hpp
 	src/renderers/editor.cpp
 	${INCLUDE_DIR}/renderers/editorwindow.hpp
 	src/renderers/editorwindow.cpp
+	# Offscreen renderer
+	${INCLUDE_DIR}/renderers/offscreen_renderer.hpp
+	src/renderers/offscreen_renderer.cpp
 )
 
 set(IMGUI_3D_FILES
@@ -140,6 +144,9 @@ source_group("2D rendering" FILES ${RENDER_2D_FILES})
 add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${IMGUI_3D_FILES} ${RENDER_2D_FILES})
 target_link_libraries(glframework PUBLIC ${OPENGL_gl_LIBRARY} glfw glad::glad glm)
 target_compile_definitions(glframework PUBLIC -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
+if(${WITH_EGL})
+	target_compile_definitions(glframework PUBLIC -DWITH_EGL)
+endif()
 if(${WITH_OPENMESH})
 	target_link_libraries(glframework PUBLIC OpenMeshCore)
 	target_compile_definitions(glframework PUBLIC -D_USE_MATH_DEFINES -DWITH_OPENMESH)

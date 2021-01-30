@@ -4,8 +4,6 @@
 #include <memory>
 #include <string>
 
-
-
 struct GLFWwindow;
 
 namespace gl {
@@ -27,6 +25,7 @@ namespace gl {
 			bool maximized = false,
 			int majorVersion = 4, 
 			int minorVersion = 3, std::shared_ptr<gl::Context> shared = nullptr);
+		~GLFWContext();
 
 		virtual void makeCurrent();
 
@@ -53,4 +52,20 @@ namespace gl {
 		GLFWwindow* mWindow;
 	};
 
+	class OffscreenContext : public Context {
+	public:
+		OffscreenContext(int width, int height, std::shared_ptr<gl::Context> shared = nullptr);
+		~OffscreenContext();
+
+		virtual void makeCurrent() override;
+	protected:
+#ifdef WITH_EGL
+		void* mDisplay;
+		void* mConfig;
+		void* mSurface;
+		void* mContext;
+#else
+		GLFWwindow* mContext;
+#endif
+	};
 }

@@ -64,6 +64,8 @@ namespace gl {
 		void bind();
 		void unbind();
 
+		size_t numColorAttachments() const { return mColorAttachments.size(); }
+
 		int width() const {
 			return mWidth;
 		}
@@ -84,9 +86,13 @@ namespace gl {
 
 			void attach(GLuint framebuffer, int width, int height);
 
+			GLenum dataType() const;
+			GLenum dataFormat() const;
+
 			std::shared_ptr<gl::Texture> targetTexture;
 			GLuint targetBuffer;
 			GLenum attachment;
+
 		};
 
 		GLuint mId;

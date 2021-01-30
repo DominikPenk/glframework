@@ -259,8 +259,8 @@ void gl::Framebuffer::readColorAttachment(int slot, int x, int y, int width, int
 	bind();
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + slot);
 	glReadPixels(x, y, width, height,
-		mColorAttachments[slot].targetTexture->glFormat(),
-		mColorAttachments[slot].targetTexture->glType(),
+		mColorAttachments[slot].dataFormat(),
+		mColorAttachments[slot].dataType(),
 		buffer);
 }
 
@@ -349,4 +349,30 @@ void gl::Framebuffer::FramebufferAttachment::attach(GLuint framebuffer, int widt
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, targetBuffer);
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+GLenum gl::Framebuffer::FramebufferAttachment::dataType() const
+{
+	if (targetTexture != nullptr) {
+		return targetTexture->glType();
+	}
+	else {
+		GLint type;
+		switch (attachment) {
+		case GL_DEPTH_ATTACHMENT:
+			return GL_FLOAT;
+		default:
+			return GL_UNSIGNED_BYTE;
+		}
+	}
+}
+
+GLenum gl::Framebuffer::FramebufferAttachment::dataFormat() const
+{
+	if (targetTexture != nullptr) {
+		return targetTexture->glFormat();
+	}
+	else {
+		return internal::getRenderBufferStorageDataType(attachment);
+	}
 }
