@@ -111,6 +111,11 @@ void gl::Editor::run()
 	}
 }
 
+bool gl::Editor::shouldClose() const
+{
+	return mContext->shouldClose();
+}
+
 size_t gl::Editor::addObject(const std::string& name, std::shared_ptr<Mesh> mesh)
 {
 	mObjects.push_back(mesh);

@@ -51,6 +51,8 @@ namespace gl {
 		/// </summary>
 		void run();
 
+		bool shouldClose() const;
+
 		size_t addObject(const std::string& name, std::shared_ptr<Mesh> mesh);
 
 		template<typename MeshType, typename ...Args>

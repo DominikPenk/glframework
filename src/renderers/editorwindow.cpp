@@ -229,6 +229,7 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 {
 	mOldImGui3DContext = ImGui3D::GImGui3D;
 	ImGui3D::SetContext(mImGui3DContext);
+	ImGui3D::NewFrame(editor->viewportCamera->viewMatrix, editor->viewportCamera->GetProjectionMatrix());
 	glViewport(0, 0, (int)size.x, (int)size.y);
 
 	
