@@ -7,6 +7,7 @@
 #include <glpp/controls.hpp>
 #include <glpp/framebuffer.hpp>
 #include <glpp/intermediate.h>
+#include <glpp/logging.hpp>
 #include <glpp/meshes.hpp>
 #include <glpp/shadermanager.hpp>
 
@@ -286,4 +287,83 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 
 
 	ImGui3D::SetContext(mOldImGui3DContext);
+}
+
+gl::LoggingEditorWindow::LoggingEditorWindow(const std::string& title, EditorWindowRegion defaultRegion) :
+	gl::EditorWindow(title, defaultRegion),
+	maxLogSize(100),
+	mMessageJustLogged(false)
+{
+	Logging::RegisterEndpoint(this);
+	icons[0] = std::string(ICON_FA_INFO_CIRCLE);
+	icons[1] = std::string(ICON_FA_CHECK_CIRCLE);
+	icons[2] = std::string(ICON_FA_EXCLAMATION_TRIANGLE);
+	icons[3] = std::string(ICON_FA_EXCLAMATION_CIRCLE);
+
+	mEnabled[0] = mEnabled[1] = mEnabled[2] = mEnabled[3] = true;
+}
+
+gl::LoggingEditorWindow::~LoggingEditorWindow()
+{
+	Logging::RemoveEndpoint(this);
+}
+
+void gl::LoggingEditorWindow::onMessage(const LogMessage& msg)
+{
+	if (mLogs.size() >= maxLogSize) {
+		mLogs.pop_front();
+	}
+	mLogs.push_back({ msg.level, msg.msg });
+	mMessageJustLogged = true;
+}
+
+void gl::LoggingEditorWindow::onDraw(Editor* editor)
+{
+	const char* types[] = {
+		"Info",
+		"Success",
+		"Warning",
+		"Error"
+	};
+
+	const ImVec4 colors[4] = {
+		ImVec4(0, 1, 1, 1),
+		ImVec4(0, 1, 0, 1),
+		ImVec4(1, 1, 0, 1),
+		ImVec4(1, 0, 0, 1)
+	};
+
+	for (int i = 0; i < 4; ++i) {
+		bool wasDisabled = !mEnabled[i];
+		if (wasDisabled) {
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+		std::string text = icons[i] + " " + types[i];
+		if (ImGui::Button(text.c_str())) {
+			mEnabled[i] = !mEnabled[i];
+		}
+		if (wasDisabled) {
+			ImGui::PopStyleVar();
+		}
+		if (i != 3) {
+			ImGui::SameLine();
+		}
+	}
+
+	if (ImGui::BeginChild("##Messages")) {
+		for (size_t i = 0; i < mLogs.size(); ++i) {
+			int t = mLogs[i].first;
+			if (!mEnabled[t]) { continue; }
+			ImGui::Separator();
+			ImGui::TextColored(colors[t], icons[t].c_str());
+			ImGui::SameLine();
+			ImGui::TextWrapped(mLogs[i].second.c_str());
+		}
+		if (mMessageJustLogged) {
+			ImGui::SetScrollHere(1.0f);
+			mMessageJustLogged = false;
+		}
+	}
+	ImGui::EndChild();
+
 }

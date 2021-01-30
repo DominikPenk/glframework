@@ -2,9 +2,11 @@
 
 #include <memory>
 #include <string>
+#include <deque>
 
 #include <glpp/renderer.hpp>
 #include <glpp/imgui.hpp>
+#include <glpp/logging.hpp>
 
 namespace ImGui3D {
 	struct ImGui3DContext;
@@ -90,5 +92,25 @@ namespace gl {
 
 	private:
 		std::shared_ptr<ImGui3D::ImGui3DContext> mOldImGui3DContext;
+	};
+
+	class LoggingEditorWindow : public EditorWindow, public LoggingEndpoint {
+	public:
+		LoggingEditorWindow(const std::string& title = "Messages", EditorWindowRegion defaultRegion = EditorWindowRegion::Bottom);
+		~LoggingEditorWindow();
+
+		int maxLogSize;
+
+		virtual void onMessage(const LogMessage& msg) override;
+
+		std::string icons[4];
+
+	
+	protected:
+		void onDraw(Editor* editor);
+
+		std::deque<std::pair<int, std::string>> mLogs;
+		bool mEnabled[4];
+		bool mMessageJustLogged;
 	};
 }

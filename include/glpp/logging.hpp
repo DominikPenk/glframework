@@ -40,10 +40,10 @@ namespace gl {
 	typedef int LogLevel;
 
 	enum LogLevel_ {
-		LogLevel_Info      = 0x1,
-		LogLevel_Success   = 0x1 << 1,
-		LogLevel_Warning   = 0x1 << 2,
-		LogLevel_Error     = 0x1 << 3
+		LogLevel_Info      = 0,
+		LogLevel_Success   = 1,
+		LogLevel_Warning   = 2,
+		LogLevel_Error     = 3
 	};
 
 	struct LogMessage {
@@ -74,6 +74,7 @@ namespace gl {
 			Dispatch(file, line, level, std::string(tmp_buffer));
 		}
 		static void RegisterEndpoint(LoggingEndpoint* endpoint);
+		static void RemoveEndpoint(LoggingEndpoint* endpoint);
 
 		static bool LogToStderr;
 	private:

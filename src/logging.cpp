@@ -34,3 +34,13 @@ void gl::Logging::RegisterEndpoint(LoggingEndpoint* endpoint)
 		sEndpoints.insert(endpoint);
 	}
 }
+
+void gl::Logging::RemoveEndpoint(LoggingEndpoint* endpoint)
+{
+	if (sEndpoints.find(endpoint) != sEndpoints.end()) {
+		Dispatch(__FILE__, __LINE__, LogLevel_Warning, "Tried to remove endpoint but could not find it");
+	}
+	else {
+		sEndpoints.erase(endpoint);
+	}
+}

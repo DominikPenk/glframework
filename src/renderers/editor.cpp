@@ -218,4 +218,5 @@ void gl::Editor::initialize()
 	mEditorWindows.push_back(std::make_shared<OutlinerEditorWindow>());
 	mEditorWindows.push_back(std::make_shared<DebugEditorWindow>());
 	mEditorWindows.push_back(std::make_shared<ViewportEditorWindow>());
+	mEditorWindows.push_back(std::make_shared<LoggingEditorWindow>());
 }
