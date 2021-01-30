@@ -6,7 +6,7 @@
 int main(int argc, const char* argv[]) {
 	
 	gl::Editor editor("Editor Sample");
-	editor.viewportCamera->lookAt(glm::vec3(0), glm::vec3(0, 5, 15));
+	editor.getViewportCamera()->lookAt(glm::vec3(0), glm::vec3(0, 5, 15));
 
 	editor.resetUILayout();
 
@@ -15,7 +15,7 @@ int main(int argc, const char* argv[]) {
 	LOG_WARNING("Just a sample warning, nothing to fear!");
 	for (int i = 0; i < 4; ++i) {
 		LOG_ONCE("This is only logged %s!", "once");
-		LOG_EVERY_N(2, "This is logged only if #calls.mod(%d) == 0.", 2);
+		LOG_ERROR_EVERY_N(2, "This is logged only if #calls.mod(%d) == 0.", 2);
 	}
 	editor.run();
 

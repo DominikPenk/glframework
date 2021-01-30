@@ -14,6 +14,8 @@ namespace ImGui3D {
 
 namespace gl {
 
+	class Camera;
+	class Control;
 	class Editor;
 	class Framebuffer;
 	class Shader;
@@ -47,6 +49,9 @@ namespace gl {
 		std::string title;
 		bool open;
 		EditorWindowRegion defaultRegion;
+
+		std::shared_ptr<gl::Camera>  camera;
+		std::shared_ptr<gl::Control> controls;
 
 	protected:
 		virtual void onDraw(Editor* editor) = 0;

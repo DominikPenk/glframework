@@ -80,6 +80,22 @@ namespace gl {
 			return windows;
 		}
 
+		/// <summary>
+		/// Returns the camera of the requested viewport.
+		/// This is a shorthand for editor.getViewport(id).camera;
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		std::shared_ptr<gl::Camera>                   getViewportCamera(int id = 0) const;
+		/// <summary>
+		/// Returns the camera controls of the requested viewport.
+		/// This is a shorthand for editor.getViewport(id).camera;
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		std::shared_ptr<gl::Control>                   getViewportControls(int id = 0) const;
+
+
 		void resetUILayout();
 
 		// Public variables (mainly influencing ui stuff)
@@ -91,16 +107,11 @@ namespace gl {
 		ToneMapping toneMapping;
 		glm::vec4 clearColor;
 
-		std::shared_ptr<Camera>  viewportCamera;
-		std::shared_ptr<Control> viewportControl;
-
 	protected:
 		virtual unsigned int buildDefaultLayout(bool force);
 
 		friend class DebugEditorWindow;
 		std::shared_ptr<GLFWContext> mContext;
-		//std::shared_ptr<Framebuffer> mGeometryFrameBuffer;
-		//std::shared_ptr<Framebuffer> mFrameBuffer;
 
 		std::vector<std::shared_ptr<Mesh>>         mObjects;
 		std::vector<std::shared_ptr<EditorWindow>> mEditorWindows;

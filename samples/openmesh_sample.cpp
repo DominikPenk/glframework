@@ -11,7 +11,7 @@
 
 int main(int argc, const char* argv[]) {
 	gl::Editor editor(1024, 720, "Test Window");
-	editor.viewportCamera->lookAt(glm::vec3(0), glm::vec3(0, 5, 15));
+	editor.getViewportCamera()->lookAt(glm::vec3(0), glm::vec3(0, 5, 15));
 
 	auto mesh = editor.addObject<gl::OpenMeshMesh>("Teapot", std::string(SAMPLE_DIR) + "teapot.obj");
 

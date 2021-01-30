@@ -4,6 +4,7 @@
 #include <glpp/imgui.hpp>
 #include <glpp/imgui3d/imgui_3d.h>
 
+#include <glpp/camera.hpp>
 #include <glpp/controls.hpp>
 #include <glpp/framebuffer.hpp>
 #include <glpp/intermediate.h>
@@ -17,7 +18,9 @@ gl::EditorWindow::EditorWindow(const std::string& title, EditorWindowRegion defa
 	open(true),
 	initialized(false),
 	position(-1, -1),
-	size(0, 0)
+	size(0, 0),
+	camera(std::make_shared<gl::Camera>()),
+	controls(std::make_shared<gl::FlyingControl>())
 {
 }
 
@@ -217,8 +220,8 @@ void gl::ViewportEditorWindow::initialize(Editor* editor) {
 }
 
 void gl::ViewportEditorWindow::onResize(ImVec2 position, ImVec2 size, Editor* editor) {
-	editor->viewportCamera->ScreenWidth  = (int)size.x;
-	editor->viewportCamera->ScreenHeight = (int)size.y;
+	camera->ScreenWidth  = (int)size.x;
+	camera->ScreenHeight = (int)size.y;
 	mImGui3DContext->ScreenSize.x = size.x;
 	mImGui3DContext->ScreenSize.y = size.y;
 	mImGui3DContext->Aspect = size.x / size.y;
@@ -230,7 +233,7 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 {
 	mOldImGui3DContext = ImGui3D::GImGui3D;
 	ImGui3D::SetContext(mImGui3DContext);
-	ImGui3D::NewFrame(editor->viewportCamera->viewMatrix, editor->viewportCamera->GetProjectionMatrix(), ImGui::GetCurrentWindow()->ID);
+	ImGui3D::NewFrame(camera->viewMatrix, camera->GetProjectionMatrix(), ImGui::GetCurrentWindow()->ID);
 	glViewport(0, 0, (int)size.x, (int)size.y);
 
 	mGeometryFrameBuffer->bind();
@@ -239,14 +242,14 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 
 	// Update viewport camera
 	if (ImGui::IsWindowHovered()) {
-		editor->viewportControl->update(editor->viewportCamera, true);
+		controls->update(camera, true);
 	}
 
 	glEnable(GL_DEPTH_TEST);
 	for (auto mesh : editor->getObjects()) {
 		if (mesh->visible) {
-			mesh->render(editor->viewportCamera);
-			mesh->handleIO(editor->viewportCamera, ImGui::GetIO());
+			mesh->render(camera);
+			mesh->handleIO(camera, ImGui::GetIO());
 		}
 	}
 	mFrameBuffer->bind();
@@ -255,21 +258,21 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 		mTonemappingShader->update();
 	}
 	if (editor->toneMapping != ToneMapping::Linear || editor->gammaCorrection) {
-		fullscreenTriangle(0, 0, editor->viewportCamera->ScreenWidth, editor->viewportCamera->ScreenHeight,
+		fullscreenTriangle(0, 0, camera->ScreenWidth, camera->ScreenHeight,
 			*mTonemappingShader,
 			"gamma", editor->gammaCorrection ? editor->gamma : 1.0f,
 			"hdr", editor->hdr,
 			"renderTexture", mGeometryFrameBuffer->getRenderTexture(0));
 	}
 	else {
-		displayTexture(0, 0, editor->viewportCamera->ScreenWidth, editor->viewportCamera->ScreenHeight, mGeometryFrameBuffer->getRenderTexture(0));
+		displayTexture(0, 0, camera->ScreenWidth, camera->ScreenHeight, mGeometryFrameBuffer->getRenderTexture(0));
 	}
 
 	// Clear id map and render ImGui3D stuff
 	mFrameBuffer->clearColorAttachment(1, glm::vec4(0, 0, 0, 1));
 	for (auto mesh : editor->getObjects()) {
 		if (mesh->visible) {
-			mesh->drawViewportUI(editor->viewportCamera);
+			mesh->drawViewportUI(camera);
 			if (std::dynamic_pointer_cast<gl::TriangleMesh>(mesh) != nullptr) {
 				ImGui3D::TransformGizmo(mesh->ModelMatrix);
 			}

@@ -23,9 +23,6 @@ gl::Editor::Editor() :
 	toneMapping(ToneMapping::Reinhard),
 	gamma(1.2f),
 	clearColor(0.24f, 0.24f, 0.24f, 1.0f),
-	viewportCamera(std::make_shared<gl::Camera>()),
-	viewportControl(std::make_shared<gl::FlyingControl>()),
-	//mLastTonemapping(ToneMapping::Reinhard),
 	mForceUiResetOnNextDraw(false)
 {
 	
@@ -145,6 +142,20 @@ std::shared_ptr<gl::ViewportEditorWindow> gl::Editor::getViewport(int id) const
 		}
 	}
 	return nullptr;
+}
+
+std::shared_ptr<gl::Camera> gl::Editor::getViewportCamera(int id) const
+{
+	std::shared_ptr<gl::ViewportEditorWindow> window = getViewport(id);
+	if (window == nullptr) { return nullptr; }
+	return window->camera;
+}
+
+std::shared_ptr<gl::Control> gl::Editor::getViewportControls(int id) const
+{
+	std::shared_ptr<gl::ViewportEditorWindow> window = getViewport(id);
+	if (window == nullptr) { return nullptr; }
+	return window->controls;
 }
 
 void gl::Editor::resetUILayout()
