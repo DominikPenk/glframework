@@ -2,6 +2,7 @@
 
 #include <glpp/meshes.hpp>
 #include <glpp/imgui.hpp>
+#include <glpp/imgui3d/imgui_3d.h>
 
 int main(int argc, const char* argv[]) {
 
@@ -15,8 +16,11 @@ int main(int argc, const char* argv[]) {
 
 		ImGui::ShowDemoWindow();
 
-		renderer.renderObjects(renderer.viewportCamera);
-		
+
+		// You can render all objects stored by the renderer like this:
+		// renderer.renderObjects(renderer.viewportCamera);
+		teapot->render(renderer.viewportCamera);
+		ImGui3D::TransformGizmo(teapot->ModelMatrix);
 		
 		renderer.endFrame();
 	}

@@ -229,10 +229,9 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 {
 	mOldImGui3DContext = ImGui3D::GImGui3D;
 	ImGui3D::SetContext(mImGui3DContext);
-	ImGui3D::NewFrame(editor->viewportCamera->viewMatrix, editor->viewportCamera->GetProjectionMatrix());
+	ImGui3D::NewFrame(editor->viewportCamera->viewMatrix, editor->viewportCamera->GetProjectionMatrix(), ImGui::GetCurrentWindow()->ID);
 	glViewport(0, 0, (int)size.x, (int)size.y);
 
-	
 	mGeometryFrameBuffer->bind();
 	mGeometryFrameBuffer->clearColorAttachment(0, editor->clearColor);
 	mGeometryFrameBuffer->clearDepthBuffer();
@@ -270,8 +269,12 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 	for (auto mesh : editor->getObjects()) {
 		if (mesh->visible) {
 			mesh->drawViewportUI(editor->viewportCamera);
+			if (std::dynamic_pointer_cast<gl::TriangleMesh>(mesh) != nullptr) {
+				ImGui3D::TransformGizmo(mesh->ModelMatrix);
+			}
 		}
 	}
+	mFrameBuffer->clearDepthBuffer();
 	ImGui3D::Render();
 	mFrameBuffer->unbind();
 
@@ -280,6 +283,7 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 		ImGui::GetWindowPos(),
 		ImGui::GetWindowPos() + ImGui::GetWindowSize(),
 		ImVec2(0, 1), ImVec2(1, 0));
+
 
 	ImGui3D::SetContext(mOldImGui3DContext);
 }

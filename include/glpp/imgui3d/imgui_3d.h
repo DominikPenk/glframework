@@ -230,7 +230,7 @@ namespace ImGui3D {
 	/// <param name="ctx">Pointer to the context to set</param>
 	void SetContext(std::shared_ptr<ImGui3DContext> ctx);
 
-	void NewFrame(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix);
+	void NewFrame(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, ImGuiID windowId =  0);
 
 	void Render();
 

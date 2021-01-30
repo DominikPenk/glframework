@@ -79,6 +79,9 @@ bool gl::ImmediateRenderer::startFrame()
 
 void gl::ImmediateRenderer::endFrame()
 {
+	mFrameBuffer->bind();
+	// ImGui3D should overlay objects, so we clear the depth
+	mFrameBuffer->clearDepthBuffer();
 	ImGui3D::Render();
 
 	mFrameBuffer->unbind();
@@ -89,6 +92,7 @@ void gl::ImmediateRenderer::endFrame()
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	glfwSwapBuffers(*mContext);
+	ImGui3D::SetContext(mOldImGui3DContext);
 }
 
 bool gl::ImmediateRenderer::shouldClose() const
@@ -142,4 +146,15 @@ void gl::ImmediateRenderer::initialize()
 	mImGui3DContext->GetHoveredIdImpl = [&](ImVec2 mouse) -> glm::uvec4 {
 		return mFrameBuffer->readColorPixel(mouse.x, mouse.y, 1);
 	};
+}
+
+void gl::ImmediateRenderer::clearDepthBuffer() {
+	mFrameBuffer->clearDepthBuffer();
+}
+
+void gl::ImmediateRenderer::clearColorBuffer(glm::vec4 color) {
+	if (color.w < 0) {
+		color = clearColor;
+	}
+	mFrameBuffer->clearColorAttachment(0, color);
 }

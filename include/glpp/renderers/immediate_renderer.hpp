@@ -41,6 +41,9 @@ namespace gl {
 			return mesh;
 		}
 
+		void clearDepthBuffer();
+		void clearColorBuffer(glm::vec4 color = glm::vec4(-1.f));
+
 		glm::vec4                              clearColor;
 		std::vector<std::shared_ptr<gl::Mesh>> objects;
 		std::shared_ptr<gl::Camera>            viewportCamera;

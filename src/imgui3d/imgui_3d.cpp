@@ -26,7 +26,7 @@ namespace ImGui3D {
 		GImGui3D = ctx;
 	}
 
-	void NewFrame(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix)
+	void NewFrame(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, ImGuiID windowID)
 	{
 		IM_ASSERT(GImGui3D != nullptr && "No current context. Did you call ImGui3D::CreateContext() or ImGui3D::SetCurrentContext()?");
 		ImGui3DContext& g = *GImGui3D;
@@ -44,22 +44,20 @@ namespace ImGui3D {
 
 		g.SeedStack.push_back(0);
 
-		// Check if we should signal mouse and keyboard captureing
-		if (g.KeepCaptureFocus) {
-			io.WantCaptureKeyboard = true;
-			io.WantCaptureMouse = true;
-			// Make sure the AcitveId in last frame stays active
-			//g.ActiveId = g.ActiveIdPreviousFrame;
-		}
-		else {
+		if(!g.KeepCaptureFocus) {
 			// Clear current activeId
 			g.ActiveIdPreviousFrame = g.ActiveId;
 			g.ActiveId = 0;
 		}
 
 		// Look for ids under the mouse cursor if neccessary
-		ImRect windowRect(ImVec2(0, 0), g.ScreenSize);
-		if (!io.WantCaptureKeyboard && !io.WantCaptureMouse && windowRect.Contains(io.MousePos)) {
+		ImRect windowRect = windowID == 0
+			? ImRect(ImVec2(0, 0), g.ScreenSize)
+			: ImGui::FindWindowByID(windowID)->ContentRegionRect;
+		bool imguiUsesIO = windowID == 0
+			? io.WantCaptureMouse || io.WantCaptureKeyboard
+			: false;	// FIXME: This should not always be true!
+		if (!g.KeepCaptureFocus && !imguiUsesIO && windowRect.Contains(io.MousePos)) {
 			g.ActiveIdColor = g.GetHoveredIdImpl(io.MousePos);
 			g.ActiveIdPreviousFrame = g.ActiveId;
 			g.ActiveId = ColorToID(g.ActiveIdColor.r, g.ActiveIdColor.g, g.ActiveIdColor.b);
