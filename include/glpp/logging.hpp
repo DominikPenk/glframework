@@ -26,7 +26,7 @@
 #define LOG_SUCCESS(msg) gl::Logging::Dispatch(__FILE__, __LINE__, gl::LogLevel_Success, (msg))
 #define LOG_SUCCESS(format, ...) gl::Logging::Dispatchf(__FILE__, __LINE__, gl::LogLevel_Success, format, __VA_ARGS__)
 #define LOG_SUCCESS_IF(msg) if((cond)) { LOG_SUCCESS(msg); }
-#define LOG_SUCCESS_IF(format, ...) if((cond)) { LOG_SUCCESS(format, __VA_ARGS__); }
+#define LOG_SUCCESS_IF(cond, format, ...) if((cond)) { LOG_SUCCESS(format, __VA_ARGS__); }
 #define LOG_SUCCESS_ONCE(msg) { static bool __first_call__ = true; LOG_SUCCESS_IF(__first_call__, msg); __first_call__ = false; }
 #define LOG_SUCCESS_ONCE(format, ...) { static bool __first_call__ = true; LOG_SUCCESS_IF(__first_call__, format, __VA_ARGS__); __first_call__ = false; }
 #define LOG_SUCCESS_EVERY_N(n, msg) { static ptrdiff_t __callcount__ = 0; LOG_SUCCESS_IF(__callcount__ % (n) == 0, msg);  __callcount__++; }
@@ -35,7 +35,7 @@
 #define LOG_WARNING(msg) gl::Logging::Dispatch(__FILE__, __LINE__, gl::LogLevel_Warning, (msg))
 #define LOG_WARNING(format, ...) gl::Logging::Dispatchf(__FILE__, __LINE__, gl::LogLevel_Warning, format, __VA_ARGS__)
 #define LOG_WARNING_IF(msg) if((cond)) { LOG_WARNING(msg); }
-#define LOG_WARNING_IF(format, ...) if((cond)) { LOG_WARNING(format, __VA_ARGS__); }
+#define LOG_WARNING_IF(cond, format, ...) if((cond)) { LOG_WARNING(format, __VA_ARGS__); }
 #define LOG_WARNING_ONCE(msg) { static bool __first_call__ = true; LOG_WARNING_IF(__first_call__, msg); __first_call__ = false; }
 #define LOG_WARNING_ONCE(format, ...) { static bool __first_call__ = true; LOG_WARNING_IF(__first_call__, format, __VA_ARGS__); __first_call__ = false; }
 #define LOG_WARNING_EVERY_N(n, msg) { static ptrdiff_t __callcount__ = 0; LOG_WARNING_IF(__callcount__ % (n) == 0, msg);  __callcount__++; }
@@ -44,7 +44,7 @@
 #define LOG_ERROR(msg) gl::Logging::Dispatch(__FILE__, __LINE__, gl::LogLevel_Error, (msg))
 #define LOG_EROR(format, ...) gl::Logging::Dispatchf(__FILE__, __LINE__, gl::LogLevel_Error, format, __VA_ARGS__)
 #define LOG_ERROR_IF(msg) if((cond)) { LOG_ERROR(msg); }
-#define LOG_ERROR_IF(format, ...) if((cond)) { LOG_ERROR(format, __VA_ARGS__); }
+#define LOG_ERROR_IF(cond, format, ...) if((cond)) { LOG_ERROR(format, __VA_ARGS__); }
 #define LOG_ERROR_ONCE(msg) { static bool __first_call__ = true; LOG_ERROR_IF(__first_call__, msg); __first_call__ = false; }
 #define LOG_ERROR_ONCE(format, ...) { static bool __first_call__ = true; LOG_ERROR_IF(__first_call__, format, __VA_ARGS__); __first_call__ = false; }
 #define LOG_ERROR_EVERY_N(n, msg) { static ptrdiff_t __callcount__ = 0; LOG_ERROR_IF(__callcount__ % (n) == 0, msg);  __callcount__++; }
