@@ -4,7 +4,7 @@ project(GL-Framework LANGUAGES CXX)
 set(WITH_ASSIMP ON CACHE BOOL "Build with assimp")
 set(WITH_OPENMESH ON CACHE BOOL "Build with OpenMesh")
 set(WITH_EGL ON CACHE BOOL "Build offscreenrendering with EGL")
-option(BUILD_FRAMEWORK_TEST "Build framework tests" OFF)
+option(BUILD_FRAMEWORK_SAMPLES "Build framework samples" OFF)
 
 # Find Opengl libs
 find_package(OpenGL REQUIRED)
@@ -87,6 +87,9 @@ set(RENDERER_FILES
 	# Offscreen renderer
 	${INCLUDE_DIR}/renderers/offscreen_renderer.hpp
 	src/renderers/offscreen_renderer.cpp
+	# Immediate renderer
+	${INCLUDE_DIR}/renderers/immediate_renderer.hpp
+	src/renderers/immediate_renderer.cpp
 )
 
 set(IMGUI_3D_FILES
@@ -139,7 +142,7 @@ set(GL_FILES
 source_group("Meshes" FILES ${MESH_FILES})
 source_group("Dear Imgui" FILES ${IMGUI_FILES})
 source_group("Dear Imgui 3D" FILES ${IMGUI_3D_FILES})
-source_group("2D rendering" FILES ${RENDER_2D_FILES})
+source_group("Renderes" FILES ${RENDERER_FILES})
 
 add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${IMGUI_3D_FILES} ${RENDER_2D_FILES})
 target_link_libraries(glframework PUBLIC ${OPENGL_gl_LIBRARY} glfw glad::glad glm)
@@ -175,6 +178,6 @@ target_include_directories(glframework PUBLIC
 	${OPENGL_INCLUDE_DIRS} 
 	${GLM_INCLUDE_DIRS})
 
-if(${BUILD_FRAMEWORK_TEST})
-	add_subdirectory(test/)
+if(${BUILD_FRAMEWORK_SAMPLES})
+	add_subdirectory(samples/)
 endif()

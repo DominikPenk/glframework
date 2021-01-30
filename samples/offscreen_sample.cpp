@@ -25,7 +25,7 @@ int main() {
 	gl::OffscreenRenderer renderer(cam->ScreenHeight, cam->ScreenWidth);
 
 	// Create a triangle
-	gl::TriangleMesh teapot(std::string(TEST_DIR) + "teapot.obj");
+	gl::TriangleMesh teapot(std::string(SAMPLE_DIR) + "teapot.obj");
 	teapot.visualizeNormals = true;
 
 	glEnable(GL_DEPTH_TEST);
