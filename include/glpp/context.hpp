@@ -11,17 +11,22 @@ namespace gl {
 	class Context {
 	public:
 		Context(std::shared_ptr<gl::Context> shared = nullptr);
-		virtual void makeCurrent() = 0;
+		virtual void makeCurrent();
+
+		static gl::Context* GetCurrentContext();
 
 	protected:
 		std::shared_ptr<gl::Context> mSharedContext;
+
+	private:
+		static gl::Context* sCurrentContext;
 	};
 
-	class GLFWContext : Context {
+	class GLFWContext : public gl::Context {
 	public:
 		GLFWContext(
 			int width, int height,
-			const std::string& title = "Window Title",
+			const std::string& title,
 			bool maximized = false,
 			int majorVersion = 4, 
 			int minorVersion = 3, std::shared_ptr<gl::Context> shared = nullptr);
@@ -31,9 +36,13 @@ namespace gl {
 
 		operator GLFWwindow* () const;
 
+		void setFullscreenWindow(int monitorId) const;
+
 		// New setters
 		void setTitle(const std::string& title);
 		void setWindowSize(int width, int height);
+		void setCursorVisible(bool visible);
+
 
 		bool shouldClose() const;
 		bool isMinified() const;
@@ -52,7 +61,7 @@ namespace gl {
 		GLFWwindow* mWindow;
 	};
 
-	class OffscreenContext : public Context {
+	class OffscreenContext : public gl::Context {
 	public:
 		OffscreenContext(int width, int height, std::shared_ptr<gl::Context> shared = nullptr);
 		~OffscreenContext();

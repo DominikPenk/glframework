@@ -6,9 +6,20 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+gl::Context* gl::Context::sCurrentContext = nullptr;
+
 gl::Context::Context(std::shared_ptr<gl::Context> shared) :
 	mSharedContext(shared)
 {
+}
+
+void gl::Context::makeCurrent() {
+	sCurrentContext = this;
+}
+
+gl::Context* gl::Context::GetCurrentContext()
+{
+	return sCurrentContext;
 }
 
 gl::GLFWContext::GLFWContext(
@@ -61,11 +72,29 @@ void gl::GLFWContext::makeCurrent()
 {
 	assert(mWindow != nullptr);
 	glfwMakeContextCurrent(mWindow);
+	gl::Context::makeCurrent();
 }
 
 gl::GLFWContext::operator GLFWwindow* () const
 {
 	return mWindow;
+}
+
+void gl::GLFWContext::setFullscreenWindow(int monitorId) const
+{
+	int count;
+	GLFWmonitor** monitors = glfwGetMonitors(&count);
+	if (count <= monitorId) {
+		throw std::runtime_error("Tried to create a fullscreen window for monitor id " + std::to_string(monitorId) + " but only found " + std::to_string(count) + " monitors");
+	}
+	const GLFWvidmode* mode = glfwGetVideoMode(monitors[monitorId]);
+	glfwSetWindowAttrib(mWindow, GLFW_RED_BITS, mode->redBits);
+	glfwSetWindowAttrib(mWindow, GLFW_GREEN_BITS, mode->greenBits);
+	glfwSetWindowAttrib(mWindow, GLFW_BLUE_BITS, mode->blueBits);
+	glfwSetWindowAttrib(mWindow, GLFW_AUTO_ICONIFY, GL_FALSE);
+	int x, y;
+	glfwGetMonitorPos(monitors[monitorId], &x, &y);
+	glfwSetWindowMonitor(mWindow, monitors[monitorId], x, y, mode->width, mode->height, mode->refreshRate);
 }
 
 void gl::GLFWContext::setTitle(const std::string& title)
@@ -79,6 +108,11 @@ void gl::GLFWContext::setWindowSize(int width, int height)
 {
 	assert(mWindow != nullptr);
 	glfwSetWindowSize(mWindow, width, height);
+}
+
+void gl::GLFWContext::setCursorVisible(bool visible)
+{
+	glfwSetInputMode(mWindow, GLFW_CURSOR, visible ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
 }
 
 bool gl::GLFWContext::shouldClose() const
@@ -200,4 +234,5 @@ void gl::OffscreenContext::makeCurrent()
 #else
 	glfwMakeContextCurrent(mContext);
 #endif
+	gl::Context::makeCurrent();
 }

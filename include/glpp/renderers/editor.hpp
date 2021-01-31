@@ -26,7 +26,9 @@ namespace gl {
 		EditorFlags_NoDefaultOutliner = 0x1 << 1,
 		EditorFlags_NoDefaultDebug    = 0x1 << 2,
 		EditorFlags_NoDefaultLogging  = 0x1 << 3,
-		EditorFlags_NoDefaultViewport = 0x1 << 3
+		EditorFlags_NoDefaultViewport = 0x1 << 4,
+
+		EditorFlags_NoDefaultWindows = EditorFlags_NoDefaultOutliner | EditorFlags_NoDefaultDebug | EditorFlags_NoDefaultLogging | EditorFlags_NoDefaultViewport
 	};
 
 	class Editor {
