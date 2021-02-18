@@ -390,3 +390,14 @@ void gl::LoggingEditorWindow::onDraw(Editor* editor)
 	ImGui::EndChild();
 
 }
+
+gl::LambdaEditorWindow::LambdaEditorWindow(const std::string& title, std::function<void(gl::Editor*)> fn, EditorWindowRegion defaultRegion) :
+	EditorWindow(title, defaultRegion),
+	mDrawFunction(fn)
+{
+}
+
+void gl::LambdaEditorWindow::onDraw(Editor* editor)
+{
+	mDrawFunction(editor);
+}

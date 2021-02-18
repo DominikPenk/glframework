@@ -21,6 +21,11 @@ int main(int argc, const char* argv[]) {
 		LOG_ONCE("This is only logged %s!", "once");
 		LOG_ERROR_EVERY_N(2, "This is logged only if #calls.mod(%d) == 0.", 2);
 	}
+
+	editor.addEditorWindow("Lambda Window", [](gl::Editor*) {
+		ImGui::TextUnformatted("This is a lambda window");
+	});
+
 	editor.run();
 
 	return EXIT_SUCCESS;

@@ -93,11 +93,19 @@ namespace gl {
 			return windows;
 		}
 		template<typename WindowType, typename ...Args>
-		std::shared_ptr<WindowType> addEdtorWindow(const std::string& title, gl::EditorWindowRegion region, Args... args) {
+		std::shared_ptr<WindowType> addEditorWindow(const std::string& title, gl::EditorWindowRegion region, Args... args) {
 			static_assert(std::is_base_of_v<gl::EditorWindow, WindowType>, "WindowType must derive from gl::EditorWindow");
-			windows.push_back(std::make_shared<WindowType>(title, args..., region));
-			return windows.back();
+			mEditorWindows.push_back(std::make_shared<WindowType>(title, args..., region));
+			return std::dynamic_pointer_cast<WindowType>(mEditorWindows.back());
 		}
+
+		std::shared_ptr<gl::LambdaEditorWindow> addEditorWindow(
+			const std::string& title, 
+			std::function<void(gl::Editor*)> drawFunction, 
+			gl::EditorWindowRegion region = gl::EditorWindowRegion::Floating) {
+			return addEditorWindow<gl::LambdaEditorWindow>(title, region, drawFunction);
+		}
+
 
 		/// <summary>
 		/// Returns the camera of the requested viewport.

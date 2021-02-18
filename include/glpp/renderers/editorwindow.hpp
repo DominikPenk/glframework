@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -123,4 +124,13 @@ namespace gl {
 		bool mMessageJustLogged;
 	};
 
+	class LambdaEditorWindow : public EditorWindow {
+	public:
+		LambdaEditorWindow(const std::string& title, std::function<void(gl::Editor*)> fn, EditorWindowRegion defaultRegion = EditorWindowRegion::Floating);
+
+	protected:
+		virtual void onDraw(Editor* editor);
+
+		std::function<void(gl::Editor*)> mDrawFunction;
+	};
 }
