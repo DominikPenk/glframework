@@ -74,6 +74,7 @@ namespace gl {
 			addObject(name, mesh);
 			return mesh;
 		}
+		void removeObject(size_t id);
 
 		// Getters
 		const std::vector<std::shared_ptr<Mesh>>& getObjects() const;
@@ -90,6 +91,12 @@ namespace gl {
 				}
 			}
 			return windows;
+		}
+		template<typename WindowType, typename ...Args>
+		std::shared_ptr<WindowType> addEdtorWindow(const std::string& title, gl::EditorWindowRegion region, Args... args) {
+			static_assert(std::is_base_of_v<gl::EditorWindow, WindowType>, "WindowType must derive from gl::EditorWindow");
+			windows.push_back(std::make_shared<WindowType>(title, args..., region));
+			return windows.back();
 		}
 
 		/// <summary>

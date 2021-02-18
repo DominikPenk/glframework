@@ -120,6 +120,16 @@ size_t gl::Editor::addObject(const std::string& name, std::shared_ptr<Mesh> mesh
 	return mObjects.size() - 1;
 }
 
+void gl::Editor::removeObject(size_t id)
+{
+	if (id >= mObjects.size()) {
+		LOG_ERROR("Tried to delete object with id %u but there are only %u objects", id, mObjects.size());
+	}
+	else {
+		mObjects.erase(mObjects.begin() + id);
+	}
+}
+
 const std::vector<std::shared_ptr<gl::Mesh>>& gl::Editor::getObjects() const
 {
 	return mObjects;

@@ -188,6 +188,11 @@ gl::ViewportEditorWindow::ViewportEditorWindow(const std::string& title, EditorW
 {
 }
 
+void gl::ViewportEditorWindow::registerRenderHook(gl::RenderHook hook, gl::RenderHookFn fn)
+{
+	mRenderHoodks[hook].push_back(fn);
+}
+
 void gl::ViewportEditorWindow::initialize(Editor* editor) {
 	// Initialize framebuffers
 	int w = (int)size.x;
@@ -242,6 +247,10 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 		controls->update(camera, true);
 	}
 
+	for (const auto hook : mRenderHoodks[gl::RenderHook::PreMeshDrawing]) {
+		hook(this);
+	}
+
 	glEnable(GL_DEPTH_TEST);
 	for (auto mesh : editor->getObjects()) {
 		if (mesh->visible) {
@@ -249,6 +258,11 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 			mesh->handleIO(camera, ImGui::GetIO());
 		}
 	}
+
+	for (const auto hook : mRenderHoodks[gl::RenderHook::PostMeshDrawing]) {
+		hook(this);
+	}
+
 	mFrameBuffer->bind();
 	if (mLastTonemapping != editor->toneMapping) {
 		mTonemappingShader->setDefine("HDR_MAPPING_TYPE", static_cast<int>(editor->toneMapping));
@@ -264,6 +278,9 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 	else {
 		displayTexture(0, 0, camera->ScreenWidth, camera->ScreenHeight, mGeometryFrameBuffer->getRenderTexture(0));
 	}
+	for (const auto hook : mRenderHoodks[gl::RenderHook::PostToneMapping]) {
+		hook(this);
+	}
 
 	// Clear id map and render ImGui3D stuff
 	mFrameBuffer->clearColorAttachment(1, glm::vec4(0, 0, 0, 1));
@@ -276,7 +293,13 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 		}
 	}
 	mFrameBuffer->clearDepthBuffer();
+	for (const auto hook : mRenderHoodks[gl::RenderHook::PreImGui3D]) {
+		hook(this);
+	}
 	ImGui3D::Render();
+	for (const auto hook : mRenderHoodks[gl::RenderHook::PostImGui3D]) {
+		hook(this);
+	}
 	mFrameBuffer->unbind();
 
 	ImGui::GetWindowDrawList()->AddImage(

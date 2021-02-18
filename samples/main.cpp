@@ -10,6 +10,10 @@ int main(int argc, const char* argv[]) {
 
 	editor.resetUILayout();
 
+	editor.getViewport()->registerRenderHook(gl::RenderHook::PostMeshDrawing, [&](const gl::ViewportEditorWindow*) {
+		LOG_EVERY_N(100, "This is logged every 100 frames after objects are drawn");
+	});
+
 	auto teapot = editor.addObject<gl::TriangleMesh>("Teapot", std::string(SAMPLE_DIR) + "teapot.obj");
 	LOG_SUCCESS_OR_ERROR(teapot != nullptr, "Loaded teapot mesh", "Could not load teapot mesh");
 	LOG_WARNING("Just a sample warning, nothing to fear!");

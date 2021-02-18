@@ -1,7 +1,10 @@
 #pragma once
 
+#include <functional>
+
 namespace gl {
 
+	class ViewportEditorWindow;
 
 	enum class ToneMapping {
 		Linear                     = 0,
@@ -12,9 +15,14 @@ namespace gl {
 	};
 
 	enum class RenderHook {
-		Pre2DGui,
-		PostMeshDrawing
+		PreMeshDrawing,
+		PostMeshDrawing,
+		PostToneMapping,
+		PreImGui3D,
+		PostImGui3D
 	};
+
+	typedef typename std::function<void(const gl::ViewportEditorWindow*)> RenderHookFn;
 
 #if false
 	class Renderer : public RendererBase {

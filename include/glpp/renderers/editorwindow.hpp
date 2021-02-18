@@ -1,8 +1,9 @@
 #pragma once
 
+#include <deque>
 #include <memory>
 #include <string>
-#include <deque>
+#include <unordered_map>
 
 #include <glpp/renderer.hpp>
 #include <glpp/imgui.hpp>
@@ -83,6 +84,8 @@ namespace gl {
 	public:
 		ViewportEditorWindow(const std::string& title = "Viewport", EditorWindowRegion defaultRegion = EditorWindowRegion::Center);
 
+		void registerRenderHook(gl::RenderHook hook, gl::RenderHookFn fn);
+
 	protected:
 		friend class DebugEditorWindow;
 		void onDraw(Editor* editor) override;
@@ -94,6 +97,7 @@ namespace gl {
 		std::shared_ptr<Framebuffer>             mFrameBuffer;
 		std::unique_ptr<Shader>                  mTonemappingShader;
 		std::shared_ptr<ImGui3D::ImGui3DContext> mImGui3DContext;
+		std::unordered_map<gl::RenderHook, std::vector<gl::RenderHookFn>> mRenderHoodks;
 
 	private:
 		std::shared_ptr<ImGui3D::ImGui3DContext> mOldImGui3DContext;
@@ -118,4 +122,5 @@ namespace gl {
 		bool mEnabled[4];
 		bool mMessageJustLogged;
 	};
+
 }

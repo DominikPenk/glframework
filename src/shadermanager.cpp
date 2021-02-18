@@ -9,6 +9,8 @@
 #include <regex>
 #include <map>
 
+#include "glpp/logging.hpp"
+
 using namespace gl;
 
 #pragma region implementation details
@@ -140,22 +142,24 @@ std::string resolveRelative(std::string relPath, std::string workingDir = std::f
 
 bool validatePipeline(const std::map<GLenum, ShaderCode>& pipeline) {
 	bool valid = true;
+	// Check if this is a mesh shader or a traditional pipeline shaer
+
 	if (pipeline.find(GL_VERTEX_SHADER) == pipeline.end()) {
-		std::cerr << "Missing shader: Vertex Shader" << std::endl;
+		LOG_WARNING("Missing shader: Vertex Shader");
 		valid = false;
 	}
 	if (pipeline.find(GL_FRAGMENT_SHADER) == pipeline.end()) {
-		std::cerr << "Missing shader: Fragment Shader" << std::endl;
+		LOG_WARNING("Missing shader: Fragment Shader");
 		valid = false;
 	}
 	if (pipeline.find(GL_TESS_CONTROL_SHADER) != pipeline.end()
 		&& pipeline.find(GL_TESS_EVALUATION_SHADER) == pipeline.end()) {
-		std::cerr << "Missing shader: Tesselation Evaluation Shader (but Tesselation Control Shader was found)" << std::endl;
+		LOG_WARNING("Missing shader: Tesselation Evaluation Shader (but Tesselation Control Shader was found)");
 		valid = false;
 	}
 	if (pipeline.find(GL_TESS_EVALUATION_SHADER) != pipeline.end()
 		&& pipeline.find(GL_TESS_CONTROL_SHADER) == pipeline.end()) {
-		std::cerr << "Missing shader: Tesselation Control Shader (but Tesselation Evaluation Shader was found)" << std::endl;
+		LOG_WARNING("Missing shader: Tesselation Control Shader (but Tesselation Evaluation Shader was found)");
 		valid = false;
 	}
 	return valid;
