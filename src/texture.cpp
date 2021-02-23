@@ -383,6 +383,8 @@ GLenum gl::getGlSizedFormat(PixelFormat pixelFormat, PixelType pixelType)
 			return GL_RG32F;
 		case PixelFormat::RGBA:
 			return GL_RGBA32F;
+		case PixelFormat::BGRA:
+			return GL_RGBA32F;
 		case PixelFormat::DEPTH:
 			return GL_DEPTH_COMPONENT24;
 		default:
@@ -399,6 +401,7 @@ GLenum gl::getGlSizedFormat(PixelFormat pixelFormat, PixelType pixelType)
 		case PixelFormat::RG:
 			return GL_RG8;
 		case PixelFormat::RGBA:
+		case PixelFormat::BGRA:
 			return GL_RGBA8;
 		default:
 			throw std::runtime_error("Invalid dataype and pixel format combination");
@@ -414,6 +417,7 @@ GLenum gl::getGlSizedFormat(PixelFormat pixelFormat, PixelType pixelType)
 		case PixelFormat::RG:
 			return GL_RG32UI;
 		case PixelFormat::RGBA:
+		case PixelFormat::BGRA:
 			return GL_RGBA32UI;
 		default:
 			throw std::runtime_error("Invalid dataype and pixel format combination");
@@ -436,10 +440,11 @@ int gl::getChannelsForFormat(PixelFormat format)
 {
 	switch (format) {
 	case PixelFormat::RGBA:
+	case PixelFormat::BGRA:
 		return 4;
 	case PixelFormat::BGR:
 	case PixelFormat::RGB:
-		return 4;
+		return 3;
 	case PixelFormat::RG:
 		return 2;
 	case PixelFormat::DEPTH:

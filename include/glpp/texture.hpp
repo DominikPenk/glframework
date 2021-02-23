@@ -21,6 +21,7 @@ namespace gl {
 		RGB = GL_RGB,
 		BGR = GL_BGR,
 		RGBA = GL_RGBA,
+		BGRA = GL_BGRA,
 		DEPTH_STENCIL = GL_DEPTH_STENCIL,
 		DEPTH = GL_DEPTH_COMPONENT,
 		Default = 0
