@@ -135,6 +135,15 @@ void gl::Editor::removeObject(size_t id)
 	}
 }
 
+void gl::Editor::removeObjectIf(std::function<bool(std::shared_ptr<gl::Mesh>)> condition)
+{
+	mObjects.erase(std::remove_if(
+		mObjects.begin(),
+		mObjects.end(),
+		condition),
+		mObjects.end());
+}
+
 const std::vector<std::shared_ptr<gl::Mesh>>& gl::Editor::getObjects() const
 {
 	return mObjects;

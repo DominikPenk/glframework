@@ -119,6 +119,16 @@ void gl::PointCloud::setPoints(const std::vector<std::tuple<glm::vec3, glm::vec3
 	}
 }
 
+void gl::PointCloud::setPoints(const std::vector<glm::vec3>& points, glm::vec3 color)
+{
+	data->resize(points.size());
+	mBatch.indexBuffer->clear();
+	for (std::size_t i = 0; i < points.size(); ++i) {
+		data->at(i) = std::make_tuple(points[i], color);
+		mBatch.indexBuffer->push_back((unsigned int)i);
+	}
+}
+
 void gl::PointCloud::clear()
 {
 	mBatch.indexBuffer->clear();

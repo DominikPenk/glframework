@@ -28,6 +28,7 @@ namespace gl {
 		void addPoints(const std::vector<std::tuple<glm::vec3, glm::vec3>>& points);
 
 		void setPoints(const std::vector<std::tuple<glm::vec3, glm::vec3>>& points);
+		void setPoints(const std::vector<glm::vec3>& points, glm::vec3 color);
 
 		void clear();
 

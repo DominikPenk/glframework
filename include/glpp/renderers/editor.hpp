@@ -77,6 +77,7 @@ namespace gl {
 			return mesh;
 		}
 		void removeObject(size_t id);
+		void removeObjectIf(std::function<bool(std::shared_ptr<gl::Mesh>)> condition);
 
 		// Getters
 		const std::vector<std::shared_ptr<Mesh>>& getObjects() const;

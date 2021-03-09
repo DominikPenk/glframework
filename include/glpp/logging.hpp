@@ -17,9 +17,11 @@
 #define LOG_EVERY_N(n, format, ...) { static ptrdiff_t __callcount__ = 0; LOG_IF(__callcount__ % (n) == 0, format, __VA_ARGS__);  __callcount__++; }
 #if !defined(_DEBUG)
 #define DEBUG_LOG(msg)
+#define DEBUG_LOG(msg, ...)
 #define DEBUG_LOG_IF(cond, msg)
 #else
-#define DEBUG_LOG(msg) LOG(msg)
+#define DEBUG_LOG(msg) LOG((msg))
+#define DEBUG_LOG(msg, ...) LOG((msg), __VA_ARGS__)
 #define DEBUG_LOG_IF(cond, msg) LOG_IF(cond, msg)
 #endif
 

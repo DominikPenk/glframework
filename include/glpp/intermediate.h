@@ -1,8 +1,14 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
+#include <glm/glm.hpp>
 #include "glpp/shadermanager.hpp"
 
 namespace gl {
+	class Texture;
+	class Camera;
 
 	std::shared_ptr<gl::Shader> textureDispShader();
 	std::shared_ptr<gl::Shader> scalarDispShader();
