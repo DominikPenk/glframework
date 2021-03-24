@@ -40,6 +40,7 @@ set(INCLUDE_DIR include/glpp)
 
 # Gather Imgui
 set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/imgui)
+set(IMGUI_PLOT_DIR ${PROJECT_SOURCE_DIR}/implot)
 # Set the imgui sources
 file(GLOB IMGUI_SRC ${IMGUI_DIR}/*.h ${IMGUI_DIR}/*.cpp)
 # Add glfw impl
@@ -50,6 +51,11 @@ set(IMGUI_SRC
 	${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
 	${IMGUI_DIR}/backends/imgui_impl_glfw.h
 	${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+	# ImGuiPlot
+	${IMGUI_PLOT_DIR}/implot.h
+	${IMGUI_PLOT_DIR}/implot.cpp
+	${IMGUI_PLOT_DIR}/implot_internal.h
+	${IMGUI_PLOT_DIR}/implot_items.cpp
 	# Custom extensions
 	${INCLUDE_DIR}/imgui.hpp
 	${INCLUDE_DIR}/imgui_ext.hpp
@@ -128,6 +134,8 @@ set(GL_FILES
 	src/intermediate.cpp
 	${INCLUDE_DIR}/variadic_buffer.hpp
 	${INCLUDE_DIR}/map_buffer.hpp
+	${INCLUDE_DIR}/shader_storage_buffer.hpp
+	${INCLUDE_DIR}/shader_storage_buffer.cpp
 	${INCLUDE_DIR}/shadermanager.hpp
 	${INCLUDE_DIR}/shadermanager.inl.hpp
 	src/shadermanager.cpp
@@ -180,6 +188,7 @@ target_compile_features(glframework PRIVATE cxx_std_17)
 target_include_directories(glframework PUBLIC 
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	$<BUILD_INTERFACE:${IMGUI_DIR}>
+	$<BUILD_INTERFACE:${IMGUI_PLOT_DIR}>
 	$<BUILD_INTERFACE:${IMGUI_DIR}/backends>
 	${OPENGL_INCLUDE_DIRS} 
 	${GLM_INCLUDE_DIRS})
