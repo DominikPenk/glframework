@@ -21,6 +21,8 @@ namespace ImGui {
 	bool InputInt64(const char* label, int64_t* v, int step = 1, int step_fast = 100, ImGuiInputTextFlags flags = 0);
 	bool InputUInt64(const char* label, uint64_t* v, int step = 1, int step_fast = 100, ImGuiInputTextFlags flags = 0);
 
+	bool SelectButtonGroupH(const char* label, int* current, const std::vector<std::string>& choices);
+
 	template<typename T>
 	bool DropdownSelect(const char* label, T* current, const std::map<T, std::string>& choices);
 	bool DropdownSelect(const char* label, int* current, const std::vector<std::string>& choices);

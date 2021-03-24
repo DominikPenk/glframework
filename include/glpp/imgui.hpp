@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+
 #include "glpp/IconsFontAwesome5.h"
 #include "glpp/imgui_ext.hpp"
 #include "glpp/imgui_vertical_tabs.hpp"
@@ -20,6 +21,12 @@
 
 typedef typename glm::mat2 ImMat2;
 
+#define IMPLOT_POINT_CLASS_EXTRA \
+	ImPlotPoint(const glm::vec2 p) { x = p.x; y = p.y; } \
+	operator glm::vec2() const  { return glm::vec2(x, y); }
+
+#include "implot.h"
+#undef IMPLOT_POINT_CLASS_EXTRA
 
 template<typename T>
 inline ImVec2 glm2ImGui(glm::vec<2, T> v) {

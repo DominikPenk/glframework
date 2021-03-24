@@ -2,3 +2,6 @@
 	path = imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "implot"]
+	path = implot
+	url = https://github.com/epezent/implot.git

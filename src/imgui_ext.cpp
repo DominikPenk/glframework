@@ -91,6 +91,36 @@ bool ImGui::InputUInt64(const char* label, uint64_t* v, int step, int step_fast,
 	return InputScalar(label, ImGuiDataType_U64, (void*)v, (void*)(step > 0 ? &step : NULL), (void*)(step_fast > 0 ? &step_fast : NULL), format, flags);
 }
 
+bool ImGui::SelectButtonGroupH(const char* label, int* current, const std::vector<std::string>& choices)
+{
+	bool changed = false;
+	ImGui::PushID(label);
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 1));
+	for (int i = 0; i < (int)choices.size(); ++i) {
+		ImGui::PushID(i);
+		bool isSelected = *current == i;
+		if (isSelected) {
+			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
+		}
+		if (ImGui::Button(choices[i].c_str())) {
+			*current = i;
+			changed = true;
+		}
+		if (isSelected) {
+			ImGui::PopStyleColor();
+		}
+		ImGui::PopID();
+		if (i < (int)choices.size() - 1) { ImGui::SameLine(); }
+	}
+	ImGui::PopStyleVar();
+	if (std::strlen(label) != 0) {
+		ImGui::SameLine();
+		ImGui::TextUnformatted(label);
+	}
+	ImGui::PopID();
+	return changed;
+}
+
 bool ImGui::DropdownSelect(const char* label, int* current, const std::vector<std::string>& choices)
 {
 	bool changed = false;

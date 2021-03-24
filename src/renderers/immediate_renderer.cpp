@@ -122,6 +122,7 @@ void gl::ImmediateRenderer::initialize()
 	// Initialize Dear ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	ImPlot::CreateContext();
 	ImGui::StyleColorsDark();		// FIXME: Nicer style
 	ImGui_ImplGlfw_InitForOpenGL(*mContext, true);
 	ImGui_ImplOpenGL3_Init(NULL);

@@ -2,6 +2,8 @@
 
 #include <glpp/imgui.hpp>
 
+#include <functional>
+
 struct ImStatisticCriteria {
 	float median;
 	float mean;
