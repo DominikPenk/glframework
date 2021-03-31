@@ -7,6 +7,7 @@
 
 #include "glpp/framebuffer.hpp"
 #include "glpp/gl_internal.hpp"
+#include "glpp/shader_storage_buffer.hpp"
 
 namespace gl {
 
@@ -221,8 +222,6 @@ namespace gl {
 	private:
 		std::vector<value_type> mData;
 	};
-
-	
 
 #pragma region typedefs
 	typedef VertexBufferObject<unsigned int, 1> IndexBuffer;

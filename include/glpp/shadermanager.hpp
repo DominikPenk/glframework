@@ -96,7 +96,7 @@ namespace gl {
 		GLuint program() const { return mProgram; }
 
 		/// Call this function to update the Shader by reloading the sources
-		void update();
+		virtual void update();
 
 		void setDefine(const std::string& name, const std::string& value);
 		void setDefine(const std::string& name, int value);
@@ -177,6 +177,7 @@ namespace gl {
 
 	protected:
 		bool requiresUpdate() const;
+		virtual bool compileFromFile();
 
 		GLuint mProgram;
 		std::vector<std::string> mSourceFiles;
@@ -184,6 +185,16 @@ namespace gl {
 		std::vector<Layout> mVertexAttributes;
 		std::unordered_map<std::string, std::string> mDefines;
 		long long mLastUpdated;
+	};
+
+	class ComputeShader : public gl::Shader {
+	public:
+		ComputeShader();
+		ComputeShader(const std::string& fileOrCode);
+
+		void dispatch(uint32_t x, uint32_t y = 1, uint32_t z = 1);
+	protected:
+		virtual bool compileFromFile() override;
 	};
 }
 

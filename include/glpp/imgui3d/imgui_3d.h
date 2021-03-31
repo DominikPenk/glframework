@@ -301,6 +301,7 @@ namespace ImGui3D {
 
 	// Higher level functions
 	bool RotationGizmo(const float pos[3], float angles[3], ImGuiID idoverride = 0);
+	bool RotationGizmo(glm::mat4& T);
 	bool RotationGizmo(glm::vec3 pos, glm::vec3& angles);
 	bool RotationGizmo(glm::vec4 pos, glm::vec3& angles);
 	

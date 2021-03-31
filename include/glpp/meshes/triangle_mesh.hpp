@@ -13,11 +13,18 @@ namespace gl {
 
 		TriangleMesh(const std::string& path);
 
+		template<typename... Args>
+		void render(gl::Shader& shader, const Args&... uniforms) {
+			mBatch.execute(shader, uniforms...);
+		}
+
 		void render(const std::shared_ptr<gl::Camera> camera);
 
 		virtual void drawOutliner() override;
 
 		void addTriangles(std::vector<glm::vec3>& vertices);
+
+		void load(const std::string& path);
 
 		void setColor(float r, float g, float b) { mColor = glm::vec4(r, g, b, 1); }
 
@@ -31,6 +38,15 @@ namespace gl {
 		std::tuple<unsigned int, unsigned int, unsigned int> face(size_t i) const;
 
 		void transform(glm::mat4 T);
+		
+		/// <summary>
+		/// Transforms the vertices such that the median is (0, 0, 0)
+		/// </summary>
+		glm::vec3 recenter();
+
+		std::pair<glm::vec3, float> getBoundingSphere() const;
+
+		Shader& getNormalShader();
 
 		virtual bool handleIO(const std::shared_ptr<gl::Camera> camera, ImGuiIO& io) override;
 

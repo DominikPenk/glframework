@@ -142,8 +142,15 @@ std::string resolveRelative(std::string relPath, std::string workingDir = std::f
 
 bool validatePipeline(const std::map<GLenum, ShaderCode>& pipeline) {
 	bool valid = true;
-	// Check if this is a mesh shader or a traditional pipeline shaer
-
+	// If there is a compute shader it has to be the only one
+	if (pipeline.count(GL_COMPUTE_SHADER) != 0 && pipeline.size() > 1) {
+		LOG_WARNING("File contains a compute shader but also other shaders");
+		return false;
+	}
+	else if (pipeline.count(GL_COMPUTE_SHADER) != 0)
+	{
+		return true;
+	}
 	if (pipeline.find(GL_VERTEX_SHADER) == pipeline.end()) {
 		LOG_WARNING("Missing shader: Vertex Shader");
 		valid = false;
@@ -345,6 +352,9 @@ std::tuple<Prefix, std::map<GLenum, ShaderCode>> parseFile(std::ifstream& in, co
 			else if (shader_match[1].str() == "geometry") {
 				currentShaderType = GL_GEOMETRY_SHADER;
 			}
+			else if (shader_match[1].str() == "compute") {
+				currentShaderType = GL_COMPUTE_SHADER;
+			}
 			else {
 				currentShaderType = 0;
 				std::cerr << "Unknown shader type: \"" << shader_match[1] << "\"" << std::endl;
@@ -371,7 +381,7 @@ std::tuple<Prefix, std::map<GLenum, ShaderCode>> parseFile(std::ifstream& in, co
 					// Try to resolve relative
 					includePath = resolveRelative(includePath, srcDir);
 				}
-				std::cout << "Found file to include: \"" << includePath << "\"" << std::endl;
+				LOG("Found file to include: \"%s\"", includePath);
 
 				std::ifstream includeFile(includePath);
 				if (!includeFile.is_open())
@@ -430,6 +440,7 @@ std::tuple<Prefix, std::map<GLenum, ShaderCode>> parseFile(std::ifstream& in, co
 }
 
 #pragma endregion
+
 gl::Shader::Shader() :
 	mProgram(0),
 	mLastUpdated(0)
@@ -447,7 +458,7 @@ gl::Shader::Shader(std::initializer_list<std::pair<GLenum, std::string>> stages)
 {
 	auto t1 = std::chrono::high_resolution_clock::now();
 
-	std::cout << "Compiling shader" << std::endl;
+	LOG("Compiling shader from raw strings");
 
 	std::vector<GLuint> shaders;
 	bool allValid = true;
@@ -471,14 +482,14 @@ gl::Shader::Shader(std::initializer_list<std::pair<GLenum, std::string>> stages)
 		{
 			GLchar infoLog[1024];
 			glGetProgramInfoLog(mProgram, 1024, NULL, infoLog);
-			std::cerr << "failed to link shader:\n" << infoLog << std::endl;
+			LOG("failed to link shader:\n%s", infoLog);
 		}
 
 		glValidateProgram(mProgram);
 		glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &success);
 		if (!success)
 		{
-			std::cerr << "failed to validate shader" << std::endl;
+			LOG_ERROR("failed to validate shader");
 		}
 	}
 
@@ -486,7 +497,7 @@ gl::Shader::Shader(std::initializer_list<std::pair<GLenum, std::string>> stages)
 	long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
 	if (success && allValid) {
-		std::cout << "Compilation sucessfull (Compile time: " << duration << "ms)" << std::endl;
+		LOG_SUCCESS("Compilation sucessfull (Compile time: %ll ms)", duration);
 	}
 
 }
@@ -514,28 +525,12 @@ bool gl::Shader::requiresUpdate() const
 	return false;
 }
 
-void Shader::update() {
-	if (mSourceFiles.empty()) return;	// No name given -> shader was probably compield from constant char *
-
-	auto t1 = std::chrono::high_resolution_clock::now();
-
-	std::cout << "Compiling shader \"" << mSourceFiles[0] << "\"" << std::endl;
-
-	for (const std::string& srcFile : mSourceFiles) {
-		mLastUpdated = std::max(mLastUpdated, std::filesystem::last_write_time(srcFile).time_since_epoch().count());
-	}
-
-
-	// Read file
+bool gl::Shader::compileFromFile() {
 	std::ifstream in(mSourceFiles[0]);
 	if (!in.is_open()) {
-		std::cerr << "Error loading shaderfile " << mSourceFiles[0] << std::endl;
-		mSourceFiles.clear();			// We will not try to update from this file again
-		return;
+		LOG_ERROR("Could not open file %s", mSourceFiles[0].c_str());
+		return false;
 	}
-
-	mSourceFiles.resize(1);
-
 	std::map<GLenum, ShaderCode> pipeline;
 	Prefix prefix;
 
@@ -574,6 +569,7 @@ void Shader::update() {
 			previousShader = currentShader;
 		}
 
+
 		// Link pipeline
 		GLint success = 0;
 		if (validPipeline && allShadersCompiled) {
@@ -589,28 +585,52 @@ void Shader::update() {
 			{
 				GLchar infoLog[1024];
 				glGetProgramInfoLog(mProgram, 1024, NULL, infoLog);
-				std::cerr << "failed to link shader:\n" << infoLog << std::endl;
+				LOG_ERROR("failed to link shader:\n%s", infoLog);
 			}
 
 			glValidateProgram(mProgram);
 			glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &success);
 			if (!success)
 			{
-				std::cerr << "failed to validate shader" << std::endl;
+				LOG_ERROR("failed to validate shader");
 			}
 		}
 
-		auto t2 = std::chrono::high_resolution_clock::now();
-		long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-
-		if (success && allShadersCompiled && validPipeline) {
-			std::cout << "Compilation sucessfull (Compile time: " << duration << "ms)" << std::endl;
-		}
+		return success && allShadersCompiled && validPipeline;
+		
 	}
 	catch (std::runtime_error e) {
-		std::cerr << e.what() << std::endl;
+		LOG_ERROR("%s", e.what());
 	}
-	std::cout << "---------------------------------------------" << std::endl;
+}
+
+void Shader::update() {
+	if (mSourceFiles.empty()) return;	// No name given -> shader was probably compield from constant char *
+
+	auto t1 = std::chrono::high_resolution_clock::now();
+
+	LOG("Compiling shader \"%s\"", mSourceFiles[0].c_str());
+
+	for (const std::string& srcFile : mSourceFiles) {
+		mLastUpdated = std::max(mLastUpdated, std::filesystem::last_write_time(srcFile).time_since_epoch().count());
+	}
+
+	if (!std::filesystem::exists(mSourceFiles[0])) {
+		LOG_ERROR("Source file %s does not exist", mSourceFiles[0].c_str());
+		mSourceFiles.clear();			// We will not try to update from this file again
+		return;
+	}
+	mSourceFiles.resize(1);
+	
+	bool success = compileFromFile();
+
+	auto t2 = std::chrono::high_resolution_clock::now();
+	long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+	if (success) {
+		LOG("Compilation sucessfull (Compile time: %llms)");
+	}
+	
 }
 
 void gl::Shader::setDefine(const std::string& name, const std::string& value)
@@ -644,3 +664,114 @@ bool gl::Shader::hasDefine(const std::string& name)
 {
 	return mDefines.find(name) != mDefines.end();
 }
+
+
+#pragma region Compute Shader
+
+gl::ComputeShader::ComputeShader() :
+	gl::Shader() {}
+
+gl::ComputeShader::ComputeShader(const std::string& fileOrCode) {
+	// Is this a file?
+	std::filesystem::path path(fileOrCode);
+	if (path.has_extension()) {
+		LOG_WARNING_IF(path.extension() != ".glsl" && path.extension() != ".compute", "You should use extension .glsl or .compute for compute shaders");
+		if (std::filesystem::exists(path)) {
+			mSourceFiles.push_back(fileOrCode);
+		}
+		else
+		{
+			LOG_ERROR("File %s not found", fileOrCode.c_str());
+		}
+	}
+	else {
+		auto t1 = std::chrono::high_resolution_clock::now();
+
+		LOG("Compiling compute shader from raw strings");
+
+		auto [valid, shader] = compileShader(fileOrCode, GL_COMPUTE_SHADER);
+		GLint success = 0;
+		if (valid) {
+			// clean old program
+			mProgram = glCreateProgram();
+			glAttachShader(mProgram, shader);
+			glLinkProgram(mProgram);
+			glDeleteShader(shader);
+
+			glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
+			if (!success)
+			{
+				GLchar infoLog[1024];
+				glGetProgramInfoLog(mProgram, 1024, NULL, infoLog);
+				LOG_ERROR("failed to link shader:\n%s", infoLog);
+			}
+
+			glValidateProgram(mProgram);
+			glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &success);
+			if (!success)
+			{
+				LOG_ERROR("failed to validate compute shader");
+			}
+		}
+
+		auto t2 = std::chrono::high_resolution_clock::now();
+		long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+		if (success && valid) {
+			LOG_SUCCESS("Compilation sucessfull (Compile time: %ll ms)", duration);
+		}
+	}
+}
+
+void ComputeShader::dispatch(uint32_t x, uint32_t y, uint32_t z)
+{
+	use();
+	glDispatchCompute((GLuint)x, (GLuint)y, (GLuint)z);
+}
+
+bool ComputeShader::compileFromFile() {
+	std::ifstream in(mSourceFiles[0]);
+	if (!in.is_open()) {
+		LOG_ERROR("Could not open file %s", mSourceFiles[0].c_str());
+		return false;
+	}
+
+	// TODO: Implement includes and defines
+	std::stringstream shaderSource;
+	int lineNumber = 1;
+	for (std::string line; std::getline(in, line); ++lineNumber) {
+		shaderSource << line << std::endl;
+	}
+	
+	auto [ret, shader] = compileShader(shaderSource.str(), GL_COMPUTE_SHADER);
+
+	// Link pipeline
+	GLint success = 0;
+	if (ret) {
+		// clean old program
+		glDeleteProgram(mProgram);
+		mProgram = glCreateProgram();
+		glAttachShader(mProgram, shader);
+		glLinkProgram(mProgram);
+		glDeleteShader(shader);
+
+		glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			GLchar infoLog[1024];
+			glGetProgramInfoLog(mProgram, 1024, NULL, infoLog);
+			LOG_ERROR("failed to link compute shader:\n%s", infoLog);
+		}
+
+		glValidateProgram(mProgram);
+		glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &success);
+		if (!success)
+		{
+			LOG_ERROR("failed to validate compute shader");
+		}
+	}
+
+	return success && ret;
+
+}
+#pragma endregion

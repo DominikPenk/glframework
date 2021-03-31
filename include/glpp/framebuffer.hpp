@@ -74,8 +74,6 @@ namespace gl {
 		}
 
 	private:
-		static Framebuffer* s_boundBuffer;
-
 		struct FramebufferAttachment {
 			FramebufferAttachment();
 			FramebufferAttachment(GLenum attachment, std::shared_ptr<gl::Texture> texture = nullptr);
@@ -96,10 +94,18 @@ namespace gl {
 		};
 
 		GLuint mId;
+		GLint mPreviousFBO;
 		std::vector<FramebufferAttachment> mColorAttachments;
 		FramebufferAttachment mDepthAttachment;
 		int mWidth, mHeight;
 		bool mRequriesUpdate;
 	};
 
+	struct FBOState {
+		GLuint id;
+
+		static FBOState Current();
+
+		void restore();
+	};
 }

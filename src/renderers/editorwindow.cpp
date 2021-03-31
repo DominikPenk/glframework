@@ -233,6 +233,12 @@ void gl::ViewportEditorWindow::onResize(ImVec2 position, ImVec2 size, Editor* ed
 
 void gl::ViewportEditorWindow::onDraw(Editor* editor)
 {
+	// Split the the drawlist so we can layer put the render result to the back
+	ImDrawListSplitter splitter;
+	splitter.Split(ImGui::GetWindowDrawList(), 2);
+	splitter.SetCurrentChannel(ImGui::GetWindowDrawList(), 1);
+
+
 	mOldImGui3DContext = ImGui3D::GImGui3D;
 	ImGui3D::SetContext(mImGui3DContext);
 	ImGui3D::NewFrame(camera->viewMatrix, camera->GetProjectionMatrix(), ImGui::GetCurrentWindow()->ID);
@@ -302,12 +308,17 @@ void gl::ViewportEditorWindow::onDraw(Editor* editor)
 	}
 	mFrameBuffer->unbind();
 
+	splitter.SetCurrentChannel(ImGui::GetWindowDrawList(), 0);
 	ImGui::GetWindowDrawList()->AddImage(
 		*mFrameBuffer->getRenderTexture(0),
 		ImGui::GetWindowPos(),
 		ImGui::GetWindowPos() + ImGui::GetWindowSize(),
 		ImVec2(0, 1), ImVec2(1, 0));
+	splitter.Merge(ImGui::GetWindowDrawList());
 
+	for (const auto hook : mRenderHoodks[gl::RenderHook::ImGuiDrawing]) {
+		hook(this);
+	}
 
 	ImGui3D::SetContext(mOldImGui3DContext);
 }

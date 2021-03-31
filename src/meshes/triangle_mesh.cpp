@@ -1,8 +1,12 @@
 #include "glpp/meshes/triangle_mesh.hpp"
 
 #include "glpp/renderer.hpp"
+#include "glpp/logging.hpp"
 
 #include <glm/gtx/matrix_cross_product.hpp>
+
+#include <numeric>
+#include <algorithm>
 
 #ifdef WITH_ASSIMP
 #include <assimp/Importer.hpp>
@@ -44,12 +48,53 @@ gl::TriangleMesh::TriangleMesh(const std::string& path) :
 #ifndef WITH_ASSIMP
 	throw std::runtime_error("Framework was not compiled with Assimp.");
 #else
-	std::cout << "Loading mesh from \"" << path << "\" ... ";
+	load(path);
+#endif
+}
+
+void gl::TriangleMesh::render(const std::shared_ptr<gl::Camera> camera)
+{
+	glm::mat4 P = camera->GetProjectionMatrix();
+	glm::mat4 V = camera->viewMatrix;
+	glm::mat4 MVP = P * V * ModelMatrix;
+
+	render(
+		visualizeNormals ? mNormalShader : mShader,
+		"MVP", MVP,
+		"M", ModelMatrix,
+		"color", mColor);
+}
+
+void gl::TriangleMesh::drawOutliner()
+{
+	ImGui::Text("Vertices %d| Faces %d", (int)numVertices(), (int)numFaces());
+	ImGui::Checkbox("Visualize Normals", &visualizeNormals);
+	ImGui::ColorEdit4("Surface color", &mColor.x);
+}
+
+void gl::TriangleMesh::addTriangles(std::vector<glm::vec3>& vertices)
+{
+	assert(vertices.size() % 3 == 0);
+	unsigned int i0 = mVertexData->size();
+	for (int i = 0; i < vertices.size(); ++i) {
+		mVertexData->push_back(
+			vertices[i],
+			glm::vec2(0),
+			glm::vec3(0));
+		mBatch.indexBuffer->push_back(i0 + i);
+	}
+}
+
+void gl::TriangleMesh::load(const std::string& path)
+{
+#ifndef WITH_ASSIMP
+	throw std::runtime_error("Framework was not compiled with Assimp.");
+#else
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality | aiProcess_GenSmoothNormals);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+		LOG_ERROR("ERROR::ASSIMP:: %s", importer.GetErrorString());
 		return;
 	}
 
@@ -77,41 +122,51 @@ gl::TriangleMesh::TriangleMesh(const std::string& path) :
 		indexBuffer[3 * i + 1] = face.mIndices[1];
 		indexBuffer[3 * i + 2] = face.mIndices[2];
 	}
-	std::cout << "Done!\n";
 #endif
 }
 
-void gl::TriangleMesh::render(const std::shared_ptr<gl::Camera> camera)
+glm::vec3 gl::TriangleMesh::recenter()
 {
-	glm::mat4 P = camera->GetProjectionMatrix();
-	glm::mat4 V = camera->viewMatrix;
-	glm::mat4 MVP = P * V * ModelMatrix;
-
-	Mesh::render(
-		visualizeNormals ? mNormalShader : mShader,
-		"MVP", MVP,
-		"M", ModelMatrix,
-		"color", mColor);
-}
-
-void gl::TriangleMesh::drawOutliner()
-{
-	ImGui::Text("Vertices %d| Faces %d", (int)numVertices(), (int)numFaces());
-	ImGui::Checkbox("Visualize Normals", &visualizeNormals);
-	ImGui::ColorEdit4("Surface color", &mColor.x);
-}
-
-void gl::TriangleMesh::addTriangles(std::vector<glm::vec3>& vertices)
-{
-	assert(vertices.size() % 3 == 0);
-	unsigned int i0 = mVertexData->size();
-	for (int i = 0; i < vertices.size(); ++i) {
-		mVertexData->push_back(
-			vertices[i],
-			glm::vec2(0),
-			glm::vec3(0));
-		mBatch.indexBuffer->push_back(i0 + i);
+	glm::vec3 median;
+	for (int axis = 0; axis < 3; ++axis) {
+		std::vector<size_t> ids(mVertexData->size());
+		std::iota(ids.begin(), ids.end(), 0);
+		std::stable_sort(ids.begin(), ids.end(), [&](size_t i1, size_t i2) {
+			return mVertexData->at<0>(i1)[axis] < mVertexData->at<0>(i2)[axis];
+		});
+		const size_t n = ids.size();
+		if (n % 2 == 0) {
+			median[axis] = 0.5f * (mVertexData->at<0>(ids[n / 2 - 1])[axis] + mVertexData->at<0>(ids[n / 2])[axis]);
+		}
+		else
+		{
+			median[axis] = mVertexData->at<0>(ids[n / 2])[axis];
+		}
 	}
+
+	for (auto& [p, uv, n] : *mVertexData) {
+		p -= median;
+	}
+
+	return median;
+}
+
+std::pair<glm::vec3, float> gl::TriangleMesh::getBoundingSphere() const
+{
+	glm::vec3 mean = std::accumulate(mVertexData->begin(), mVertexData->end(), glm::vec3(0), [](glm::vec3 sum, const auto& v) {
+		return sum += std::get<0>(v);
+	}) / (float)mVertexData->size();
+
+	float r = 0.f;
+	for (size_t i = 0; i < mVertexData->size(); ++i) {
+		r = std::max(r, glm::distance(mean, mVertexData->at<0>(i)));
+	}
+	return { mean, r };
+}
+
+gl::Shader& gl::TriangleMesh::getNormalShader()
+{
+	return mNormalShader;
 }
 
 bool gl::TriangleMesh::handleIO(const std::shared_ptr<gl::Camera> camera, ImGuiIO& io)

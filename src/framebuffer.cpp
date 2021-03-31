@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "glpp/texture.hpp"
+#include "glpp/logging.hpp"
 
 
 namespace internal {
@@ -18,12 +19,12 @@ namespace internal {
 		assert(texture->type == gl::TextureType::D2);
 
 		if (texture->cols != width || texture->rows != height) {
-			std::cout << "WARNING: Attached texture with a different size than framebuffer. Going to resize texture" << std::endl;
+			LOG_WARNING("Attached texture with a different size than framebuffer. Going to resize texture");
 			texture->resize(width, height);
 		}
 		
 		if (texture->hasMipmap()) {
-			std::cout << "WARNING: Used a texture which indicates mip map generation for a render target" << std::endl;
+			LOG_WARNING("Used a texture which indicates mip map generation for a render target");
 		}
 
 		return texture;
@@ -43,12 +44,12 @@ namespace internal {
 		assert(texture->type == gl::TextureType::D2);
 
 		if (texture->cols != width || texture->rows != height) {
-			std::cout << "WARNING: Attached texture with a different size than framebuffer. Going to resize texture" << std::endl;
+			LOG_WARNING("Attached texture with a different size than framebuffer. Going to resize texture");
 			texture->resize(width, height);
 		}
 
 		if (texture->hasMipmap()) {
-			std::cout << "WARNING: Used a texture which indicates mip map generation for a render target" << std::endl;
+			LOG_WARNING("Used a texture which indicates mip map generation for a render target");
 		}
 
 		return texture;
@@ -104,13 +105,12 @@ void gl::Framebuffer::appendColorBuffer()
 
 void gl::Framebuffer::clear(std::initializer_list<glm::vec4> clearColors)
 {
-	bind();
 	// clear depth and stencils
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	int idx = 0;
 	for (glm::vec4 col : clearColors) {
 		if (idx >= mColorAttachments.size()) {
-			std::cerr << "WARNING: got more clear colors than attachments" << std::endl;
+			LOG_WARNING("Got more clear colors than attachments");
 			break;
 		}
 		glClearBufferfv(GL_COLOR, idx++, &col[0]);
@@ -119,13 +119,11 @@ void gl::Framebuffer::clear(std::initializer_list<glm::vec4> clearColors)
 
 void gl::Framebuffer::clearColorAttachment(int slot, glm::vec4 clearColor)
 {
-	bind();
 	glClearBufferfv(GL_COLOR, slot, &clearColor[0]);
 }
 
 void gl::Framebuffer::clearColorAttachment(int slot, int value)
 {
-	bind();
 	glClearBufferiv(GL_COLOR, slot, &value);
 }
 
@@ -146,6 +144,7 @@ void gl::Framebuffer::clearDepthAndStencilBuffer()
 
 gl::Framebuffer::Framebuffer(int width, int height) :
 	mId(0),
+	mPreviousFBO(-1),
 	mWidth(width),
 	mHeight(height),
 	mDepthAttachment(GL_DEPTH_ATTACHMENT),
@@ -198,7 +197,7 @@ void gl::Framebuffer::update()
 
 	GLenum framebufferState = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (framebufferState != GL_FRAMEBUFFER_COMPLETE) {
-		std::cerr << "Error creating framebuffer" << std::endl;
+		LOG_ERROR("Error creating framebuffer");
 		throw std::runtime_error("Error creating framebuffer");
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -242,6 +241,7 @@ glm::uvec4 gl::Framebuffer::readColorPixel(int col, int row, int slot)
 	glReadPixels(col, mHeight - row, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	return glm::vec4(buffer[0], buffer[1], buffer[2], buffer[3]);
+	unbind();
 }
 
 std::shared_ptr<gl::Texture> gl::Framebuffer::getRenderTexture(int slot)
@@ -262,14 +262,16 @@ void gl::Framebuffer::readColorAttachment(int slot, int x, int y, int width, int
 		mColorAttachments[slot].dataFormat(),
 		mColorAttachments[slot].dataType(),
 		buffer);
+	unbind();
 }
 
 void gl::Framebuffer::bind()
 {
 	if (mRequriesUpdate)
 		update();
-	glViewport(0, 0, mWidth, mHeight);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, mId);
+	glViewport(0, 0, mWidth, mHeight);
 }
 
 void gl::Framebuffer::unbind()
@@ -375,4 +377,16 @@ GLenum gl::Framebuffer::FramebufferAttachment::dataFormat() const
 	else {
 		return internal::getRenderBufferStorageDataType(attachment);
 	}
+}
+
+gl::FBOState gl::FBOState::Current()
+{
+	GLint id;
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &id);
+	return { GLuint(id) };
+}
+
+void gl::FBOState::restore()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
 }

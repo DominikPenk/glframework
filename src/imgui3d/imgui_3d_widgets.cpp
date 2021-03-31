@@ -81,6 +81,30 @@ namespace ImGui3D {
 		ImGui3D::PopID();
 		return retVal;
 	}
+	
+	bool RotationGizmo(glm::mat4& T)
+	{
+		static bool s_rotation_active = false;
+		static glm::mat4 s_Told;
+
+		ImGuiID rotId = GetID(&T, false);
+		float angles[3] = { 0.f, 0.f, 0.f };
+		bool rUpdating = RotationGizmo(&T[3].x, angles, rotId);
+
+		if (rUpdating) {
+			if (!s_rotation_active) {
+				// This is the first time the rotation is updated
+				s_Told = T;
+				s_rotation_active = true;
+			}
+			T = glm::eulerAngleXYZ(angles[0], angles[1], angles[2]) * s_Told;
+		}
+		else
+		{
+			s_rotation_active = false;
+		}
+		return rUpdating;
+	}
 	bool RotationGizmo(glm::vec4 pos, glm::vec3& angles)
 	{
 		return RotationGizmo(&pos[0], &angles[0]);
@@ -190,7 +214,7 @@ namespace ImGui3D {
 					_T[4 * i + j] = T[i][j];
 				}
 			}
-			std::printf("Angle: %.3f %.3f %.3f\r", angles[0], angles[1], angles[2]);
+			//std::printf("Angle: %.3f %.3f %.3f\r", angles[0], angles[1], angles[2]);
 		}
 		else
 		{

@@ -19,7 +19,8 @@ namespace gl {
 		PostMeshDrawing,
 		PostToneMapping,
 		PreImGui3D,
-		PostImGui3D
+		PostImGui3D,
+		ImGuiDrawing
 	};
 
 	typedef typename std::function<void(const gl::ViewportEditorWindow*)> RenderHookFn;
