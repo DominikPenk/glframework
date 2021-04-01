@@ -8,6 +8,12 @@
 namespace gl {
 	typedef int TextureFlags;
 
+	enum class Access {
+		ReadAndWrite = GL_READ_WRITE,
+		ReadOnly = GL_READ_ONLY,
+		WriteOnly = GL_WRITE_ONLY
+	};
+
 	enum class PixelType {
 		Float = GL_FLOAT,
 		UByte = GL_UNSIGNED_BYTE,
@@ -143,6 +149,7 @@ namespace gl {
 		void download(void* dst, gl::PixelFormat format = gl::PixelFormat::Default, int level = 0);
 
 		void bind(int slot = -1);
+		void bindAsImage(int slot, gl::Access access = gl::Access::ReadAndWrite);
 		void unbind();
 
 		// New getters

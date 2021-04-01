@@ -351,6 +351,11 @@ void gl::Texture::bind(int slot)
 	glBindTexture(static_cast<GLenum>(mTextureType), mId);
 }
 
+void gl::Texture::bindAsImage(int slot, gl::Access access)
+{
+	glBindImageTexture(slot, mId, 0, GL_FALSE, 0, static_cast<GLenum>(access), glSizedFormat());
+}
+
 void gl::Texture::unbind()
 {
 	glBindTexture(static_cast<GLenum>(mTextureType), 0);
