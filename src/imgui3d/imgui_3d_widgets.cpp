@@ -11,7 +11,7 @@
 
 namespace ImGui3D {
 
-	bool RotationGizmo(const float _pos[3], float _angles[3], ImGuiID idoverride)
+	bool RotationGizmo(const float _pos[3], float _quat[4], glm::mat3 coordinateSystem, ImGuiID idoverride)
 	{
 		// Rotation gizmo computes the delta angle
 		static glm::vec4 s_startPoint;
@@ -26,7 +26,9 @@ namespace ImGui3D {
 		const float s = g.Style.GizmoSize * glm::distance(g.ViewMatrix * glm::vec4(pos, 1), glm::vec4(0, 0, 0, 1)) / g.ScreenSize.x;
 
 		// Draw circles
-		const glm::mat4 T = glm::translate(pos);
+		glm::mat4 T(coordinateSystem);
+		T[3] = glm::vec4(_pos[0], _pos[1], _pos[2], 1.0f);
+
 		int segments = g.Style.RotationGizmoSegments;
 		const float delta_angle = glm::two_pi<float>() / segments;
 		std::vector<glm::vec4> line_points;
@@ -36,7 +38,7 @@ namespace ImGui3D {
 		}
 
 		if (idoverride == 0)
-			ImGui3D::PushID(_angles);
+			ImGui3D::PushID(_quat);
 		else
 			ImGui3D::PushID(idoverride);
 
@@ -54,25 +56,28 @@ namespace ImGui3D {
 			if (io.MouseClicked[0] && ImGui3D::IsItemActive()) {
 				// First mouse click
 				auto [o, d] = worldCameraRay(io.MousePos);
-				s_startPoint = closestPointOnUnitCircle(o, d, glm::vec4(pos, 1), getAxis4(axis));
+				s_startPoint = closestPointOnUnitCircle(o, d, glm::vec4(pos, 1), glm::vec4(coordinateSystem[axis], 0.f));
 				s_lastPoint = s_startPoint;
 			}
 			else if (ImGui::IsMouseDragging(0) && ImGui3D::IsItemActive()) {
 				// Get current angle
 				auto [o, d] = worldCameraRay(io.MousePos);
-				glm::vec4 currentPoint = closestPointOnUnitCircle(o, d, glm::vec4(pos, 1), getAxis4(axis));
+				glm::vec3 n = coordinateSystem[axis];
+				glm::vec4 currentPoint = closestPointOnUnitCircle(o, d, glm::vec4(pos, 1), glm::vec4(n, 0.f));
 				retVal = true;
 
 				// Visualize angle
 				float composedAngle = glm::orientedAngle(
 					glm::normalize(glm::vec3(s_startPoint) - pos), 
-					glm::normalize(glm::vec3(currentPoint) - pos)
-					, getAxis3(axis));
-				_angles[axis] = composedAngle;
+					glm::normalize(glm::vec3(currentPoint) - pos), 
+					n);
+				glm::quat quat = glm::angleAxis(composedAngle, n);
+				std::memcpy(_quat, &quat.x, sizeof(quat));
+
 				g.currentDrawList()->AddFilledSemiCircle(
 					pos, 
 					s * glm::vec3(s_startPoint - glm::vec4(pos, 1)), 
-					getAxis3(axis), composedAngle,
+					n, composedAngle,
 					g.Style.Colors[ImGui3DCol_xRotation_circle + axis], 24);
 
 				s_lastPoint = currentPoint;
@@ -82,14 +87,14 @@ namespace ImGui3D {
 		return retVal;
 	}
 	
-	bool RotationGizmo(glm::mat4& T)
+	bool RotationGizmo(glm::mat4& T, glm::mat3 coordinateSystem)
 	{
 		static bool s_rotation_active = false;
 		static glm::mat4 s_Told;
 
 		ImGuiID rotId = GetID(&T, false);
-		float angles[3] = { 0.f, 0.f, 0.f };
-		bool rUpdating = RotationGizmo(&T[3].x, angles, rotId);
+		glm::quat q;
+		bool rUpdating = RotationGizmo(&T[3].x, &q.x, coordinateSystem, rotId);
 
 		if (rUpdating) {
 			if (!s_rotation_active) {
@@ -97,7 +102,7 @@ namespace ImGui3D {
 				s_Told = T;
 				s_rotation_active = true;
 			}
-			T = glm::eulerAngleXYZ(angles[0], angles[1], angles[2]) * s_Told;
+			T = glm::toMat4(q) * s_Told;
 		}
 		else
 		{
@@ -105,16 +110,40 @@ namespace ImGui3D {
 		}
 		return rUpdating;
 	}
-	bool RotationGizmo(glm::vec4 pos, glm::vec3& angles)
+
+	bool RotationGizmo(glm::mat4& T, bool local)
 	{
-		return RotationGizmo(&pos[0], &angles[0]);
-	}
-	bool RotationGizmo(glm::vec3 pos, glm::vec3& angles)
-	{
-		return RotationGizmo(&pos[0], &angles[0]);
+		static bool s_rotation_active = false;
+		static glm::mat4 s_Told;
+
+		ImGuiID rotId = GetID(&T, false);
+		glm::quat q;
+		glm::mat3 coo = local
+			? s_rotation_active ? s_Told : T
+			: glm::mat3(1);
+		bool rUpdating = RotationGizmo(&T[3].x, &q.x, coo, rotId);
+
+		if (rUpdating) {
+			if (!s_rotation_active) {
+				// This is the first time the rotation is updated
+				s_Told = T;
+				s_rotation_active = true;
+			}
+			T = glm::toMat4(q) * s_Told;
+		}
+		else
+		{
+			s_rotation_active = false;
+		}
+		return rUpdating;
 	}
 
-	bool TranslationGizmo(float _pos[3]) {
+	bool RotationGizmo(glm::vec3 pos, glm::quat& quat, glm::mat3 coordinateSystem)
+	{
+		return RotationGizmo(&pos[0], &quat[0], coordinateSystem);
+	}
+
+	bool TranslationGizmo(float _pos[3], glm::mat3 coordinateSystem) {
 		// Scale gizmo based on distance
 		ImGui3DContext& g = *GImGui3D;
 		const float distance = glm::distance(g.ViewMatrix * glm::vec4(_pos[0], _pos[1], _pos[2], 1), glm::vec4(0, 0, 0, 1));
@@ -124,16 +153,17 @@ namespace ImGui3D {
 
 		ImGui3D::PushID(_pos);
 
-		const glm::mat4 T = glm::translate(glm::vec3(_pos[0], _pos[1], _pos[2]));
-
+		glm::mat4 T(coordinateSystem);
+		T[3] = glm::vec4(_pos[0], _pos[1], _pos[2], 1.0f);
 
 		ImGuiIO& io = ImGui::GetIO();
 		bool retVal = false;
 		for (int axis = 0; axis < 3; ++axis) {
 			// Arrows
 			const ImGuiID id = ImGui3D::GetID("axis" + axis);
+
 			g.currentDrawList()->AddArrow(
-				T * glm::vec4(0, 0, 0, 1), T * glm::vec4(s * getAxis3(axis), 1),
+				T[3], T * glm::vec4(s * getAxis3(axis), 1),
 				g.Style.getColor(static_cast<ImGui3DColors>(ImGui3DCol_xAxis + 2 * axis)), 
 				.03 * s, .11 * s, 
 				.35f, 16, id);
@@ -141,8 +171,9 @@ namespace ImGui3D {
 				const ImVec2 MousePosPrev = io.MousePos - io.MouseDelta;
 				auto [oprev, dprev] = worldCameraRay(MousePosPrev);
 				auto [ocurr, dcurr] = worldCameraRay(io.MousePos);
-				glm::vec4 pprev = getClosestPointOnLine(glm::vec4(0, 0, 0, 1), getAxis4(axis), oprev, dprev);
-				glm::vec4 pcurr = getClosestPointOnLine(glm::vec4(0, 0, 0, 1), getAxis4(axis), ocurr, dcurr);
+				glm::vec4 dir = glm::vec4(coordinateSystem * getAxis3(axis), 0.f);
+				glm::vec4 pprev = getClosestPointOnLine(glm::vec4(_pos[0], _pos[1], _pos[2], 1), dir, oprev, dprev);
+				glm::vec4 pcurr = getClosestPointOnLine(glm::vec4(_pos[0], _pos[1], _pos[2], 1), dir, ocurr, dcurr);
 				if (std::isfinite(pprev.x) && std::isfinite(pcurr.x)) {
 					glm::vec delta = glm::vec3(pcurr - pprev);
 					_pos[0] += delta.x;
@@ -154,8 +185,8 @@ namespace ImGui3D {
 
 			// Plane
 			const ImGuiID idPlane = ImGui3D::GetID("plane" + axis);
-			const glm::vec3 uAxis = getAxis3((axis + 1) % 3);
-			const glm::vec3 vAxis = getAxis3((axis + 2) % 3);
+			const glm::vec3 uAxis = coordinateSystem * getAxis3((axis + 1) % 3);
+			const glm::vec3 vAxis = coordinateSystem * getAxis3((axis + 2) % 3);
 			const glm::vec3 offset = planesOffset * (uAxis + vAxis);
 			g.currentDrawList()->AddTriangleStrip(std::vector<glm::vec4>{
 				glm::vec4(offset, 1),
@@ -168,8 +199,9 @@ namespace ImGui3D {
 				const ImVec2 MousePosPrev = io.MousePos - io.MouseDelta;
 				auto [oprev, dprev] = worldCameraRay(MousePosPrev);
 				auto [ocurr, dcurr] = worldCameraRay(io.MousePos);
-				glm::vec4 pprev = pointPlaneIntersection(oprev, dprev, glm::vec4(0, 0, 0, 1), getAxis4(axis));
-				glm::vec4 pcurr = pointPlaneIntersection(ocurr, dcurr, glm::vec4(0, 0, 0, 1), getAxis4(axis));
+				glm::vec4 normal = glm::vec4(coordinateSystem * getAxis3(axis), 0.f);
+				glm::vec4 pprev = pointPlaneIntersection(oprev, dprev, glm::vec4(_pos[0], _pos[1], _pos[2], 1), normal);
+				glm::vec4 pcurr = pointPlaneIntersection(ocurr, dcurr, glm::vec4(_pos[0], _pos[1], _pos[2], 1), normal);
 				if (std::isfinite(pprev.x) && std::isfinite(pcurr.x)) {
 					glm::vec delta = glm::vec3(pcurr - pprev);
 					_pos[0] += delta.x;
@@ -183,24 +215,27 @@ namespace ImGui3D {
 		ImGui3D::PopID();
 		return retVal;
 	}
-	bool TranslationGizmo(glm::vec4& pos)
+	bool TranslationGizmo(glm::vec4& pos, glm::mat3 coordinateSystem)
 	{
 		return TranslationGizmo(&pos[0]);
 	}
-	bool TranslationGizmo(glm::vec3& pos)
+	bool TranslationGizmo(glm::vec3& pos, glm::mat3 coordinateSystem)
 	{
 		return TranslationGizmo(&pos[0]);
 	}
 
-	bool TransformGizmo(float _T[16])
+	bool TransformGizmo(float _T[16], bool local)
 	{
 		static bool s_rotation_active = false;
 		static glm::mat4 s_Told;
 
 		ImGuiID rotId = GetID(_T, false);
-		float angles[3] = {0.f, 0.f, 0.f};
-		bool rUpdating = RotationGizmo(&_T[4 * 3], angles, rotId);
-		bool tUpdating = TranslationGizmo(&_T[4 * 3]);
+		glm::quat q;
+		glm::mat3 coo = local 
+			? s_rotation_active ? s_Told : glm::make_mat4(_T)
+			: glm::mat3(1);
+		bool rUpdating = RotationGizmo(&_T[4 * 3], &q[0], coo, rotId);
+		bool tUpdating = TranslationGizmo(&_T[4 * 3], coo);
 
 		if (rUpdating) {
 			if (!s_rotation_active) {
@@ -208,7 +243,7 @@ namespace ImGui3D {
 				s_Told = glm::make_mat4(_T);
 				s_rotation_active = true;
 			}
-			glm::mat4 T = glm::eulerAngleXYZ(angles[0], angles[1], angles[2]) * s_Told;
+			glm::mat4 T = glm::toMat4(q) * s_Told;
 			for (int i = 0; i < 3; ++i) {
 				for (int j = 0; j < 3; ++j) {
 					_T[4 * i + j] = T[i][j];
@@ -222,9 +257,9 @@ namespace ImGui3D {
 		}
 		return rUpdating || tUpdating;
 	}
-	bool TransformGizmo(glm::mat4& T)
+	bool TransformGizmo(glm::mat4& T, bool local)
 	{
-		return TransformGizmo(&T[0][0]);
+		return TransformGizmo(&T[0][0], local);
 	}
 
 	bool Vertex(float pos[3]) {

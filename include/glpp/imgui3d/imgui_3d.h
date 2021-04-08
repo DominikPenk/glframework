@@ -300,17 +300,17 @@ namespace ImGui3D {
 	void ViewFrustum(glm::mat4& VP, glm::vec3 color);
 
 	// Higher level functions
-	bool RotationGizmo(const float pos[3], float angles[3], ImGuiID idoverride = 0);
-	bool RotationGizmo(glm::mat4& T);
-	bool RotationGizmo(glm::vec3 pos, glm::vec3& angles);
-	bool RotationGizmo(glm::vec4 pos, glm::vec3& angles);
+	bool RotationGizmo(const float pos[3], float quat[4], glm::mat3 coordinateSystem = glm::mat3(1), ImGuiID idoverride = 0);
+	bool RotationGizmo(glm::mat4& T, glm::mat3 coordinateSystem = glm::mat3(1));
+	bool RotationGizmo(glm::mat4& T, bool local);
+	bool RotationGizmo(glm::vec3 pos, glm::quat& quat, glm::mat3 coordinateSystem = glm::mat3(1));
 	
-	bool TranslationGizmo(float pos[3]);
-	bool TranslationGizmo(glm::vec3& pos);
-	bool TranslationGizmo(glm::vec4& pos);
+	bool TranslationGizmo(float pos[3], glm::mat3 coordinateSystem = glm::mat3(1));
+	bool TranslationGizmo(glm::vec3& pos, glm::mat3 coordinateSystem = glm::mat3(1));
+	bool TranslationGizmo(glm::vec4& pos, glm::mat3 coordinateSystem = glm::mat3(1));
 	
-	bool TransformGizmo(float T[16]);
-	bool TransformGizmo(glm::mat4& T);
+	bool TransformGizmo(float T[16], bool local = false);
+	bool TransformGizmo(glm::mat4& T, bool local = false);
 
 	bool Vertex(float pos[3]);
 	bool Vertex(glm::vec3& pos);
