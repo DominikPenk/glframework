@@ -390,3 +390,13 @@ void gl::FBOState::restore()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 }
+
+gl::FBOStateGuard::FBOStateGuard() :
+	oldState(FBOState::Current())
+{
+}
+
+gl::FBOStateGuard::~FBOStateGuard()
+{
+	oldState.restore();
+}

@@ -108,4 +108,14 @@ namespace gl {
 
 		void restore();
 	};
+
+	struct FBOStateGuard {
+		FBOStateGuard();
+		FBOStateGuard(const FBOStateGuard&) = delete;
+		FBOStateGuard& operator=(const FBOStateGuard&) = delete;
+
+		~FBOStateGuard();
+
+		FBOState oldState;
+	};
 }
