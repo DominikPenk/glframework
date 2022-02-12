@@ -23,7 +23,9 @@ gl::Editor::Editor() :
 	toneMapping(ToneMapping::Reinhard),
 	gamma(1.2f),
 	clearColor(0.24f, 0.24f, 0.24f, 1.0f),
-	mForceUiResetOnNextDraw(false)
+	mForceUiResetOnNextDraw(false),
+	mEventSystem(),
+	eventSystem(mEventSystem)
 {
 	
 }

@@ -9,6 +9,7 @@
 
 #include <glpp/renderer.hpp>
 #include <glpp/renderers/editorwindow.hpp>
+#include <glpp/eventsystem.hpp>
 
 namespace gl {
 
@@ -137,6 +138,8 @@ namespace gl {
 		ToneMapping toneMapping;
 		glm::vec4 clearColor;
 
+		EventSystem& eventSystem;
+
 	protected:
 		virtual unsigned int buildDefaultLayout(bool force);
 
@@ -145,6 +148,9 @@ namespace gl {
 
 		std::vector<std::shared_ptr<Mesh>>         mObjects;
 		std::vector<std::shared_ptr<EditorWindow>> mEditorWindows;
+
+		EventSystem mEventSystem;
+
 
 	private:
 		/// <summary>
