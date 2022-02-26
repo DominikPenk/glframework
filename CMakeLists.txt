@@ -98,6 +98,11 @@ set(RENDERER_FILES
 	src/renderers/immediate_renderer.cpp
 )
 
+set(EVENT_FILES
+	${INCLUDE_DIR}/eventsystem.hpp
+	${INCLUDE_DIR}/eventsystem.cpp
+)
+
 set(IMGUI_3D_FILES
 	${INCLUDE_DIR}/imgui3d/imgui_3d.h
 	${INCLUDE_DIR}/imgui3d/imgui_3d_utils.h
@@ -121,6 +126,7 @@ set(GL_FILES
 	${MESH_FILES}
 	${RENDERER_FILES}
 	${LOGGING_FILES}
+	${EVENT_FILES}
 	${INCLUDE_DIR}/texture.hpp
 	src/texture.cpp
 	src/paged_texture.cpp
