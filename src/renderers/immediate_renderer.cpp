@@ -50,6 +50,27 @@ bool gl::ImmediateRenderer::startFrame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	// Create central dockspace
+	ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGuiID dockSpaceID = ImGui::GetID("Dockspace");
+	if (dockSpaceID == NULL) {
+		ImGui::DockBuilderAddNode(dockSpaceID, ImGuiDockNodeFlags_DockSpace);
+		ImGui::DockBuilderSetNodeSize(dockSpaceID, viewport->GetWorkSize());
+		ImGui::DockBuilderFinish(dockSpaceID);
+	}
+	ImGui::SetNextWindowPos(viewport->GetWorkPos());
+	ImGui::SetNextWindowSize(viewport->GetWorkSize());
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
+	ImGui::Begin("Central Widget", NULL, window_flags);
+	ImGui::PopStyleVar(3);
+	ImGui::DockSpace(dockSpaceID, ImVec2(0, 0), ImGuiDockNodeFlags_PassthruCentralNode);	// TODO: Put viewport into seperate window
+	ImGui::End();
+
 	// Update camera
 	auto [w, h] = mContext->getWindowSize();
 	viewportCamera->ScreenWidth = w;

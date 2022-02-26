@@ -5,6 +5,8 @@
 #include <string>
 #include <cassert>
 
+#include <filesystem>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "3rdparty/stb_image.h"
 
@@ -216,8 +218,15 @@ gl::Texture::Texture(std::string path, bool flipY, TextureFlags flags) :
 	Texture(TextureType::D2, PixelFormat::RGB, PixelType::UByte, flags)
 {
 	int channels;
+	void* data = NULL;
 	stbi_set_flip_vertically_on_load(flipY);
-	unsigned char * data = stbi_load(path.c_str(), &mCols, &mRows, &channels, 0);
+	if (std::filesystem::path(path).extension() == ".hdr") {
+		data = static_cast<void*>(stbi_loadf(path.c_str(), &mCols, &mRows, &channels, 0));
+		mDataType = gl::PixelType::Float;
+	}
+	else {
+		data = static_cast<void*>(stbi_load(path.c_str(), &mCols, &mRows, &channels, 0));
+	}
 	if(data == NULL) {
 		throw std::runtime_error("Could not load texture from \"" + path + "\"");
 	}
@@ -233,7 +242,6 @@ gl::Texture::Texture(std::string path, bool flipY, TextureFlags flags) :
 	else if (channels == 4) {
 		mPixelFormat = PixelFormat::RGBA;
 	}
-
 	setData(data);
 	stbi_image_free(data);
 }
@@ -462,4 +470,3 @@ int gl::getChannelsForFormat(PixelFormat format)
 }
 
 #pragma endregion
-
