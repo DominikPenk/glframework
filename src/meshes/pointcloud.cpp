@@ -1,6 +1,7 @@
 #include "glpp/meshes/pointcloud.hpp"
 
 #include "glpp/renderer.hpp"
+#include "../shaders/pointcloud.glsl.h"
 
 #include <numeric>
 
@@ -11,7 +12,8 @@ gl::PointCloud::PointCloud() :
 {
 	data = mBatch.addVertexAttributes<glm::vec3, glm::vec3>();
 	mBatch.primitiveType = GL_POINTS;
-	mShader = gl::Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "pointcloud.glsl");
+	//mShader = gl::Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "pointcloud.glsl");
+	mShader = gl::Shader(POINT_CLOUD_SHADER);
 }
 
 gl::PointCloud::PointCloud(const std::vector<glm::vec3>& points, glm::vec3 color) :

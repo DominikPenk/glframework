@@ -1,4 +1,6 @@
-#version 330
+#pragma once
+
+static const char* TRIANGLE_SHADER = R"(#version 330
 
 // --vertex
 layout(location = 0) in vec3 vPosition;
@@ -40,4 +42,4 @@ void main() {
 	vec4 Ispec = vec4(1, 1, 1, 1) * pow(max(dot(R, E), 0.0), 0.3*n);
 
 	FragColor = k_ambi * Iambi + k_diff * Idiff + k_spec * Ispec;
-}
+})";

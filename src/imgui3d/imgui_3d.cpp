@@ -4,7 +4,7 @@
 
 #include "glpp/imgui.hpp"
 
-
+#include "../shaders/imgui3d.glsl.h"
 
 #define GLMCOLCHAR2FLOAT(r, g, b, a) glm::vec4(static_cast<float>(r) / 255, static_cast<float>(g) / 255, static_cast<float>(b)/255, static_cast<float>(a) / 255);
 
@@ -203,7 +203,7 @@ namespace ImGui3D {
 		KeepCaptureFocus(false),
 		ActiveId(0),
 		ActiveIdPreviousFrame(0),
-		Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "imgui3d.glsl"),
+		Shader(IMGUI3D_SHADER),
 		ModelMatrix(1),
 		ViewMatrix(0),
 		ProjectionMatrix(0),

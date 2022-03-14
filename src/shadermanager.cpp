@@ -293,9 +293,9 @@ static std::pair<bool, GLuint> compileShader(std::string src, GLenum type) {
 	return std::make_pair(true, shader);
 }
 
-std::tuple<Prefix, std::map<GLenum, ShaderCode>> parseFile(std::ifstream& in, const std::string & srcDir, 
+std::tuple<Prefix, std::map<GLenum, ShaderCode>> parseFile(std::istream& in, const std::string & srcDir, 
 	std::vector<std::string>& sources, const std::unordered_map<std::string, std::string>& _defines = std::unordered_map<std::string, std::string>()) {
-	assert(in.is_open(), "Tried to parse closed file");
+	//assert(in.is_open(), "Tried to parse closed file");
 
 	constexpr GLenum PREFIX = 0;
 	constexpr GLenum REQUIRE_SHADER = -1;
@@ -451,6 +451,77 @@ Shader::Shader(std::string path) :
 	Shader() 
 {
 	mSourceFiles.push_back(path);
+}
+
+gl::Shader::Shader(const char* src) :
+	Shader()
+{
+	std::istringstream in(src);
+	std::map<GLenum, ShaderCode> pipeline;
+	Prefix prefix;
+
+	try {
+		std::tie(prefix, pipeline) = parseFile(in, "", mSourceFiles, mDefines);
+
+		// Validate that all shaders required are found
+		bool validPipeline = validatePipeline(pipeline);
+
+		// Compile all shaders
+		bool allShadersCompiled = true;
+		GLenum previousShader = 0;
+		auto getNextShaderStageInPipeline = [&](int stage) {
+			int nextStage = stage + 1;
+			for (; nextStage < 5; ++nextStage) {
+				if (pipeline.find(ShaderPipeline[nextStage]) != pipeline.end())
+					break;
+			}
+			return nextStage;
+		};
+
+		std::vector<GLuint> shaders;
+
+		for (int shaderStage = 0; shaderStage < 5; shaderStage = getNextShaderStageInPipeline(shaderStage)) {
+			GLenum currentShader = ShaderPipeline[shaderStage];
+			auto [ret, shader] = loadAndCompileShader(
+				pipeline[currentShader],
+				currentShader,
+				previousShader,
+				prefix);
+			if (ret) shaders.push_back(shader);
+			allShadersCompiled &= ret;
+			previousShader = currentShader;
+		}
+
+
+		// Link pipeline
+		GLint success = 0;
+		if (validPipeline && allShadersCompiled) {
+			// clean old program
+			glDeleteProgram(mProgram);
+			mProgram = glCreateProgram();
+			for (GLuint shader : shaders) glAttachShader(mProgram, shader);
+			glLinkProgram(mProgram);
+			for (GLuint shader : shaders) glDeleteShader(shader);
+
+			glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
+			if (!success)
+			{
+				GLchar infoLog[1024];
+				glGetProgramInfoLog(mProgram, 1024, NULL, infoLog);
+				LOG_ERROR("failed to link shader:\n%s", infoLog);
+			}
+
+			glValidateProgram(mProgram);
+			glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &success);
+			if (!success)
+			{
+				LOG_ERROR("failed to validate shader");
+			}
+		}
+	}
+	catch (std::runtime_error e) {
+		LOG_ERROR("%s", e.what());
+	}
 }
 
 gl::Shader::Shader(std::initializer_list<std::pair<GLenum, std::string>> stages) 

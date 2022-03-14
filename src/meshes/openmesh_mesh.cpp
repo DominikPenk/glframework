@@ -3,6 +3,9 @@
 
 #include "glpp/renderer.hpp"
 
+#include "../shaders/triangle.glsl.h"
+#include "../shaders/triangle_normal.glsl.h"
+
 gl::OpenMeshMesh::OpenMeshMesh() :
 	Mesh(),
 	dirty(true),
@@ -12,8 +15,10 @@ gl::OpenMeshMesh::OpenMeshMesh() :
 	drawEdges(false),
 	visualizeNormals(false)
 {
-	mShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
-	normalShader = std::make_shared<Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle_normal.glsl");
+	//mShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
+	//normalShader = std::make_shared<Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle_normal.glsl");
+	mShader = Shader(TRIANGLE_SHADER);
+	normalShader = std::make_shared<Shader>(TRIANGLE_NORMAL_SHADER);
 	mVertexData = mBatch.addVertexAttributes<glm::vec3, glm::vec2, glm::vec3>(0);
 }
 

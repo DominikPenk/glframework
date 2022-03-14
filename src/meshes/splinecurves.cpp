@@ -7,6 +7,7 @@
 #include "glpp/renderer.hpp"
 
 #include "glpp/imgui3d/imgui_3d.h"
+#include "../shaders/catmullromspline.glsl.h"
 
 void computeCatmulRomData(
 	const std::vector<glm::vec3>& points,
@@ -42,7 +43,8 @@ gl::CatmullRomSpline::CatmullRomSpline(const std::vector<glm::vec3>& points) :
 	mVAO.setIndexBufferObject(mIndices);
 	mVAO.addVertexAttribute(mPoints, 0);
 
-	mShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "catmullromspline.glsl");
+	//mShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "catmullromspline.glsl");
+	mShader = Shader(CATMULL_ROM_SPLINE_SHADER);
 
 	computeCatmulRomData(points, mPoints, mIndices);
 }

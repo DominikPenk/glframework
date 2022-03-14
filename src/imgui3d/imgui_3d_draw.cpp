@@ -8,6 +8,8 @@
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
+#include "../shaders/imgui3d.glsl.h"
+
 
 #define IM3D_NORMALIZE2F_OVER_ZERO(VX,VY)                         { float d2 = VX*VX + VY*VY; if (d2 > 0.0f) { float inv_len = 1.0f / std::sqrt(d2); VX *= inv_len; VY *= inv_len; } }
 #define IM3D_NORMALIZE2F_OVER_EPSILON_CLAMP(VX,VY,EPS,INVLENMAX)  { float d2 = VX*VX + VY*VY; if (d2 > EPS)  { float inv_len = 1.0f / std::sqrt(d2); if (inv_len > INVLENMAX) inv_len = INVLENMAX; VX *= inv_len; VY *= inv_len; } }
@@ -22,7 +24,7 @@ namespace ImGui3D {
 	DrawCommand::DrawCommand()
 	{
 		data = batch.addVertexAttributes<glm::vec4, glm::vec4, ImGuiID, glm::vec2>();
-		shader = gl::Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "imgui3d.glsl");
+		shader = gl::Shader(IMGUI3D_SHADER);
 	}
 
 	void DrawCommand::AddFilledScreenAlignedQuad(glm::vec4 pos, ImVec2 size, glm::vec4 color, ImGuiID id)

@@ -14,14 +14,19 @@
 #include <assimp/postprocess.h>
 #endif
 
+#include "../shaders/triangle.glsl.h"
+#include "../shaders/triangle_normal.glsl.h"
+
 gl::TriangleMesh::TriangleMesh() :
 	Mesh(),
 	visualizeNormals(false)
 {
 	mColor = glm::vec4(0.7f, 0.8f, 0.7f, 1.0f);
 
-	mShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
-	mNormalShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle_normal.glsl");
+	// mShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
+	// mNormalShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle_normal.glsl");
+	mShader = Shader(TRIANGLE_SHADER);
+	mNormalShader = Shader(TRIANGLE_NORMAL_SHADER);
 
 	mVertexData = mBatch.addVertexAttributes<glm::vec3, glm::vec2, glm::vec3>(0);
 }

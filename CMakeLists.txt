@@ -122,11 +122,14 @@ set(LOGGING_FILES
 	${INCLUDE_DIR}/logging.hpp
 	src/logging.cpp)
 
+file(GLOB STATIC_SHADERS ${PROJECT_SOURCE_DIR}/shaders/*.glsl.h)
+
 set(GL_FILES
 	${MESH_FILES}
 	${RENDERER_FILES}
 	${LOGGING_FILES}
 	${EVENT_FILES}
+	${STATIC_SHADERS}
 	${INCLUDE_DIR}/texture.hpp
 	src/texture.cpp
 	src/paged_texture.cpp
@@ -163,6 +166,7 @@ source_group("Dear Imgui" FILES ${IMGUI_FILES})
 source_group("Dear Imgui 3D" FILES ${IMGUI_3D_FILES})
 source_group("Renderes" FILES ${RENDERER_FILES})
 source_group("Logging" FILES ${LOGGING_FILES})
+source_group("Shaders" FILES ${STATIC_SHADERS})
 
 add_library(glframework STATIC ${GL_FILES} ${IMGUI_FILES} ${IMGUI_3D_FILES} ${RENDER_2D_FILES})
 target_link_libraries(glframework PUBLIC ${OPENGL_gl_LIBRARY} glfw glad::glad glm)

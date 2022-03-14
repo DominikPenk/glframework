@@ -1,6 +1,8 @@
 #include "glpp/meshes/coordinate_frame.hpp"
 #include "glpp/renderer.hpp"
 
+#include "../shaders/axis.glsl.h"
+
 gl::CoordinateFrame::CoordinateFrame(float length) :
 	Mesh(),
 	axisLength(length)
@@ -11,7 +13,8 @@ gl::CoordinateFrame::CoordinateFrame(float length) :
 
 	mVAO.addVertexAttribute(mPoints, 0);
 
-	mShader = std::string(GL_FRAMEWORK_SHADER_DIR) + "axis.glsl";
+	//mShader = std::string(GL_FRAMEWORK_SHADER_DIR) + "axis.glsl";
+	mShader = Shader(AXIS_SHADER);
 
 	mShowInOutliner = false;
 }

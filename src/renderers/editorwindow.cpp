@@ -12,6 +12,8 @@
 #include <glpp/meshes.hpp>
 #include <glpp/shadermanager.hpp>
 
+#include "../shaders/display_shader.glsl.h"
+
 gl::EditorWindow::EditorWindow(const std::string& title, EditorWindowRegion defaultRegion) :
 	title(title),
 	defaultRegion(defaultRegion),
@@ -206,7 +208,8 @@ void gl::ViewportEditorWindow::initialize(Editor* editor) {
 	mFrameBuffer->setDepthTexture(depthTexture);
 
 	// Initialize postporcessing shader
-	mTonemappingShader = std::make_unique<gl::Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "displayShader.glsl");
+	//mTonemappingShader = std::make_unique<gl::Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "displayShader.glsl");
+	mTonemappingShader = std::make_unique<gl::Shader>(DISPLAY_SHADER);
 	mTonemappingShader->setDefine("HDR_MAPPING_TYPE", static_cast<int>(editor->toneMapping));
 	mTonemappingShader->update();
 	mLastTonemapping = editor->toneMapping;
