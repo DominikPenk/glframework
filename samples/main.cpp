@@ -18,7 +18,7 @@ int main(int argc, const char* argv[]) {
 	LOG_SUCCESS_OR_ERROR(teapot != nullptr, "Loaded teapot mesh", "Could not load teapot mesh");
 	LOG_WARNING("Just a sample warning, nothing to fear!");
 	for (int i = 0; i < 4; ++i) {
-		LOG_ONCE("This is only logged %s!", "once");
+		LOG_ONCE("This is only logged once!");
 		LOG_ERROR_EVERY_N(2, "This is logged only if #calls.mod(%d) == 0.", 2);
 	}
 

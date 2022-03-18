@@ -23,10 +23,14 @@ gl::TriangleMesh::TriangleMesh() :
 {
 	mColor = glm::vec4(0.7f, 0.8f, 0.7f, 1.0f);
 
-	// mShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
+	 mShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
 	// mNormalShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle_normal.glsl");
-	mShader = Shader(TRIANGLE_SHADER);
-	mNormalShader = Shader(TRIANGLE_NORMAL_SHADER);
+	//mShader = Shader(std::initializer_list<std::pair<GLenum, std::string>>{
+	//	{ GL_VERTEX_SHADER, TRIANGLE_VS },
+	//	{ GL_FRAGMENT_SHADER, TRIANGLE_FS }});
+	mNormalShader = Shader(std::initializer_list<std::pair<GLenum, std::string>>{
+		{ GL_VERTEX_SHADER, TRIANGLE_NORMAL_VS },
+		{ GL_FRAGMENT_SHADER, TRIANGLE_NORMAL_FS }});
 
 	mVertexData = mBatch.addVertexAttributes<glm::vec3, glm::vec2, glm::vec3>(0);
 }
@@ -99,7 +103,8 @@ void gl::TriangleMesh::load(const std::string& path)
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality | aiProcess_GenSmoothNormals);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		LOG_ERROR("ERROR::ASSIMP:: %s", importer.GetErrorString());
+		const char* err = importer.GetErrorString();
+		LOG_ERROR("ERROR::ASSIMP:: %s", err);
 		return;
 	}
 

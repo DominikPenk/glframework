@@ -453,76 +453,76 @@ Shader::Shader(std::string path) :
 	mSourceFiles.push_back(path);
 }
 
-gl::Shader::Shader(const char* src) :
-	Shader()
-{
-	std::istringstream in(src);
-	std::map<GLenum, ShaderCode> pipeline;
-	Prefix prefix;
-
-	try {
-		std::tie(prefix, pipeline) = parseFile(in, "", mSourceFiles, mDefines);
-
-		// Validate that all shaders required are found
-		bool validPipeline = validatePipeline(pipeline);
-
-		// Compile all shaders
-		bool allShadersCompiled = true;
-		GLenum previousShader = 0;
-		auto getNextShaderStageInPipeline = [&](int stage) {
-			int nextStage = stage + 1;
-			for (; nextStage < 5; ++nextStage) {
-				if (pipeline.find(ShaderPipeline[nextStage]) != pipeline.end())
-					break;
-			}
-			return nextStage;
-		};
-
-		std::vector<GLuint> shaders;
-
-		for (int shaderStage = 0; shaderStage < 5; shaderStage = getNextShaderStageInPipeline(shaderStage)) {
-			GLenum currentShader = ShaderPipeline[shaderStage];
-			auto [ret, shader] = loadAndCompileShader(
-				pipeline[currentShader],
-				currentShader,
-				previousShader,
-				prefix);
-			if (ret) shaders.push_back(shader);
-			allShadersCompiled &= ret;
-			previousShader = currentShader;
-		}
-
-
-		// Link pipeline
-		GLint success = 0;
-		if (validPipeline && allShadersCompiled) {
-			// clean old program
-			glDeleteProgram(mProgram);
-			mProgram = glCreateProgram();
-			for (GLuint shader : shaders) glAttachShader(mProgram, shader);
-			glLinkProgram(mProgram);
-			for (GLuint shader : shaders) glDeleteShader(shader);
-
-			glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
-			if (!success)
-			{
-				GLchar infoLog[1024];
-				glGetProgramInfoLog(mProgram, 1024, NULL, infoLog);
-				LOG_ERROR("failed to link shader:\n%s", infoLog);
-			}
-
-			glValidateProgram(mProgram);
-			glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &success);
-			if (!success)
-			{
-				LOG_ERROR("failed to validate shader");
-			}
-		}
-	}
-	catch (std::runtime_error e) {
-		LOG_ERROR("%s", e.what());
-	}
-}
+//gl::Shader::Shader(const char* src) :
+//	Shader()
+//{
+//	std::istringstream in(src);
+//	std::map<GLenum, ShaderCode> pipeline;
+//	Prefix prefix;
+//
+//	try {
+//		std::tie(prefix, pipeline) = parseFile(in, "", mSourceFiles, mDefines);
+//
+//		// Validate that all shaders required are found
+//		bool validPipeline = validatePipeline(pipeline);
+//
+//		// Compile all shaders
+//		bool allShadersCompiled = true;
+//		GLenum previousShader = 0;
+//		auto getNextShaderStageInPipeline = [&](int stage) {
+//			int nextStage = stage + 1;
+//			for (; nextStage < 5; ++nextStage) {
+//				if (pipeline.find(ShaderPipeline[nextStage]) != pipeline.end())
+//					break;
+//			}
+//			return nextStage;
+//		};
+//
+//		std::vector<GLuint> shaders;
+//
+//		for (int shaderStage = 0; shaderStage < 5; shaderStage = getNextShaderStageInPipeline(shaderStage)) {
+//			GLenum currentShader = ShaderPipeline[shaderStage];
+//			auto [ret, shader] = loadAndCompileShader(
+//				pipeline[currentShader],
+//				currentShader,
+//				previousShader,
+//				prefix);
+//			if (ret) shaders.push_back(shader);
+//			allShadersCompiled &= ret;
+//			previousShader = currentShader;
+//		}
+//
+//
+//		// Link pipeline
+//		GLint success = 0;
+//		if (validPipeline && allShadersCompiled) {
+//			// clean old program
+//			glDeleteProgram(mProgram);
+//			mProgram = glCreateProgram();
+//			for (GLuint shader : shaders) glAttachShader(mProgram, shader);
+//			glLinkProgram(mProgram);
+//			for (GLuint shader : shaders) glDeleteShader(shader);
+//
+//			glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
+//			if (!success)
+//			{
+//				GLchar infoLog[1024];
+//				glGetProgramInfoLog(mProgram, 1024, NULL, infoLog);
+//				LOG_ERROR("failed to link shader:\n%s", infoLog);
+//			}
+//
+//			glValidateProgram(mProgram);
+//			glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &success);
+//			if (!success)
+//			{
+//				LOG_ERROR("failed to validate shader");
+//			}
+//		}
+//	}
+//	catch (std::runtime_error e) {
+//		LOG_ERROR("%s", e.what());
+//	}
+//}
 
 gl::Shader::Shader(std::initializer_list<std::pair<GLenum, std::string>> stages) 
 	: Shader()
@@ -565,10 +565,10 @@ gl::Shader::Shader(std::initializer_list<std::pair<GLenum, std::string>> stages)
 	}
 
 	auto t2 = std::chrono::high_resolution_clock::now();
-	long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::chrono::duration<float> elapsed = t2 - t1;
 
 	if (success && allValid) {
-		LOG_SUCCESS("Compilation sucessfull (Compile time: %ll ms)", duration);
+		LOG_SUCCESS("Compilation sucessfull (Compile time: %.1f ms)", (float)elapsed.count() * 1e-3f);
 	}
 
 }

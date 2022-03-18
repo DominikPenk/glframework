@@ -203,7 +203,10 @@ namespace ImGui3D {
 		KeepCaptureFocus(false),
 		ActiveId(0),
 		ActiveIdPreviousFrame(0),
-		Shader(IMGUI3D_SHADER),
+		//Shader(std::initializer_list<std::pair<GLenum, std::string>>{
+		//	{ GL_VERTEX_SHADER, IMGUI3D_VS },
+		//	{ GL_FRAGMENT_SHADER, IMGUI3D_FS }}),
+		Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "imgui3d.glsl"),
 		ModelMatrix(1),
 		ViewMatrix(0),
 		ProjectionMatrix(0),

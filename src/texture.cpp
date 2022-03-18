@@ -263,7 +263,7 @@ void gl::Texture::createMipmap(bool shouldCreate)
 	mCreateMipmap = shouldCreate;
 }
 
-void gl::Texture::setData(void* data, PixelFormat pixelFormat)
+void gl::Texture::setData(const void* data, PixelFormat pixelFormat)
 {
 	bind();
 	GLenum format = pixelFormat == gl::PixelFormat::Default ? glFormat() : getGLFormat(pixelFormat);

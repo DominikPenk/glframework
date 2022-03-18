@@ -209,7 +209,10 @@ void gl::ViewportEditorWindow::initialize(Editor* editor) {
 
 	// Initialize postporcessing shader
 	//mTonemappingShader = std::make_unique<gl::Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "displayShader.glsl");
-	mTonemappingShader = std::make_unique<gl::Shader>(DISPLAY_SHADER);
+	mTonemappingShader = std::make_unique<gl::Shader>(std::initializer_list<std::pair<GLenum, std::string>>{
+		{ GL_VERTEX_SHADER, DISPLAY_VS },
+		{ GL_FRAGMENT_SHADER, DISPLAY_FS }}
+		);
 	mTonemappingShader->setDefine("HDR_MAPPING_TYPE", static_cast<int>(editor->toneMapping));
 	mTonemappingShader->update();
 	mLastTonemapping = editor->toneMapping;

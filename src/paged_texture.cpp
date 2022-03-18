@@ -58,7 +58,7 @@ gl::LargeTexture::~LargeTexture()
 	mIds.clear();
 }
 
-void gl::LargeTexture::setData(void* data, PixelFormat pixelFormat)
+void gl::LargeTexture::setData(const void* data, PixelFormat pixelFormat)
 {
 	GLenum format = pixelFormat == gl::PixelFormat::Default ? glFormat() : getGLFormat(pixelFormat);
 	GLint oldAlign;

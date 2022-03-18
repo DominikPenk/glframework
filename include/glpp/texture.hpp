@@ -89,7 +89,7 @@ namespace gl {
 		TextureBase(TextureType type, PixelFormat pixelFormat, PixelType dataType, TextureFlags flags);
 
 		// Setters
-		virtual void setData(void* data, PixelFormat format = PixelFormat::Default) = 0;
+		virtual void setData(const void* data, PixelFormat format = PixelFormat::Default) = 0;
 		virtual void setFilters(gl::FilterType minFilter, gl::FilterType magFilter) = 0;
 		virtual void setWrapping(gl::WrapType s, gl::WrapType t = gl::WrapType::None, gl::WrapType r = gl::WrapType::None) = 0;
 		
@@ -140,7 +140,7 @@ namespace gl {
 
 		// Implemented and new Setter functions
 		void createMipmap(bool shouldCreate);
-		virtual void setData(void* data, PixelFormat format = PixelFormat::Default) override;
+		virtual void setData(const void* data, PixelFormat format = PixelFormat::Default) override;
 		virtual void setFilters(gl::FilterType minFilter, gl::FilterType magFilter) override;
 		virtual void setWrapping(gl::WrapType s, gl::WrapType t = gl::WrapType::None, gl::WrapType r = gl::WrapType::None) override;
 		void resize(int cols, int rows = -1, int depth = -1);
@@ -177,7 +177,7 @@ namespace gl {
 		~LargeTexture();
 
 		// Inherited via TextureBase
-		virtual void setData(void* data, PixelFormat format = PixelFormat::Default) override;
+		virtual void setData(const void* data, PixelFormat format = PixelFormat::Default) override;
 		virtual void setFilters(gl::FilterType minFilter, gl::FilterType magFilter) override;
 		virtual void setWrapping(gl::WrapType s, gl::WrapType t = gl::WrapType::None, gl::WrapType r = gl::WrapType::None) override;
 		virtual int dimensions() const override;

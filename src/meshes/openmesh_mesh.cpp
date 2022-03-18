@@ -17,8 +17,12 @@ gl::OpenMeshMesh::OpenMeshMesh() :
 {
 	//mShader = Shader(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle.glsl");
 	//normalShader = std::make_shared<Shader>(std::string(GL_FRAMEWORK_SHADER_DIR) + "triangle_normal.glsl");
-	mShader = Shader(TRIANGLE_SHADER);
-	normalShader = std::make_shared<Shader>(TRIANGLE_NORMAL_SHADER);
+	mShader = Shader(std::initializer_list<std::pair<GLenum, std::string>>{
+		{ GL_VERTEX_SHADER, TRIANGLE_VS },
+		{ GL_FRAGMENT_SHADER, TRIANGLE_FS }});
+	normalShader = std::make_shared<Shader>(std::initializer_list<std::pair<GLenum, std::string>>{
+		{ GL_VERTEX_SHADER, TRIANGLE_NORMAL_VS },
+		{ GL_FRAGMENT_SHADER, TRIANGLE_NORMAL_FS }});
 	mVertexData = mBatch.addVertexAttributes<glm::vec3, glm::vec2, glm::vec3>(0);
 }
 

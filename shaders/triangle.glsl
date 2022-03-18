@@ -1,7 +1,6 @@
-#pragma once
-
-static const char* TRIANGLE_VS = R"(
 #version 330
+
+// --vertex
 layout(location = 0) in vec3 vPosition;
 layout(location = 2) in vec3 vNormal;
 
@@ -16,10 +15,8 @@ void main() {
 	pos = gl_Position.xyz;
 	N = normalize(MVP * vec4(vNormal, 0.0)).xyz; 
 }
-)";
 
-static const char* TRIANGLE_FS = R"(
-#version 330
+// --fragment
 uniform vec4 color;
 in vec3 N;
 in vec3 pos;
@@ -44,4 +41,3 @@ void main() {
 
 	FragColor = k_ambi * Iambi + k_diff * Idiff + k_spec * Ispec;
 }
-)";

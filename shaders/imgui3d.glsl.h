@@ -1,6 +1,6 @@
 #pragma once
 
-static const char* IMGUI3D_SHADER = R"(#version 430 core
+static const char* IMGUI3D_VS = R"(#version 430 core
 // --vertex
 layout (location = 0) in vec4 position;
 layout (location = 1) in vec4 color;
@@ -23,9 +23,10 @@ void main() {
 	idcol = id2col(id);
 	fuv = uv;
 }
+)";
 
-// --fragment
-
+static const char* IMGUI3D_FS = R"(
+#version 430 core
 in vec4 fcol;
 in vec4 idcol;
 in vec2 fuv;

@@ -1,6 +1,7 @@
 #pragma once
 
-static const char* DISPLAY_SHADER = R"(#version 430
+static const char* DISPLAY_VS = R"(
+#version 430
 // --vertex
 out vec2 texCoord;
  
@@ -12,8 +13,10 @@ void main()
     texCoord.y = (y+1.0)*0.5;
     gl_Position = vec4(x, y, 0, 1);
 }
+)";
 
-// --fragment
+static const char* DISPLAY_FS = R"(
+#version 430
 in vec2 texCoord;
 
 uniform sampler2D renderTexture;
